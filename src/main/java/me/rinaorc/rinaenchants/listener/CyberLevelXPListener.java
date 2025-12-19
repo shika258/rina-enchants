@@ -2,8 +2,10 @@ package me.rinaorc.rinaenchants.listener;
 
 import me.rinaorc.rinaenchants.RinaEnchantsPlugin;
 import me.rivaldev.harvesterhoes.api.events.HoeXPGainEvent;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -130,6 +132,41 @@ public class CyberLevelXPListener implements Listener {
      */
     public double getCropBaseXP(Material material) {
         return cropXpValues.getOrDefault(material, 0.0);
+    }
+
+    /**
+     * Donne l'XP CyberLevel directement au joueur pour une culture cassée.
+     * Cette méthode est utilisée quand HellRainAbility.replaceWithDrops ne déclenche pas HoeXPGainEvent.
+     *
+     * @param player Le joueur qui reçoit l'XP
+     * @param cropType Le type de culture cassée
+     * @param multiplier Le multiplicateur de l'enchantement (1.0 = pas de multiplicateur)
+     */
+    public void giveDirectXP(Player player, Material cropType, double multiplier) {
+        if (!plugin.getConfig().getBoolean("cyberlevels-hook.enabled", false)) {
+            return;
+        }
+
+        double baseXP = getCropBaseXP(cropType);
+        if (baseXP <= 0) {
+            return;
+        }
+
+        double finalXP = baseXP * multiplier;
+        int xpToGive = (int) Math.round(finalXP);
+
+        if (xpToGive <= 0) {
+            return;
+        }
+
+        // Exécuter la commande CyberLevel pour donner l'XP
+        String command = "cyberlevel giveExp " + xpToGive + " " + player.getName();
+        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
+
+        if (plugin.getConfig().getBoolean("debug", false)) {
+            plugin.getLogger().info("§a[CyberLevel] XP donné: " + xpToGive + " à " + player.getName() +
+                " (base: " + baseXP + ", multi: x" + multiplier + ", crop: " + cropType + ")");
+        }
     }
 
     /**
