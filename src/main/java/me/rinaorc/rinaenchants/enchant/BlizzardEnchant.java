@@ -221,7 +221,7 @@ public class BlizzardEnchant implements HoeEnchant {
         animation.setOnCropHit((loc) -> {
             Block block = loc.getBlock();
             if (isMatureCrop(block)) {
-                plugin.safeBreakCrop(player, loc);
+                plugin.safeBreakCrop(player, loc, "blizzard-eternal");
             }
         });
 

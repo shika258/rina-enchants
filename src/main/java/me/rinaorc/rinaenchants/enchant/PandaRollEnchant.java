@@ -179,7 +179,7 @@ public class PandaRollEnchant implements HoeEnchant, Listener {
         animation.setOnCropHit((cropLoc) -> {
             Block block = cropLoc.getBlock();
             if (isMatureCrop(block)) {
-                plugin.safeBreakCrop(player, cropLoc);
+                plugin.safeBreakCrop(player, cropLoc, "panda-roll");
             }
         });
         

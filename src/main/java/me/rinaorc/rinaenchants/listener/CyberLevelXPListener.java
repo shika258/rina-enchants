@@ -14,10 +14,9 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 /**
  * Listener pour le système d'XP CyberLevel des enchantements
  *
- * Nouveau système simplifié:
- * - Chaque culture cassée par un enchantement donne un XP fixe (cyber-level-xp-per-block)
+ * Système avec XP par enchantement:
+ * - Chaque enchantement a sa propre valeur XP (cyber-level-xp-per-block)
  * - L'XP est accumulé en async puis donné par batch via /cyberlevel addExp
- * - Plus de multiplicateurs, plus de valeurs par type de culture
  */
 public class CyberLevelXPListener implements Listener {
 
@@ -30,14 +29,23 @@ public class CyberLevelXPListener implements Listener {
     // Queue des XP à donner (thread-safe)
     private final ConcurrentLinkedQueue<XPQueueEntry> xpQueue = new ConcurrentLinkedQueue<>();
 
-    // XP accumulé par joueur (pour batch processing)
-    private final ConcurrentHashMap<UUID, Integer> accumulatedXP = new ConcurrentHashMap<>();
+    // XP accumulé par joueur (pour batch processing) - Long pour supporter les grandes valeurs
+    private final ConcurrentHashMap<UUID, Long> accumulatedXP = new ConcurrentHashMap<>();
 
     // Intervalle de processing en ticks (5 ticks = 250ms)
     private static final long XP_PROCESS_INTERVAL = 5L;
 
-    // XP par bloc cassé (chargé depuis la config)
-    private int xpPerBlock = 200;
+    // Map des XP par bloc pour chaque enchantement (chargé depuis la config)
+    private final Map<String, Long> xpPerBlockByEnchant = new HashMap<>();
+
+    // Liste des sections d'enchantements à charger
+    private static final String[] ENCHANT_SECTIONS = {
+        "bee-collector",
+        "panda-roll",
+        "allay-laser",
+        "ravager-stampede",
+        "blizzard-eternal"
+    };
 
     public CyberLevelXPListener(RinaEnchantsPlugin plugin) {
         this.plugin = plugin;
@@ -49,7 +57,7 @@ public class CyberLevelXPListener implements Listener {
         plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, () -> {
             XPQueueEntry entry;
             while ((entry = xpQueue.poll()) != null) {
-                accumulatedXP.merge(entry.playerId, entry.xpAmount, Integer::sum);
+                accumulatedXP.merge(entry.playerId, entry.xpAmount, Long::sum);
             }
         }, XP_PROCESS_INTERVAL, XP_PROCESS_INTERVAL);
 
@@ -60,13 +68,13 @@ public class CyberLevelXPListener implements Listener {
             if (accumulatedXP.isEmpty()) return;
 
             // Copier et vider l'accumulation
-            Map<UUID, Integer> toProcess = new HashMap<>(accumulatedXP);
+            Map<UUID, Long> toProcess = new HashMap<>(accumulatedXP);
             accumulatedXP.clear();
 
-            for (Map.Entry<UUID, Integer> xpEntry : toProcess.entrySet()) {
+            for (Map.Entry<UUID, Long> xpEntry : toProcess.entrySet()) {
                 Player player = Bukkit.getPlayer(xpEntry.getKey());
                 if (player != null && player.isOnline()) {
-                    int xp = xpEntry.getValue();
+                    long xp = xpEntry.getValue();
                     if (xp > 0) {
                         // Utilise /cyberlevel addExp <amount> <player>
                         String command = "cyberlevel addExp " + xp + " " + player.getName();
@@ -80,24 +88,32 @@ public class CyberLevelXPListener implements Listener {
             }
         }, XP_PROCESS_INTERVAL * 2, XP_PROCESS_INTERVAL * 2);
 
-        plugin.getLogger().info("§a[CyberLevel] Listener XP initialisé (XP par bloc: " + xpPerBlock + ")");
+        plugin.getLogger().info("§a[CyberLevel] Listener XP initialisé avec XP par enchantement");
         plugin.getLogger().info("§a[CyberLevel] Système de queue async activé (batch processing)");
     }
 
     /**
-     * Charge la configuration
+     * Charge la configuration - XP par enchantement
      */
     public void loadConfig() {
+        xpPerBlockByEnchant.clear();
+
         if (!plugin.getConfig().getBoolean("cyberlevels-hook.enabled", false)) {
             plugin.getLogger().info("§e[CyberLevel] Hook désactivé dans la config");
-            xpPerBlock = 0;
             return;
         }
 
-        xpPerBlock = plugin.getConfig().getInt("cyberlevels-hook.cyber-level-xp-per-block", 200);
+        boolean debug = plugin.getConfig().getBoolean("debug", false);
 
-        if (plugin.getConfig().getBoolean("debug", false)) {
-            plugin.getLogger().info("§a[CyberLevel] XP par bloc configuré: " + xpPerBlock);
+        // Charger l'XP de chaque enchantement
+        for (String enchantSection : ENCHANT_SECTIONS) {
+            String configPath = enchantSection + ".cyber-level-xp-per-block";
+            long xp = plugin.getConfig().getLong(configPath, 200);
+            xpPerBlockByEnchant.put(enchantSection, xp);
+
+            if (debug) {
+                plugin.getLogger().info("§a[CyberLevel] " + enchantSection + " XP par bloc: " + xp);
+            }
         }
     }
 
@@ -106,11 +122,10 @@ public class CyberLevelXPListener implements Listener {
      * MÉTHODE PRINCIPALE: Queue l'XP pour une culture cassée par un enchantement
      * ═══════════════════════════════════════════════════════════════════════
      *
-     * Appelé par safeBreakCrop APRÈS avoir cassé la culture.
-     *
      * @param player Le joueur qui reçoit l'XP
+     * @param enchantId L'ID de la section d'enchantement (ex: "panda-roll", "bee-collector")
      */
-    public void queueXPForCrop(Player player) {
+    public void queueXPForCrop(Player player, String enchantId) {
         if (!plugin.getConfig().getBoolean("cyberlevels-hook.enabled", false)) {
             return;
         }
@@ -119,7 +134,9 @@ public class CyberLevelXPListener implements Listener {
             return;
         }
 
-        if (xpPerBlock <= 0) {
+        // Récupérer l'XP pour cet enchantement
+        Long xpPerBlock = xpPerBlockByEnchant.get(enchantId);
+        if (xpPerBlock == null || xpPerBlock <= 0) {
             return;
         }
 
@@ -127,7 +144,7 @@ public class CyberLevelXPListener implements Listener {
         xpQueue.offer(new XPQueueEntry(player.getUniqueId(), xpPerBlock));
 
         if (plugin.getConfig().getBoolean("debug", false)) {
-            plugin.getLogger().info("§a[CyberLevel] XP ajouté à la queue: " + xpPerBlock + " pour " + player.getName());
+            plugin.getLogger().info("§a[CyberLevel] XP ajouté à la queue: " + xpPerBlock + " (" + enchantId + ") pour " + player.getName());
         }
     }
 
@@ -139,10 +156,10 @@ public class CyberLevelXPListener implements Listener {
     }
 
     /**
-     * Retourne l'XP par bloc configuré
+     * Retourne l'XP par bloc pour un enchantement donné
      */
-    public int getXpPerBlock() {
-        return xpPerBlock;
+    public long getXpPerBlock(String enchantId) {
+        return xpPerBlockByEnchant.getOrDefault(enchantId, 200L);
     }
 
     /**
@@ -150,9 +167,9 @@ public class CyberLevelXPListener implements Listener {
      */
     private static class XPQueueEntry {
         final UUID playerId;
-        final int xpAmount;
+        final long xpAmount;
 
-        XPQueueEntry(UUID playerId, int xpAmount) {
+        XPQueueEntry(UUID playerId, long xpAmount) {
             this.playerId = playerId;
             this.xpAmount = xpAmount;
         }
