@@ -5,6 +5,7 @@ import me.rinaorc.rinaenchants.enchant.AllayLaserEnchant;
 import me.rinaorc.rinaenchants.enchant.BeeCollectorEnchant;
 import me.rinaorc.rinaenchants.enchant.PandaRollEnchant;
 import me.rinaorc.rinaenchants.enchant.RavagerStampedeEnchant;
+import me.rinaorc.rinaenchants.listener.CyberLevelXPListener;
 import me.rivaldev.harvesterhoes.api.events.HoeEnchant;
 import me.rivaldev.harvesterhoes.api.events.RivalHarvesterHoesAPI;
 import org.bukkit.Bukkit;
@@ -30,6 +31,7 @@ public class RinaEnchantsPlugin extends JavaPlugin implements Listener {
 
     private static RinaEnchantsPlugin instance;
     private RivalHarvesterHoesAPI hoesAPI;
+    private CyberLevelXPListener cyberLevelListener;
 
     // Liste des enchantements enregistrés
     private final List<HoeEnchant> registeredEnchants = new ArrayList<>();
@@ -69,6 +71,10 @@ public class RinaEnchantsPlugin extends JavaPlugin implements Listener {
 
         // Enregistrer les listeners
         Bukkit.getPluginManager().registerEvents(this, this);
+
+        // Initialiser et enregistrer le listener CyberLevel XP
+        cyberLevelListener = new CyberLevelXPListener(this);
+        Bukkit.getPluginManager().registerEvents(cyberLevelListener, this);
 
         // Enregistrer la commande reload
         getCommand("rinaenchants").setExecutor(new ReloadCommand(this));
@@ -165,6 +171,11 @@ public class RinaEnchantsPlugin extends JavaPlugin implements Listener {
     public void reload() {
         getLogger().info("§eRechargement de RinaEnchants...");
         reloadConfig();
+
+        // Recharger le listener CyberLevel
+        if (cyberLevelListener != null) {
+            cyberLevelListener.reload();
+        }
 
         if (hoesAPI != null) {
             registerAllEnchants();
@@ -310,6 +321,10 @@ public class RinaEnchantsPlugin extends JavaPlugin implements Listener {
 
     public RivalHarvesterHoesAPI getHoesAPI() {
         return hoesAPI;
+    }
+
+    public CyberLevelXPListener getCyberLevelListener() {
+        return cyberLevelListener;
     }
 
     // ═══════════════════════════════════════════════════════════════════════

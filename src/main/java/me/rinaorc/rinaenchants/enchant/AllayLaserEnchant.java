@@ -100,7 +100,16 @@ public class AllayLaserEnchant implements HoeEnchant, Listener {
             plugin.getLogger().info("§c[AllayLaser] Bloqué - isEntityBreakingLocation=true");
             return;
         }
-        
+
+        // ═══════════════════════════════════════════════════════════
+        // ENREGISTREMENT DU MULTIPLICATEUR CYBERLEVEL
+        // ═══════════════════════════════════════════════════════════
+        double cyberLevelMulti = plugin.getConfig().getDouble("allay-laser.cyber-level-multi", 1.0);
+        if (cyberLevelMulti > 1.0 && plugin.getCyberLevelListener() != null) {
+            plugin.getCyberLevelListener().registerMultiplier(
+                player.getUniqueId(), getEnchantId(), cyberLevelMulti, cropLocation);
+        }
+
         plugin.getLogger().info("§b[AllayLaser] Vérification passée, continuation...");
 
         int maxLevel = plugin.getConfig().getInt("allay-laser.max-level", 1000);

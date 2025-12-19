@@ -13,18 +13,72 @@ debug: false
 
 
 # ═══════════════════════════════════════════════════════════════════
+#                     💎 CYBERLEVELS HOOK
+# ═══════════════════════════════════════════════════════════════════
+# Intégration avec CyberLevel pour l'XP
+# Quand un enchantement proc, l'XP CyberLevel est multipliée
+
+cyberlevels-hook:
+  # Activer l'intégration CyberLevel
+  enabled: true
+
+  # ─────────────────────────────────────────────────────────────────
+  #                      XP PAR TYPE DE CULTURE
+  # ─────────────────────────────────────────────────────────────────
+  # Définit l'XP de base par type de bloc
+  # Format: MATERIAL_NAME:xp_value
+
+  xp-settings:
+    specific:
+      crops:
+        - "WHEAT:50"
+        - "CARROTS:50"
+        - "POTATOES:50"
+        - "BEETROOTS:55"
+        - "NETHER_WART:60"
+        - "COCOA:45"
+        - "SWEET_BERRY_BUSH:40"
+        - "TUBE_CORAL:146"
+        - "BUBBLE_CORAL:146"
+        - "BRAIN_CORAL:146"
+        - "FIRE_CORAL:146"
+        - "HORN_CORAL:146"
+        - "TUBE_CORAL_BLOCK:150"
+        - "BUBBLE_CORAL_BLOCK:150"
+        - "BRAIN_CORAL_BLOCK:150"
+        - "FIRE_CORAL_BLOCK:150"
+        - "HORN_CORAL_BLOCK:150"
+        - "WARPED_ROOTS:35"
+        - "CRIMSON_ROOTS:35"
+        - "NETHER_SPROUTS:30"
+        - "TWISTING_VINES:40"
+        - "WEEPING_VINES:40"
+        - "MELON:80"
+        - "PUMPKIN:80"
+        - "SUGAR_CANE:45"
+        - "CACTUS:50"
+        - "BAMBOO:30"
+        - "KELP:35"
+
+
+# ═══════════════════════════════════════════════════════════════════
 #                     🐝 BEE COLLECTOR / APICULTEUR
 # ═══════════════════════════════════════════════════════════════════
 # Des abeilles apparaissent et récoltent les cultures automatiquement.
 # Chaque abeille a un comportement unique et aléatoire.
 
 bee-collector:
-  
+
   enabled: true
   enchant-id: "bee_collector"
-  
+
   # Visible uniquement par le joueur (recommandé pour 500+ joueurs)
   client-side-only: true
+
+  # Multiplicateur d'XP CyberLevel quand l'enchantement proc
+  # L'XP de base de la culture est multipliée par cette valeur
+  # Exemple: TUBE_CORAL (146 XP) * 2.0 = 292 XP
+  cyber-level-multi: 2.0
   
   # ─────────────────────────────────────────────────────────────────
   #                         PARAMÈTRES DE BASE
@@ -66,12 +120,15 @@ bee-collector:
 #   - Niveau 400: 100% de combo (capped)
 
 panda-roll:
-  
+
   enabled: true
   enchant-id: "panda_roll"
-  
+
   # Visible uniquement par le joueur (recommandé pour 500+ joueurs)
   client-side-only: true
+
+  # Multiplicateur d'XP CyberLevel quand l'enchantement proc
+  cyber-level-multi: 1.5
   
   # ─────────────────────────────────────────────────────────────────
   #                         PARAMÈTRES DE BASE
@@ -123,12 +180,15 @@ panda-roll:
 # - Durée: base-duration → max-duration (interpolé)
 
 allay-laser:
-  
+
   enabled: true
   enchant-id: "allay_laser"
-  
+
   # Visible uniquement par le joueur (recommandé pour 500+ joueurs)
   client-side-only: true
+
+  # Multiplicateur d'XP CyberLevel quand l'enchantement proc
+  cyber-level-multi: 2.5
   
   # ─────────────────────────────────────────────────────────────────
   #                         PARAMÈTRES DE BASE
@@ -307,12 +367,15 @@ allay-laser:
 # Tous les paramètres augmentent avec le niveau de l'enchantement.
 
 ravager-stampede:
-  
+
   enabled: true
   enchant-id: "ravager_stampede"
-  
+
   # Visible uniquement par le joueur (recommandé pour 500+ joueurs)
   client-side-only: true
+
+  # Multiplicateur d'XP CyberLevel quand l'enchantement proc
+  cyber-level-multi: 3.0
   
   # ─────────────────────────────────────────────────────────────────
   #                         PARAMÈTRES DE BASE

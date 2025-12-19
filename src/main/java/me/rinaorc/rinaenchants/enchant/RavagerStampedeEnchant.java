@@ -131,6 +131,15 @@ public class RavagerStampedeEnchant implements HoeEnchant {
         }
 
         // ═══════════════════════════════════════════════════════════
+        // ENREGISTREMENT DU MULTIPLICATEUR CYBERLEVEL
+        // ═══════════════════════════════════════════════════════════
+        double cyberLevelMulti = plugin.getConfig().getDouble("ravager-stampede.cyber-level-multi", 1.0);
+        if (cyberLevelMulti > 1.0 && plugin.getCyberLevelListener() != null) {
+            plugin.getCyberLevelListener().registerMultiplier(
+                player.getUniqueId(), getEnchantId(), cyberLevelMulti, cropLocation);
+        }
+
+        // ═══════════════════════════════════════════════════════════
         // PARAMÈTRES DE CONFIG
         // ═══════════════════════════════════════════════════════════
         

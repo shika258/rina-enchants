@@ -135,7 +135,16 @@ public class BeeCollectorEnchant implements HoeEnchant, Listener {
             plugin.getLogger().info("§c[BeeCollector] Bloqué - isEntityBreakingLocation=true");
             return;
         }
-        
+
+        // ═══════════════════════════════════════════════════════════
+        // ENREGISTREMENT DU MULTIPLICATEUR CYBERLEVEL
+        // ═══════════════════════════════════════════════════════════
+        double cyberLevelMulti = plugin.getConfig().getDouble("bee-collector.cyber-level-multi", 1.0);
+        if (cyberLevelMulti > 1.0 && plugin.getCyberLevelListener() != null) {
+            plugin.getCyberLevelListener().registerMultiplier(
+                player.getUniqueId(), getEnchantId(), cyberLevelMulti, cropLocation);
+        }
+
         plugin.getLogger().info("§a[BeeCollector] Vérification passée, continuation...");
 
         // Récupérer les paramètres de config

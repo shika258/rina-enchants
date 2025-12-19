@@ -132,7 +132,16 @@ public class PandaRollEnchant implements HoeEnchant, Listener {
             }
             return;
         }
-        
+
+        // ═══════════════════════════════════════════════════════════
+        // ENREGISTREMENT DU MULTIPLICATEUR CYBERLEVEL
+        // ═══════════════════════════════════════════════════════════
+        double cyberLevelMulti = plugin.getConfig().getDouble("panda-roll.cyber-level-multi", 1.0);
+        if (cyberLevelMulti > 1.0 && plugin.getCyberLevelListener() != null) {
+            plugin.getCyberLevelListener().registerMultiplier(
+                player.getUniqueId(), getEnchantId(), cyberLevelMulti, cropLocation);
+        }
+
         if (debug) {
             plugin.getLogger().info("§e[DEBUG] PandaRoll proc! Niveau: " + enchantLevel);
         }
