@@ -140,13 +140,11 @@ public class BeeCollectorEnchant implements HoeEnchant, Listener {
         }
 
         // ═══════════════════════════════════════════════════════════
-        // ENREGISTREMENT DU MULTIPLICATEUR CYBERLEVEL
+        // RÉCUPÉRATION DU MULTIPLICATEUR CYBERLEVEL
+        // (sera appliqué JUSTE AVANT chaque récolte dans safeBreakCrop)
         // ═══════════════════════════════════════════════════════════
-        double cyberLevelMulti = plugin.getConfig().getDouble("bee-collector.cyber-level-multi", 1.0);
-        if (cyberLevelMulti > 1.0 && plugin.getCyberLevelListener() != null) {
-            plugin.getCyberLevelListener().registerMultiplier(
-                player.getUniqueId(), getEnchantId(), cyberLevelMulti, cropLocation);
-        }
+        final double cyberLevelMulti = plugin.getConfig().getDouble("bee-collector.cyber-level-multi", 1.0);
+        final String enchantIdForCyber = getEnchantId();
 
         // Récupérer les paramètres de config
         int baseRadius = plugin.getConfig().getInt("bee-collector.radius", 3);
@@ -237,8 +235,8 @@ public class BeeCollectorEnchant implements HoeEnchant, Listener {
                 animation.setOnCropReached((cropLoc) -> {
                     Block block = cropLoc.getBlock();
                     if (CROPS.contains(block.getType())) {
-                        // Utiliser la méthode sécurisée pour casser
-                        plugin.safeBreakCrop(player, cropLoc);
+                        // Utiliser la méthode sécurisée avec le multiplicateur CyberLevel
+                        plugin.safeBreakCrop(player, cropLoc, enchantIdForCyber, cyberLevelMulti);
                     }
                     
                     if (showParticles) {

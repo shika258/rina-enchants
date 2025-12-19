@@ -430,6 +430,27 @@ public class RinaEnchantsPlugin extends JavaPlugin implements Listener {
      * @return true si le bloc a été cassé
      */
     public boolean safeBreakCrop(Player player, Location cropLocation) {
+        return safeBreakCrop(player, cropLocation, null, 1.0);
+    }
+
+    /**
+     * Casse une culture de manière sécurisée avec un multiplicateur CyberLevel.
+     * Le multiplicateur est enregistré JUSTE AVANT de casser le bloc pour
+     * garantir qu'il est actif quand l'événement XP est déclenché.
+     *
+     * @param player Le joueur qui "casse" la culture
+     * @param cropLocation La location de la culture
+     * @param enchantId L'ID de l'enchantement (pour le tracking)
+     * @param cyberLevelMulti Le multiplicateur CyberLevel à appliquer
+     * @return true si le bloc a été cassé
+     */
+    public boolean safeBreakCrop(Player player, Location cropLocation, String enchantId, double cyberLevelMulti) {
+        // Enregistrer le multiplicateur CyberLevel JUSTE AVANT de casser
+        // Cela garantit que le multiplicateur est actif quand HoeXPGainEvent est déclenché
+        if (cyberLevelMulti > 1.0 && cyberLevelListener != null && enchantId != null) {
+            cyberLevelListener.registerMultiplier(
+                player.getUniqueId(), enchantId, cyberLevelMulti, cropLocation);
+        }
         // Marquer la location AVANT pour éviter les cascades internes
         markEntityBreakingLocation(cropLocation);
 
