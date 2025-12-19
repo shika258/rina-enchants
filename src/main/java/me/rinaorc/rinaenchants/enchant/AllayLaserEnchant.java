@@ -104,13 +104,6 @@ public class AllayLaserEnchant implements HoeEnchant, Listener {
             return;
         }
 
-        // ═══════════════════════════════════════════════════════════
-        // RÉCUPÉRATION DU MULTIPLICATEUR CYBERLEVEL
-        // (sera appliqué JUSTE AVANT chaque récolte dans safeBreakCrop)
-        // ═══════════════════════════════════════════════════════════
-        final double cyberLevelMulti = plugin.getConfig().getDouble("allay-laser.cyber-level-multi", 1.0);
-        final String enchantIdForCyber = getEnchantId();
-
         int maxLevel = plugin.getConfig().getInt("allay-laser.max-level", 1000);
         int baseRadius = plugin.getConfig().getInt("allay-laser.base-radius", 3);
         int baseDuration = plugin.getConfig().getInt("allay-laser.base-duration", 100);
@@ -167,9 +160,7 @@ public class AllayLaserEnchant implements HoeEnchant, Listener {
         animation.setOnCropHit((loc) -> {
             Block block = loc.getBlock();
             if (isMatureCrop(block)) {
-                // Utiliser la méthode sécurisée avec le multiplicateur CyberLevel
-                // Le multiplicateur est enregistré JUSTE AVANT pour garantir qu'il est actif
-                plugin.safeBreakCrop(player, loc, enchantIdForCyber, cyberLevelMulti);
+                plugin.safeBreakCrop(player, loc);
             }
         });
         
