@@ -22,13 +22,6 @@ cyberlevels-hook:
   # Activer l'intégration CyberLevel
   enabled: true
 
-  # ─────────────────────────────────────────────────────────────────
-  #                      XP PAR BLOC CASSÉ
-  # ─────────────────────────────────────────────────────────────────
-  # Chaque culture cassée par un enchantement donne cet XP
-  # Commande utilisée: /cyberlevel addExp <xp> <player>
-
-  cyber-level-xp-per-block: 200
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -41,6 +34,9 @@ bee-collector:
 
   enabled: true
   enchant-id: "bee_collector"
+
+  # XP CyberLevel par culture récoltée
+  cyber-level-xp-per-block: 200
 
   # Visible uniquement par le joueur (recommandé pour 500+ joueurs)
   client-side-only: true
@@ -88,6 +84,9 @@ panda-roll:
 
   enabled: true
   enchant-id: "panda_roll"
+
+  # XP CyberLevel par culture récoltée
+  cyber-level-xp-per-block: 150
 
   # Visible uniquement par le joueur (recommandé pour 500+ joueurs)
   client-side-only: true
@@ -145,6 +144,9 @@ allay-laser:
 
   enabled: true
   enchant-id: "allay_laser"
+
+  # XP CyberLevel par culture récoltée
+  cyber-level-xp-per-block: 250
 
   # Visible uniquement par le joueur (recommandé pour 500+ joueurs)
   client-side-only: true
@@ -330,6 +332,9 @@ ravager-stampede:
   enabled: true
   enchant-id: "ravager_stampede"
 
+  # XP CyberLevel par culture récoltée
+  cyber-level-xp-per-block: 300
+
   # Visible uniquement par le joueur (recommandé pour 500+ joueurs)
   client-side-only: true
 
@@ -411,6 +416,9 @@ blizzard-eternal:
 
   enabled: true
   enchant-id: "blizzard_eternal"
+
+  # XP CyberLevel par culture récoltée
+  cyber-level-xp-per-block: 200
 
   # Visible uniquement par le joueur (recommandé pour 500+ joueurs)
   client-side-only: true
