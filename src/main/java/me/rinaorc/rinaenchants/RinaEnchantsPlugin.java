@@ -8,6 +8,7 @@ import me.rinaorc.rinaenchants.enchant.PandaRollEnchant;
 import me.rinaorc.rinaenchants.enchant.RavagerStampedeEnchant;
 import me.rinaorc.rinaenchants.listener.CyberLevelXPListener;
 import me.rivaldev.harvesterhoes.api.events.HoeEnchant;
+import me.rivaldev.harvesterhoes.api.events.RivalBlockBreakEvent;
 import me.rivaldev.harvesterhoes.api.events.RivalHarvesterHoesAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -565,10 +566,38 @@ public class RinaEnchantsPlugin extends JavaPlugin implements Listener {
         }
 
         // Fallback: casser manuellement avec drops si HellRainAbility n'a pas fonctionné
+        // ═══════════════════════════════════════════════════════════════════════
+        // INTÉGRATION RIVALHARVESTERHOES: Déclencher RivalBlockBreakEvent
+        // Cela permet à CyberLevel et autres plugins de détecter la cassure
+        // ═══════════════════════════════════════════════════════════════════════
         if (!cropBroken) {
-            java.util.Collection<org.bukkit.inventory.ItemStack> drops = block.getDrops(
-                player.getInventory().getItemInMainHand()
+            org.bukkit.inventory.ItemStack hoeItem = player.getInventory().getItemInMainHand();
+
+            // Créer et appeler l'événement RivalBlockBreakEvent
+            // Paramètres: Player, Block, amount, hoe_level, hoe_prestige, ItemStack, Material
+            RivalBlockBreakEvent rivalEvent = new RivalBlockBreakEvent(
+                player,
+                block,
+                1,              // amount: 1 bloc cassé
+                1,              // hoe_level: niveau par défaut
+                0,              // hoe_prestige: prestige par défaut
+                hoeItem,
+                blockType
             );
+
+            // Appeler l'événement pour que les autres plugins (CyberLevel) le voient
+            Bukkit.getPluginManager().callEvent(rivalEvent);
+
+            // Vérifier si un autre plugin a annulé l'événement
+            if (rivalEvent.isCancelled()) {
+                if (debug) {
+                    getLogger().info("§c[safeBreakCrop] RivalBlockBreakEvent annulé par un autre plugin");
+                }
+                return false;
+            }
+
+            // L'événement n'est pas annulé, on peut casser le bloc
+            java.util.Collection<org.bukkit.inventory.ItemStack> drops = block.getDrops(hoeItem);
             block.setType(org.bukkit.Material.AIR);
 
             org.bukkit.Location dropLoc = cropLocation.clone().add(0.5, 0.5, 0.5);
@@ -582,7 +611,7 @@ public class RinaEnchantsPlugin extends JavaPlugin implements Listener {
             cropBroken = true;
 
             if (debug) {
-                getLogger().info("§e[safeBreakCrop] Bloc cassé manuellement (fallback): " + blockType);
+                getLogger().info("§a[safeBreakCrop] Bloc cassé via RivalBlockBreakEvent (fallback): " + blockType);
             }
         }
 
