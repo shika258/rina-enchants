@@ -310,8 +310,9 @@ public class BlizzardAnimation {
         ItemStack giftItem = createGiftHead();
         Item droppedGift = world.dropItem(spawnLoc, giftItem);
 
-        // Configuration du cadeau
-        droppedGift.setPickupDelay(0);
+        // Configuration du cadeau - empêcher le ramassage automatique
+        // Le tracker gère la détection de proximité et les récompenses
+        droppedGift.setPickupDelay(Integer.MAX_VALUE);
         droppedGift.setGlowing(true);
         droppedGift.setCustomName(ChatColor.translateAlternateColorCodes('&', "&6&l🎁 Cadeau de Noël"));
         droppedGift.setCustomNameVisible(true);
@@ -437,9 +438,6 @@ public class BlizzardAnimation {
             String processedCommand = command.replace("%player%", owner.getName());
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), processedCommand);
         }
-
-        // Retirer l'item de l'inventaire s'il a été ramassé
-        owner.getInventory().remove(Material.PLAYER_HEAD);
     }
 
     private boolean isMatureCrop(Block block) {
