@@ -23,42 +23,12 @@ cyberlevels-hook:
   enabled: true
 
   # ─────────────────────────────────────────────────────────────────
-  #                      XP PAR TYPE DE CULTURE
+  #                      XP PAR BLOC CASSÉ
   # ─────────────────────────────────────────────────────────────────
-  # Définit l'XP de base par type de bloc
-  # Format: MATERIAL_NAME:xp_value
+  # Chaque culture cassée par un enchantement donne cet XP
+  # Commande utilisée: /cyberlevel addExp <xp> <player>
 
-  xp-settings:
-    specific:
-      crops:
-        - "WHEAT:50"
-        - "CARROTS:50"
-        - "POTATOES:50"
-        - "BEETROOTS:55"
-        - "NETHER_WART:60"
-        - "COCOA:45"
-        - "SWEET_BERRY_BUSH:40"
-        - "TUBE_CORAL:146"
-        - "BUBBLE_CORAL:146"
-        - "BRAIN_CORAL:146"
-        - "FIRE_CORAL:146"
-        - "HORN_CORAL:146"
-        - "TUBE_CORAL_BLOCK:150"
-        - "BUBBLE_CORAL_BLOCK:150"
-        - "BRAIN_CORAL_BLOCK:150"
-        - "FIRE_CORAL_BLOCK:150"
-        - "HORN_CORAL_BLOCK:150"
-        - "WARPED_ROOTS:35"
-        - "CRIMSON_ROOTS:35"
-        - "NETHER_SPROUTS:30"
-        - "TWISTING_VINES:40"
-        - "WEEPING_VINES:40"
-        - "MELON:80"
-        - "PUMPKIN:80"
-        - "SUGAR_CANE:45"
-        - "CACTUS:50"
-        - "BAMBOO:30"
-        - "KELP:35"
+  cyber-level-xp-per-block: 200
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -75,15 +45,10 @@ bee-collector:
   # Visible uniquement par le joueur (recommandé pour 500+ joueurs)
   client-side-only: true
 
-  # Multiplicateur d'XP CyberLevel quand l'enchantement proc
-  # L'XP de base de la culture est multipliée par cette valeur
-  # Exemple: TUBE_CORAL (146 XP) * 2.0 = 292 XP
-  cyber-level-multi: 2.0
-  
   # ─────────────────────────────────────────────────────────────────
   #                         PARAMÈTRES DE BASE
   # ─────────────────────────────────────────────────────────────────
-  
+
   # Rayon de base (blocs). Rayon réel = radius + (niveau / 3)
   radius: 3
   
@@ -127,13 +92,10 @@ panda-roll:
   # Visible uniquement par le joueur (recommandé pour 500+ joueurs)
   client-side-only: true
 
-  # Multiplicateur d'XP CyberLevel quand l'enchantement proc
-  cyber-level-multi: 1.5
-  
   # ─────────────────────────────────────────────────────────────────
   #                         PARAMÈTRES DE BASE
   # ─────────────────────────────────────────────────────────────────
-  
+
   # Distance de roulade (en blocs)
   roll-distance: 5
   
@@ -187,13 +149,10 @@ allay-laser:
   # Visible uniquement par le joueur (recommandé pour 500+ joueurs)
   client-side-only: true
 
-  # Multiplicateur d'XP CyberLevel quand l'enchantement proc
-  cyber-level-multi: 2.5
-  
   # ─────────────────────────────────────────────────────────────────
   #                         PARAMÈTRES DE BASE
   # ─────────────────────────────────────────────────────────────────
-  
+
   # Niveau maximum (1000 recommandé pour ce système)
   max-level: 1000
   
@@ -374,13 +333,10 @@ ravager-stampede:
   # Visible uniquement par le joueur (recommandé pour 500+ joueurs)
   client-side-only: true
 
-  # Multiplicateur d'XP CyberLevel quand l'enchantement proc
-  cyber-level-multi: 3.0
-  
   # ─────────────────────────────────────────────────────────────────
   #                         PARAMÈTRES DE BASE
   # ─────────────────────────────────────────────────────────────────
-  
+
   # Niveau maximum (100 recommandé pour ce système)
   max-level: 100
   
@@ -458,9 +414,6 @@ blizzard-eternal:
 
   # Visible uniquement par le joueur (recommandé pour 500+ joueurs)
   client-side-only: true
-
-  # Multiplicateur d'XP CyberLevel quand l'enchantement proc
-  cyber-level-multi: 2.0
 
   # ─────────────────────────────────────────────────────────────────
   #                         PARAMÈTRES DE BASE

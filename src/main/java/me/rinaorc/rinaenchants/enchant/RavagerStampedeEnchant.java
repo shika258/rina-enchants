@@ -131,13 +131,6 @@ public class RavagerStampedeEnchant implements HoeEnchant {
         }
 
         // ═══════════════════════════════════════════════════════════
-        // RÉCUPÉRATION DU MULTIPLICATEUR CYBERLEVEL
-        // (sera appliqué JUSTE AVANT chaque récolte dans safeBreakCrop)
-        // ═══════════════════════════════════════════════════════════
-        final double cyberLevelMulti = plugin.getConfig().getDouble("ravager-stampede.cyber-level-multi", 1.0);
-        final String enchantIdForCyber = getEnchantId();
-
-        // ═══════════════════════════════════════════════════════════
         // PARAMÈTRES DE CONFIG
         // ═══════════════════════════════════════════════════════════
         
@@ -228,8 +221,7 @@ public class RavagerStampedeEnchant implements HoeEnchant {
         animation.setOnCropHit((loc) -> {
             Block block = loc.getBlock();
             if (isMatureCrop(block)) {
-                // Utiliser la méthode sécurisée avec le multiplicateur CyberLevel
-                plugin.safeBreakCrop(player, loc, enchantIdForCyber, cyberLevelMulti);
+                plugin.safeBreakCrop(player, loc);
             }
         });
         

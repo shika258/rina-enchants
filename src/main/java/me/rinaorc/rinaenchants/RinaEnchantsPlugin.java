@@ -447,33 +447,14 @@ public class RinaEnchantsPlugin extends JavaPlugin implements Listener {
      * Cette méthode est utilisée par AirStrike et donne les multiplicateurs
      * de RivalHarvesterHoes SANS déclencher d'autres enchantements.
      *
+     * Chaque culture cassée donne l'XP configuré dans cyber-level-xp-per-block.
+     *
      * @param player Le joueur qui "casse" la culture
      * @param cropLocation La location de la culture
      * @return true si le bloc a été cassé
      */
     public boolean safeBreakCrop(Player player, Location cropLocation) {
-        return safeBreakCrop(player, cropLocation, null, 1.0);
-    }
-
-    /**
-     * Casse une culture de manière sécurisée avec un multiplicateur CyberLevel.
-     *
-     * IMPORTANT: Le type de bloc est détecté AVANT de casser le bloc pour
-     * garantir que l'XP CyberLevel est correctement calculé.
-     *
-     * @param player Le joueur qui "casse" la culture
-     * @param cropLocation La location de la culture
-     * @param enchantId L'ID de l'enchantement (pour le tracking)
-     * @param cyberLevelMulti Le multiplicateur CyberLevel à appliquer
-     * @return true si le bloc a été cassé
-     */
-    public boolean safeBreakCrop(Player player, Location cropLocation, String enchantId, double cyberLevelMulti) {
         org.bukkit.block.Block block = cropLocation.getBlock();
-
-        // ═══════════════════════════════════════════════════════════════════════
-        // DÉTECTION DU TYPE DE CULTURE AVANT LE CASSAGE
-        // C'est CRITIQUE pour le calcul de l'XP CyberLevel
-        // ═══════════════════════════════════════════════════════════════════════
         org.bukkit.Material blockType = block.getType();
 
         if (blockType.isAir()) {
@@ -617,13 +598,13 @@ public class RinaEnchantsPlugin extends JavaPlugin implements Listener {
 
         // ═══════════════════════════════════════════════════════════════════════
         // DONNER L'XP CYBERLEVEL APRÈS AVOIR CASSÉ LE BLOC
-        // Le type de bloc a été détecté AVANT le cassage (blockType)
+        // Chaque bloc cassé donne l'XP configuré dans cyber-level-xp-per-block
         // ═══════════════════════════════════════════════════════════════════════
         if (cropBroken && cyberLevelListener != null) {
             if (debug) {
-                getLogger().info("§a[safeBreakCrop] Appel queueXPForCrop: type=" + blockType + ", multi=" + cyberLevelMulti);
+                getLogger().info("§a[safeBreakCrop] Appel queueXPForCrop pour " + player.getName());
             }
-            cyberLevelListener.queueXPForCrop(player, blockType, cyberLevelMulti);
+            cyberLevelListener.queueXPForCrop(player);
         }
 
         return cropBroken;
