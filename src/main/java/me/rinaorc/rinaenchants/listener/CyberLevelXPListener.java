@@ -154,10 +154,10 @@ public class CyberLevelXPListener implements Listener {
         }
 
         // Appliquer le multiplicateur
-        double originalXP = event.getXp();
+        double originalXP = event.getXP();
         double newXP = originalXP * multiplier;
 
-        event.setXp(newXP);
+        event.setXP(newXP);
 
         if (plugin.getConfig().getBoolean("debug", false)) {
             plugin.getLogger().info("§a[CyberLevel] XP modifié: " + originalXP + " -> " + newXP + " (x" + multiplier + ")");
