@@ -108,14 +108,19 @@ public class BeeAnimation {
             beeEntity.setHasStung(false);
             beeEntity.setHasNectar(random.nextBoolean());
             beeEntity.setRemoveWhenFarAway(false);
-            
+
+            // ═══════════════════════════════════════════════════════════
+            // MARQUER L'ENTITÉ pour cleanup après reboot
+            // ═══════════════════════════════════════════════════════════
+            plugin.markAsEnchantEntity(beeEntity);
+
             // ═══════════════════════════════════════════════════════════
             // CLIENT-SIDE: Cacher l'abeille à tous sauf le propriétaire
             // ═══════════════════════════════════════════════════════════
             if (clientSideOnly) {
                 plugin.makeEntityClientSide(beeEntity, owner);
             }
-            
+
         } catch (Exception e) {
             useParticleMode = true;
             currentParticleLocation = startLocation.clone();
