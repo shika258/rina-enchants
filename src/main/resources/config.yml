@@ -1,0 +1,372 @@
+# ╔══════════════════════════════════════════════════════════════════╗
+# ║                    RinaEnchants Configuration                     ║
+# ║         Enchantements personnalisés pour RivalHarvesterHoes       ║
+# ║                      Par Rinaorc Studio                           ║
+# ║                                                                    ║
+# ║   OPTIMISÉ pour serveurs haute population (500+ joueurs)          ║
+# ║   - Entités client-side (visibles uniquement par le joueur)       ║
+# ║   - Système anti-récursion robuste                                 ║
+# ╚══════════════════════════════════════════════════════════════════╝
+
+# Mode debug - Affiche des messages dans la console
+debug: false
+
+
+# ═══════════════════════════════════════════════════════════════════
+#                     🐝 BEE COLLECTOR / APICULTEUR
+# ═══════════════════════════════════════════════════════════════════
+# Des abeilles apparaissent et récoltent les cultures automatiquement.
+# Chaque abeille a un comportement unique et aléatoire.
+
+bee-collector:
+  
+  enabled: true
+  enchant-id: "bee_collector"
+  
+  # Visible uniquement par le joueur (recommandé pour 500+ joueurs)
+  client-side-only: true
+  
+  # ─────────────────────────────────────────────────────────────────
+  #                         PARAMÈTRES DE BASE
+  # ─────────────────────────────────────────────────────────────────
+  
+  # Rayon de base (blocs). Rayon réel = radius + (niveau / 3)
+  radius: 3
+  
+  # Nombre d'abeilles de base. Réel = bee-count + (niveau / 2)
+  bee-count: 3
+  
+  # Max cultures par activation. Réel = max-crops + (niveau * 2)
+  max-crops: 10
+  
+  # ─────────────────────────────────────────────────────────────────
+  #                         EFFETS
+  # ─────────────────────────────────────────────────────────────────
+  
+  particles: true
+  sound: true
+  message: true
+  message-text: "&e&l🐝 &6Vos abeilles récoltent &e{count} &6cultures!"
+
+
+# ═══════════════════════════════════════════════════════════════════
+#                     🐼 PANDA ROLL / ROULADE DE PANDA
+# ═══════════════════════════════════════════════════════════════════
+# Un panda fait une VRAIE roulade (animation native) et casse
+# les cultures sur son passage.
+#
+# SYSTÈME DE COMBO:
+# - À la fin de chaque roulade, chance de faire une nouvelle roulade
+# - La chance est calculée: niveau × combo-chance-per-level
+#
+# Exemple avec combo-chance-per-level: 0.25
+#   - Niveau 1:   0.25% de combo
+#   - Niveau 50:  12.5% de combo  
+#   - Niveau 100: 25% de combo
+#   - Niveau 400: 100% de combo (capped)
+
+panda-roll:
+  
+  enabled: true
+  enchant-id: "panda_roll"
+  
+  # Visible uniquement par le joueur (recommandé pour 500+ joueurs)
+  client-side-only: true
+  
+  # ─────────────────────────────────────────────────────────────────
+  #                         PARAMÈTRES DE BASE
+  # ─────────────────────────────────────────────────────────────────
+  
+  # Distance de roulade (en blocs)
+  roll-distance: 5
+  
+  # ─────────────────────────────────────────────────────────────────
+  #                      SYSTÈME DE COMBO
+  # ─────────────────────────────────────────────────────────────────
+  
+  # Chance de combo PAR NIVEAU en pourcentage
+  # Formule: niveau × combo-chance-per-level
+  # Exemple: niveau 100 avec 0.25 = 25% de combo
+  # Le résultat est capé à 100% maximum
+  combo-chance-per-level: 0.25
+  
+  # ─────────────────────────────────────────────────────────────────
+  #                         EFFETS
+  # ─────────────────────────────────────────────────────────────────
+  
+  particles: true
+  sound: true
+  
+  # Message de fin
+  message: true
+  message-text: "&d&l🐼 &5Le panda a récolté &d{count} &5cultures!"
+  
+  # Message de combo
+  combo-message: true
+  combo-message-text: "&d&l🐼 &5COMBO x{combo}!"
+
+
+# ═══════════════════════════════════════════════════════════════════
+#                     ✦ ALLAY LASER / LASER D'ALLAY
+# ═══════════════════════════════════════════════════════════════════
+# Un Allay apparaît, suit le joueur et tire des LASERS de particules
+# vers les cultures pour les récolter automatiquement.
+#
+# 1000 NIVEAUX MAXIMUM:
+# - Plus le niveau est élevé, plus l'Allay tire rapidement
+# - Plus le niveau est élevé, plus le rayon est grand
+# - Plus le niveau est élevé, plus l'Allay reste longtemps
+#
+# SCALING:
+# - Rayon: base-radius + (niveau / 50) blocs (max +20)
+# - Vitesse de tir: base-fire-rate → min-fire-rate (interpolé)
+# - Durée: base-duration → max-duration (interpolé)
+
+allay-laser:
+  
+  enabled: true
+  enchant-id: "allay_laser"
+  
+  # Visible uniquement par le joueur (recommandé pour 500+ joueurs)
+  client-side-only: true
+  
+  # ─────────────────────────────────────────────────────────────────
+  #                         PARAMÈTRES DE BASE
+  # ─────────────────────────────────────────────────────────────────
+  
+  # Niveau maximum (1000 recommandé pour ce système)
+  max-level: 1000
+  
+  # Rayon de base pour la détection des cultures (en blocs)
+  # Rayon réel = base-radius + (niveau / 50), cap à base + 20
+  base-radius: 3
+  
+  # ─────────────────────────────────────────────────────────────────
+  #                      VITESSE DE TIR (en ticks)
+  # ─────────────────────────────────────────────────────────────────
+  # L'Allay tire un laser toutes les X ticks
+  # Plus le niveau est élevé, plus il tire vite
+  
+  # Ticks entre chaque tir au niveau 1
+  base-fire-rate: 20
+  
+  # Ticks entre chaque tir au niveau max (minimum possible)
+  min-fire-rate: 2
+  
+  # ─────────────────────────────────────────────────────────────────
+  #                      DURÉE (en ticks)
+  # ─────────────────────────────────────────────────────────────────
+  # Combien de temps l'Allay reste actif
+  # Plus le niveau est élevé, plus il reste longtemps
+  
+  # Durée au niveau 1 (100 ticks = 5 secondes)
+  base-duration: 100
+  
+  # Durée au niveau max (600 ticks = 30 secondes)
+  max-duration: 600
+  
+  # ─────────────────────────────────────────────────────────────────
+  #                         EFFETS
+  # ─────────────────────────────────────────────────────────────────
+  
+  particles: true
+  sound: true
+  
+  # Message de début (quand l'Allay apparaît)
+  start-message: true
+  start-message-text: "&b&l✦ &3Un Allay magique vous assiste!"
+  
+  # Message de fin (quand l'Allay disparaît)
+  message: true
+  message-text: "&b&l✦ &3L'Allay a récolté &b{count} &3cultures avec ses lasers!"
+
+
+# ═══════════════════════════════════════════════════════════════════
+#                   CULTURES SUPPORTÉES
+# ═══════════════════════════════════════════════════════════════════
+#
+# Tous les enchantements supportent automatiquement ces cultures:
+#
+# CLASSIQUES:
+#   - WHEAT, CARROTS, POTATOES, BEETROOTS, NETHER_WART
+#   - SWEET_BERRY_BUSH, COCOA
+#
+# CORAUX:
+#   - TUBE_CORAL, BUBBLE_CORAL, BRAIN_CORAL, FIRE_CORAL, HORN_CORAL
+#   - Et leurs variantes en bloc (_BLOCK)
+#
+# RACINES DU NETHER:
+#   - WARPED_ROOTS, CRIMSON_ROOTS, NETHER_SPROUTS
+#   - TWISTING_VINES, WEEPING_VINES
+#
+# FLEURS:
+#   - LILAC, ROSE_BUSH, PEONY, SUNFLOWER
+#   - TALL_GRASS, LARGE_FERN
+#
+# POUSSES D'ARBRES:
+#   - OAK_SAPLING, BIRCH_SAPLING, JUNGLE_SAPLING
+#   - SPRUCE_SAPLING, CHERRY_SAPLING, ACACIA_SAPLING
+#   - DARK_OAK_SAPLING, MANGROVE_PROPAGULE
+#
+# AUTRES:
+#   - MELON, PUMPKIN, SUGAR_CANE, CACTUS, BAMBOO, KELP
+#   - SEA_PICKLE, CHORUS_FLOWER, CHORUS_PLANT
+#
+# ═══════════════════════════════════════════════════════════════════
+
+
+# ═══════════════════════════════════════════════════════════════════
+#                   CONFIGURATION RIVALHARVESTERHOES
+# ═══════════════════════════════════════════════════════════════════
+#
+# IMPORTANT: Ajoutez ces enchantements dans enchants.yml de
+# RivalHarvesterHoes pour qu'ils fonctionnent!
+#
+# ─────────────────────────────────────────────────────────────────
+# bee_collector:
+#   enabled: true
+#   name: "&e🐝 Apiculteur"
+#   description:
+#     - "&7Des abeilles récoltent les cultures"
+#     - "&7autour de vous automatiquement!"
+#   max-level: 10
+#   chance-per-level: 3.0
+#   base-chance: 5.0
+#   cost-per-level: 5000
+#   base-cost: 10000
+#
+# panda_roll:
+#   enabled: true
+#   name: "&d🐼 Roulade de Panda"
+#   description:
+#     - "&7Un panda fait une roulade et"
+#     - "&7casse les cultures sur son passage!"
+#     - "&6Système de combo intégré!"
+#   max-level: 100
+#   chance-per-level: 0.5
+#   base-chance: 2.0
+#   cost-per-level: 2500
+#   base-cost: 5000
+#
+# allay_laser:
+#   enabled: true
+#   name: "&b✦ Laser d'Allay"
+#   description:
+#     - "&7Un Allay vous suit et tire"
+#     - "&7des lasers sur les cultures!"
+#     - "&61000 niveaux possibles!"
+#   max-level: 1000
+#   chance-per-level: 0.1
+#   base-chance: 1.0
+#   cost-per-level: 1000
+#   base-cost: 2000
+#
+# ═══════════════════════════════════════════════════════════════════
+
+
+# ═══════════════════════════════════════════════════════════════════
+#                      EXEMPLES DE SCALING
+# ═══════════════════════════════════════════════════════════════════
+#
+# BEE COLLECTOR (max level 10):
+#   Niveau 1:  Rayon 3, 3 abeilles, max 12 cultures
+#   Niveau 5:  Rayon 4, 5 abeilles, max 20 cultures
+#   Niveau 10: Rayon 6, 8 abeilles, max 30 cultures
+#
+# PANDA ROLL (combo-chance-per-level: 0.25):
+#   Niveau 1:   0.25% chance de combo
+#   Niveau 50:  12.5% chance de combo
+#   Niveau 100: 25% chance de combo
+#   Niveau 200: 50% chance de combo
+#   Niveau 400: 100% chance de combo (cap)
+#
+# ALLAY LASER (max level 1000):
+#   Niveau 1:    Rayon 3, tir/20t, durée 5s
+#   Niveau 100:  Rayon 5, tir/18t, durée 10s
+#   Niveau 500:  Rayon 13, tir/11t, durée 17.5s
+#   Niveau 1000: Rayon 23, tir/2t, durée 30s
+#
+# RAVAGER STAMPEDE (max level 100):
+#   Niveau 1:   Distance 10, Stomp/15t rayon 3, Roar rayon 5
+#   Niveau 50:  Distance 20, Stomp/10t rayon 5, Roar rayon 10
+#   Niveau 100: Distance 30, Stomp/5t rayon 8, Roar rayon 15
+#
+# ═══════════════════════════════════════════════════════════════════
+
+
+# ═══════════════════════════════════════════════════════════════════
+#                  ⚔ RAVAGER STAMPEDE / CHARGE DU RAVAGEUR
+# ═══════════════════════════════════════════════════════════════════
+# Un Ravageur massif apparaît et charge dans la direction du joueur!
+#
+# MÉCANIQUE EN 3 PHASES:
+# 1. CHARGE - Le Ravageur fonce en ligne droite (3 blocs de large)
+# 2. STOMP - Piétinements périodiques avec onde de choc circulaire
+# 3. ROAR - Rugissement final = explosion de récolte MASSIVE
+#
+# Tous les paramètres augmentent avec le niveau de l'enchantement.
+
+ravager-stampede:
+  
+  enabled: true
+  enchant-id: "ravager_stampede"
+  
+  # Visible uniquement par le joueur (recommandé pour 500+ joueurs)
+  client-side-only: true
+  
+  # ─────────────────────────────────────────────────────────────────
+  #                         PARAMÈTRES DE BASE
+  # ─────────────────────────────────────────────────────────────────
+  
+  # Niveau maximum (100 recommandé pour ce système)
+  max-level: 100
+  
+  # ─────────────────────────────────────────────────────────────────
+  #                      PHASE 1: CHARGE
+  # ─────────────────────────────────────────────────────────────────
+  # Distance parcourue par le Ravageur (en blocs)
+  # Distance réelle = base + (niveau / max-level) * (max - base)
+  
+  base-charge-distance: 10
+  max-charge-distance: 30
+  
+  # ─────────────────────────────────────────────────────────────────
+  #                      PHASE 2: STOMP (Piétinement)
+  # ─────────────────────────────────────────────────────────────────
+  # Le Ravageur piétine le sol toutes les X ticks, créant une onde de choc
+  # Plus le niveau est élevé, plus les stomps sont fréquents et puissants
+  
+  # Intervalle entre les stomps (en ticks, 20 ticks = 1 seconde)
+  # Diminue avec le niveau (plus fréquent)
+  base-stomp-interval: 15
+  min-stomp-interval: 5
+  
+  # Rayon de l'onde de choc du stomp (en blocs)
+  # Augmente avec le niveau
+  base-stomp-radius: 3
+  max-stomp-radius: 8
+  
+  # ─────────────────────────────────────────────────────────────────
+  #                      PHASE 3: ROAR (Rugissement Final)
+  # ─────────────────────────────────────────────────────────────────
+  # À la fin de la charge, le Ravageur rugit et crée une explosion massive
+  
+  # Rayon de l'explosion de récolte finale (en blocs)
+  # Augmente avec le niveau
+  base-roar-radius: 5
+  max-roar-radius: 15
+  
+  # ─────────────────────────────────────────────────────────────────
+  #                         EFFETS
+  # ─────────────────────────────────────────────────────────────────
+  
+  particles: true
+  sound: true
+  
+  # Message de début (quand le Ravageur apparaît)
+  start-message: true
+  start-message-text: "&c&l⚔ &4Un Ravageur déchaîné charge!"
+  
+  # Message de fin (statistiques de récolte)
+  message: true
+  message-text: "&c&l⚔ &4Le Ravageur a dévasté &c{count} &4cultures avec &c{stomps} &4piétinements!"

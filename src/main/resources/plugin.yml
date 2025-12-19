@@ -1,0 +1,33 @@
+name: RinaEnchants
+version: 1.0.0
+main: me.rinaorc.rinaenchants.RinaEnchantsPlugin
+api-version: '1.21'
+author: Rinaorc
+description: Plugin d'enchantements personnalisés pour RivalHarvesterHoes - Abeilles, Pandas et plus!
+
+depend:
+  - RivalHarvesterHoes
+
+softdepend:
+  - PlaceholderAPI
+
+commands:
+  rinaenchants:
+    description: Commandes principales de RinaEnchants
+    usage: /<command> <reload|info|help>
+    aliases: [renchants, re]
+    permission: rinaenchants.use
+
+permissions:
+  rinaenchants.use:
+    description: Permet d'utiliser les commandes de base de RinaEnchants
+    default: true
+  rinaenchants.reload:
+    description: Permet de recharger la configuration de RinaEnchants
+    default: op
+  rinaenchants.enchant.bee:
+    description: Permet d'utiliser l'enchantement Bee Collector
+    default: true
+  rinaenchants.enchant.panda:
+    description: Permet d'utiliser l'enchantement Panda Roll
+    default: true
