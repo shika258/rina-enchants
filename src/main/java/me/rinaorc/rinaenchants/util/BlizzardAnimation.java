@@ -187,7 +187,7 @@ public class BlizzardAnimation {
             plugin.makeEntityClientSide(snowball, owner);
         }
 
-        // Tracker pour l'explosion potentielle
+        // Tracker pour la récolte et l'explosion potentielle
         new BukkitRunnable() {
             int ticks = 0;
 
@@ -197,7 +197,42 @@ public class BlizzardAnimation {
                     // La boule a touché le sol ou expiré
                     Location impactLoc = snowball.getLocation();
 
-                    // Vérifier la chance d'explosion
+                    // ═══════════════════════════════════════════════════════════
+                    // RÉCOLTE DE LA CULTURE TOUCHÉE PAR LA BOULE DE NEIGE
+                    // ═══════════════════════════════════════════════════════════
+                    Block hitBlock = impactLoc.getBlock();
+                    // Vérifier aussi les blocs adjacents (la boule peut atterrir à côté)
+                    Block[] blocksToCheck = {
+                        hitBlock,
+                        hitBlock.getRelative(0, -1, 0),
+                        hitBlock.getRelative(0, 1, 0),
+                        hitBlock.getRelative(1, 0, 0),
+                        hitBlock.getRelative(-1, 0, 0),
+                        hitBlock.getRelative(0, 0, 1),
+                        hitBlock.getRelative(0, 0, -1)
+                    };
+
+                    for (Block block : blocksToCheck) {
+                        if (isMatureCrop(block)) {
+                            Location cropLoc = block.getLocation();
+                            plugin.markEntityBreakingLocation(cropLoc);
+
+                            if (onCropHit != null) {
+                                onCropHit.accept(cropLoc);
+                            }
+                            totalCropsHarvested++;
+
+                            // Particules de récolte
+                            if (showParticles) {
+                                owner.spawnParticle(Particle.SNOWFLAKE, cropLoc.clone().add(0.5, 0.5, 0.5), 5, 0.2, 0.2, 0.2, 0.02);
+                            }
+                            break; // Une seule culture par boule de neige
+                        }
+                    }
+
+                    // ═══════════════════════════════════════════════════════════
+                    // CHANCE D'EXPLOSION (récolte en zone 3x3)
+                    // ═══════════════════════════════════════════════════════════
                     if (random.nextDouble() * 100 < explosionChance) {
                         triggerExplosion(impactLoc);
                     }
