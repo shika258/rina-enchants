@@ -55,6 +55,27 @@ public class RinaEnchantsPlugin extends JavaPlugin implements Listener {
     // Cache pour les entités client-side par joueur (pour cleanup)
     private final ConcurrentHashMap<UUID, Set<Integer>> playerClientEntities = new ConcurrentHashMap<>();
 
+    // ═══════════════════════════════════════════════════════════════════════
+    // CULTURES SANS ÂGE (pas besoin de vérifier Ageable)
+    // ═══════════════════════════════════════════════════════════════════════
+    private static final Set<org.bukkit.Material> NO_AGE_CROPS = new HashSet<>(Arrays.asList(
+        org.bukkit.Material.MELON, org.bukkit.Material.PUMPKIN, org.bukkit.Material.SUGAR_CANE,
+        org.bukkit.Material.CACTUS, org.bukkit.Material.BAMBOO, org.bukkit.Material.KELP,
+        org.bukkit.Material.KELP_PLANT,
+        org.bukkit.Material.TUBE_CORAL, org.bukkit.Material.BUBBLE_CORAL, org.bukkit.Material.BRAIN_CORAL,
+        org.bukkit.Material.FIRE_CORAL, org.bukkit.Material.HORN_CORAL,
+        org.bukkit.Material.TUBE_CORAL_BLOCK, org.bukkit.Material.BUBBLE_CORAL_BLOCK,
+        org.bukkit.Material.BRAIN_CORAL_BLOCK, org.bukkit.Material.FIRE_CORAL_BLOCK,
+        org.bukkit.Material.HORN_CORAL_BLOCK,
+        org.bukkit.Material.WARPED_ROOTS, org.bukkit.Material.CRIMSON_ROOTS, org.bukkit.Material.NETHER_SPROUTS,
+        org.bukkit.Material.LILAC, org.bukkit.Material.ROSE_BUSH, org.bukkit.Material.PEONY,
+        org.bukkit.Material.SUNFLOWER,
+        org.bukkit.Material.OAK_SAPLING, org.bukkit.Material.BIRCH_SAPLING, org.bukkit.Material.JUNGLE_SAPLING,
+        org.bukkit.Material.SPRUCE_SAPLING, org.bukkit.Material.CHERRY_SAPLING, org.bukkit.Material.ACACIA_SAPLING,
+        org.bukkit.Material.DARK_OAK_SAPLING, org.bukkit.Material.MANGROVE_PROPAGULE,
+        org.bukkit.Material.CHORUS_FLOWER, org.bukkit.Material.CHORUS_PLANT, org.bukkit.Material.SEA_PICKLE
+    ));
+
     @Override
     public void onEnable() {
         instance = this;
@@ -445,27 +466,24 @@ public class RinaEnchantsPlugin extends JavaPlugin implements Listener {
      * @return true si le bloc a été cassé
      */
     public boolean safeBreakCrop(Player player, Location cropLocation, String enchantId, double cyberLevelMulti) {
-        // Enregistrer le multiplicateur CyberLevel JUSTE AVANT de casser
-        // Cela garantit que le multiplicateur est actif quand HoeXPGainEvent est déclenché
-        if (cyberLevelMulti > 1.0 && cyberLevelListener != null && enchantId != null) {
-            cyberLevelListener.registerMultiplier(
-                player.getUniqueId(), enchantId, cyberLevelMulti, cropLocation);
-        }
-        // Marquer la location AVANT pour éviter les cascades internes
-        markEntityBreakingLocation(cropLocation);
-
         org.bukkit.block.Block block = cropLocation.getBlock();
         org.bukkit.Material blockType = block.getType();
         if (blockType.isAir()) return false;
 
         // Vérifier si c'est une culture mature
-        if (!(block.getBlockData() instanceof org.bukkit.block.data.Ageable)) {
-            return false;
+        // Pour les NO_AGE_CROPS (coraux, saplings, etc.), pas besoin de vérifier l'âge
+        if (!NO_AGE_CROPS.contains(blockType)) {
+            if (!(block.getBlockData() instanceof org.bukkit.block.data.Ageable)) {
+                return false;
+            }
+            org.bukkit.block.data.Ageable ageable = (org.bukkit.block.data.Ageable) block.getBlockData();
+            if (ageable.getAge() < ageable.getMaximumAge()) {
+                return false;
+            }
         }
-        org.bukkit.block.data.Ageable ageable = (org.bukkit.block.data.Ageable) block.getBlockData();
-        if (ageable.getAge() < ageable.getMaximumAge()) {
-            return false;
-        }
+
+        // Marquer la location AVANT pour éviter les cascades internes
+        markEntityBreakingLocation(cropLocation);
 
         // Charger les méthodes HellRainAbility via réflexion (une seule fois)
         if (!hellRainMethodsChecked) {
@@ -497,6 +515,11 @@ public class RinaEnchantsPlugin extends JavaPlugin implements Listener {
                 // Rayon de 1.0 = bloc central + croix adjacente
                 // C'est le minimum qui fonctionne avec la logique interne de RivalHarvesterHoes
                 hellRainReplaceWithDrops.invoke(null, player, cropLocation, 1.0, blockType, 1L);
+
+                // Donner l'XP CyberLevel directement après avoir cassé le bloc
+                if (cyberLevelListener != null) {
+                    cyberLevelListener.giveDirectXP(player, blockType, cyberLevelMulti);
+                }
                 return true;
             } catch (Exception e) {
                 if (getConfig().getBoolean("debug", false)) {
@@ -506,6 +529,11 @@ public class RinaEnchantsPlugin extends JavaPlugin implements Listener {
                 if (hellRainReplaceCropsde != null) {
                     try {
                         hellRainReplaceCropsde.invoke(null, player, cropLocation, 1.0, blockType, 1L);
+
+                        // Donner l'XP CyberLevel directement après avoir cassé le bloc
+                        if (cyberLevelListener != null) {
+                            cyberLevelListener.giveDirectXP(player, blockType, cyberLevelMulti);
+                        }
                         return true;
                     } catch (Exception e2) {
                         if (getConfig().getBoolean("debug", false)) {
@@ -529,6 +557,11 @@ public class RinaEnchantsPlugin extends JavaPlugin implements Listener {
             for (org.bukkit.inventory.ItemStack item : leftover.values()) {
                 block.getWorld().dropItemNaturally(dropLoc, item);
             }
+        }
+
+        // Donner l'XP CyberLevel directement même en fallback
+        if (cyberLevelListener != null) {
+            cyberLevelListener.giveDirectXP(player, blockType, cyberLevelMulti);
         }
         return true;
     }
