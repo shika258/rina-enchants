@@ -146,6 +146,9 @@ public class BlizzardEnchant implements HoeEnchant {
         // PARAMÈTRES DE CONFIG
         // ═══════════════════════════════════════════════════════════
 
+        // XP CyberLevel par bloc pour cet enchantement
+        final int xpPerBlock = plugin.getConfig().getInt("blizzard-eternal.cyber-level-xp-per-block", 200);
+
         int maxLevel = plugin.getConfig().getInt("blizzard-eternal.max-level", 10000);
 
         // Durée du blizzard
@@ -221,7 +224,7 @@ public class BlizzardEnchant implements HoeEnchant {
         animation.setOnCropHit((loc) -> {
             Block block = loc.getBlock();
             if (isMatureCrop(block)) {
-                plugin.safeBreakCrop(player, loc);
+                plugin.safeBreakCrop(player, loc, xpPerBlock);
             }
         });
 

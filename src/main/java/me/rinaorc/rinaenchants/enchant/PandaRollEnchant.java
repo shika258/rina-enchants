@@ -143,6 +143,9 @@ public class PandaRollEnchant implements HoeEnchant, Listener {
         boolean showParticles = plugin.getConfig().getBoolean("panda-roll.particles", true);
         boolean playSound = plugin.getConfig().getBoolean("panda-roll.sound", true);
         boolean clientSideOnly = plugin.getConfig().getBoolean("panda-roll.client-side-only", true);
+
+        // XP CyberLevel par bloc pour cet enchantement
+        final int xpPerBlock = plugin.getConfig().getInt("panda-roll.cyber-level-xp-per-block", 150);
         
         // ═══════════════════════════════════════════════════════════
         // CALCUL DE LA CHANCE DE COMBO CONFIGURABLE
@@ -179,7 +182,7 @@ public class PandaRollEnchant implements HoeEnchant, Listener {
         animation.setOnCropHit((cropLoc) -> {
             Block block = cropLoc.getBlock();
             if (isMatureCrop(block)) {
-                plugin.safeBreakCrop(player, cropLoc);
+                plugin.safeBreakCrop(player, cropLoc, xpPerBlock);
             }
         });
         

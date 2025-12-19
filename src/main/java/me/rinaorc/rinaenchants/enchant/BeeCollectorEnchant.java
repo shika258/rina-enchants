@@ -146,6 +146,9 @@ public class BeeCollectorEnchant implements HoeEnchant, Listener {
         boolean showParticles = plugin.getConfig().getBoolean("bee-collector.particles", true);
         boolean playSound = plugin.getConfig().getBoolean("bee-collector.sound", true);
         boolean clientSideOnly = plugin.getConfig().getBoolean("bee-collector.client-side-only", true);
+
+        // XP CyberLevel par bloc pour cet enchantement
+        final int xpPerBlock = plugin.getConfig().getInt("bee-collector.cyber-level-xp-per-block", 200);
         
         // Bonus basé sur le niveau de l'enchant
         int radius = baseRadius + (int)(enchantLevel / 3);
@@ -228,7 +231,7 @@ public class BeeCollectorEnchant implements HoeEnchant, Listener {
                 animation.setOnCropReached((cropLoc) -> {
                     Block block = cropLoc.getBlock();
                     if (CROPS.contains(block.getType())) {
-                        plugin.safeBreakCrop(player, cropLoc);
+                        plugin.safeBreakCrop(player, cropLoc, xpPerBlock);
                     }
                     
                     if (showParticles) {

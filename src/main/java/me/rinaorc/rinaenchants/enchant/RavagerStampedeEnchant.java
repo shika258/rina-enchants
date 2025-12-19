@@ -133,7 +133,10 @@ public class RavagerStampedeEnchant implements HoeEnchant {
         // ═══════════════════════════════════════════════════════════
         // PARAMÈTRES DE CONFIG
         // ═══════════════════════════════════════════════════════════
-        
+
+        // XP CyberLevel par bloc pour cet enchantement
+        final int xpPerBlock = plugin.getConfig().getInt("ravager-stampede.cyber-level-xp-per-block", 300);
+
         int maxLevel = plugin.getConfig().getInt("ravager-stampede.max-level", 100);
         
         // Paramètres de base
@@ -221,7 +224,7 @@ public class RavagerStampedeEnchant implements HoeEnchant {
         animation.setOnCropHit((loc) -> {
             Block block = loc.getBlock();
             if (isMatureCrop(block)) {
-                plugin.safeBreakCrop(player, loc);
+                plugin.safeBreakCrop(player, loc, xpPerBlock);
             }
         });
         

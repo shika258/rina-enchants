@@ -113,6 +113,9 @@ public class AllayLaserEnchant implements HoeEnchant, Listener {
         boolean showParticles = plugin.getConfig().getBoolean("allay-laser.particles", true);
         boolean playSound = plugin.getConfig().getBoolean("allay-laser.sound", true);
         boolean clientSideOnly = plugin.getConfig().getBoolean("allay-laser.client-side-only", true);
+
+        // XP CyberLevel par bloc pour cet enchantement
+        final int xpPerBlock = plugin.getConfig().getInt("allay-laser.cyber-level-xp-per-block", 250);
         
         double levelRatio = Math.min(1.0, (double) enchantLevel / maxLevel);
         
@@ -160,7 +163,7 @@ public class AllayLaserEnchant implements HoeEnchant, Listener {
         animation.setOnCropHit((loc) -> {
             Block block = loc.getBlock();
             if (isMatureCrop(block)) {
-                plugin.safeBreakCrop(player, loc);
+                plugin.safeBreakCrop(player, loc, xpPerBlock);
             }
         });
         

@@ -443,17 +443,23 @@ public class RinaEnchantsPlugin extends JavaPlugin implements Listener {
     private boolean hellRainMethodsChecked = false;
 
     /**
+     * Casse une culture de manière sécurisée (sans XP CyberLevel).
+     */
+    public boolean safeBreakCrop(Player player, Location cropLocation) {
+        return safeBreakCrop(player, cropLocation, 0);
+    }
+
+    /**
      * Casse une culture de manière sécurisée en utilisant HellRainAbility.
      * Cette méthode est utilisée par AirStrike et donne les multiplicateurs
      * de RivalHarvesterHoes SANS déclencher d'autres enchantements.
      *
-     * Chaque culture cassée donne l'XP configuré dans cyber-level-xp-per-block.
-     *
      * @param player Le joueur qui "casse" la culture
      * @param cropLocation La location de la culture
+     * @param xpAmount L'XP CyberLevel à donner (0 = pas d'XP)
      * @return true si le bloc a été cassé
      */
-    public boolean safeBreakCrop(Player player, Location cropLocation) {
+    public boolean safeBreakCrop(Player player, Location cropLocation, int xpAmount) {
         org.bukkit.block.Block block = cropLocation.getBlock();
         org.bukkit.Material blockType = block.getType();
 
@@ -598,13 +604,13 @@ public class RinaEnchantsPlugin extends JavaPlugin implements Listener {
 
         // ═══════════════════════════════════════════════════════════════════════
         // DONNER L'XP CYBERLEVEL APRÈS AVOIR CASSÉ LE BLOC
-        // Chaque bloc cassé donne l'XP configuré dans cyber-level-xp-per-block
+        // L'XP est défini par l'enchantement qui appelle safeBreakCrop
         // ═══════════════════════════════════════════════════════════════════════
-        if (cropBroken && cyberLevelListener != null) {
+        if (cropBroken && cyberLevelListener != null && xpAmount > 0) {
             if (debug) {
-                getLogger().info("§a[safeBreakCrop] Appel queueXPForCrop pour " + player.getName());
+                getLogger().info("§a[safeBreakCrop] +" + xpAmount + " XP pour " + player.getName());
             }
-            cyberLevelListener.queueXPForCrop(player);
+            cyberLevelListener.queueXPForCrop(player, xpAmount);
         }
 
         return cropBroken;

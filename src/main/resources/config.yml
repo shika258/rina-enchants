@@ -22,14 +22,6 @@ cyberlevels-hook:
   # Activer l'intégration CyberLevel
   enabled: true
 
-  # ─────────────────────────────────────────────────────────────────
-  #                      XP PAR BLOC CASSÉ
-  # ─────────────────────────────────────────────────────────────────
-  # Chaque culture cassée par un enchantement donne cet XP
-  # Commande utilisée: /cyberlevel addExp <xp> <player>
-
-  cyber-level-xp-per-block: 200
-
 
 # ═══════════════════════════════════════════════════════════════════
 #                     🐝 BEE COLLECTOR / APICULTEUR
@@ -44,6 +36,10 @@ bee-collector:
 
   # Visible uniquement par le joueur (recommandé pour 500+ joueurs)
   client-side-only: true
+
+  # XP CyberLevel par culture cassée par cet enchantement
+  # Commande: /cyberlevel addExp <xp> <player>
+  cyber-level-xp-per-block: 200
 
   # ─────────────────────────────────────────────────────────────────
   #                         PARAMÈTRES DE BASE
@@ -91,6 +87,9 @@ panda-roll:
 
   # Visible uniquement par le joueur (recommandé pour 500+ joueurs)
   client-side-only: true
+
+  # XP CyberLevel par culture cassée par cet enchantement
+  cyber-level-xp-per-block: 150
 
   # ─────────────────────────────────────────────────────────────────
   #                         PARAMÈTRES DE BASE
@@ -148,6 +147,9 @@ allay-laser:
 
   # Visible uniquement par le joueur (recommandé pour 500+ joueurs)
   client-side-only: true
+
+  # XP CyberLevel par culture cassée par cet enchantement
+  cyber-level-xp-per-block: 250
 
   # ─────────────────────────────────────────────────────────────────
   #                         PARAMÈTRES DE BASE
@@ -333,6 +335,9 @@ ravager-stampede:
   # Visible uniquement par le joueur (recommandé pour 500+ joueurs)
   client-side-only: true
 
+  # XP CyberLevel par culture cassée par cet enchantement
+  cyber-level-xp-per-block: 300
+
   # ─────────────────────────────────────────────────────────────────
   #                         PARAMÈTRES DE BASE
   # ─────────────────────────────────────────────────────────────────
@@ -414,6 +419,9 @@ blizzard-eternal:
 
   # Visible uniquement par le joueur (recommandé pour 500+ joueurs)
   client-side-only: true
+
+  # XP CyberLevel par culture cassée par cet enchantement
+  cyber-level-xp-per-block: 200
 
   # ─────────────────────────────────────────────────────────────────
   #                         PARAMÈTRES DE BASE
