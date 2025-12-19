@@ -89,15 +89,18 @@ public class AllayLaserEnchant implements HoeEnchant, Listener {
                               String enchantId, Location cropLocation, boolean isMultiHarvest) {
         
         boolean debug = plugin.getConfig().getBoolean("debug", false);
-        
-        // LOG TOUJOURS pour diagnostic
-        plugin.getLogger().info("§b[AllayLaser] onEnchantProc appelé! Joueur: " + player.getName() + ", Niveau: " + enchantLevel);
-        
+
+        if (debug) {
+            plugin.getLogger().info("§b[AllayLaser] onEnchantProc appelé! Joueur: " + player.getName() + ", Niveau: " + enchantLevel);
+        }
+
         // ═══════════════════════════════════════════════════════════
         // VÉRIFICATION ANTI-CASCADE: Empêche les proc récursifs
         // ═══════════════════════════════════════════════════════════
         if (plugin.isEntityBreakingLocation(cropLocation)) {
-            plugin.getLogger().info("§c[AllayLaser] Bloqué - isEntityBreakingLocation=true");
+            if (debug) {
+                plugin.getLogger().info("§c[AllayLaser] Bloqué - isEntityBreakingLocation=true");
+            }
             return;
         }
 
@@ -109,8 +112,6 @@ public class AllayLaserEnchant implements HoeEnchant, Listener {
             plugin.getCyberLevelListener().registerMultiplier(
                 player.getUniqueId(), getEnchantId(), cyberLevelMulti, cropLocation);
         }
-
-        plugin.getLogger().info("§b[AllayLaser] Vérification passée, continuation...");
 
         int maxLevel = plugin.getConfig().getInt("allay-laser.max-level", 1000);
         int baseRadius = plugin.getConfig().getInt("allay-laser.base-radius", 3);
@@ -131,22 +132,25 @@ public class AllayLaserEnchant implements HoeEnchant, Listener {
         fireRate = Math.max(minFireRate, fireRate);
         
         int duration = (int)(baseDuration + (levelRatio * (maxDuration - baseDuration)));
-        
-        plugin.getLogger().info("§b[AllayLaser] Paramètres: Rayon=" + radius + ", FireRate=" + fireRate + "t, Durée=" + duration + "t");
+
+        if (debug) {
+            plugin.getLogger().info("§b[AllayLaser] Paramètres: Rayon=" + radius + ", FireRate=" + fireRate + "t, Durée=" + duration + "t");
+        }
 
         World world = cropLocation.getWorld();
         if (world == null) {
-            plugin.getLogger().info("§c[AllayLaser] World est null, abandon");
             return;
         }
-        
+
         Location allaySpawn = player.getLocation().clone().add(
             -player.getLocation().getDirection().getX() * 1.5,
             2.0,
             -player.getLocation().getDirection().getZ() * 1.5
         );
-        
-        plugin.getLogger().info("§b[AllayLaser] Spawn Allay à " + allaySpawn.getBlockX() + "," + allaySpawn.getBlockY() + "," + allaySpawn.getBlockZ());
+
+        if (debug) {
+            plugin.getLogger().info("§b[AllayLaser] Spawn Allay à " + allaySpawn.getBlockX() + "," + allaySpawn.getBlockY() + "," + allaySpawn.getBlockZ());
+        }
         
         if (playSound) {
             player.playSound(allaySpawn, Sound.ENTITY_ALLAY_AMBIENT_WITHOUT_ITEM, 1.0f, 1.2f);

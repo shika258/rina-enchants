@@ -301,19 +301,38 @@ public class BlizzardAnimation {
         // Tracker pour le ramassage
         new BukkitRunnable() {
             int ticks = 0;
+            boolean rewardGiven = false;
 
             @Override
             public void run() {
-                if (droppedGift.isDead() || !droppedGift.isValid()) {
-                    // Le cadeau a été ramassé!
-                    executeGiftReward();
+                // Timeout après 30 secondes - pas de récompense
+                if (ticks > 600) {
+                    if (!droppedGift.isDead()) {
+                        droppedGift.remove();
+                    }
                     cancel();
                     return;
                 }
 
-                // Timeout après 30 secondes
-                if (ticks > 600) {
-                    droppedGift.remove();
+                // Vérifier si le joueur est proche (ramassage) - SEUL moyen d'obtenir la récompense
+                if (!droppedGift.isDead() && droppedGift.isValid() && owner.isOnline()) {
+                    try {
+                        if (owner.getLocation().distance(droppedGift.getLocation()) < 1.5) {
+                            droppedGift.remove();
+                            if (!rewardGiven) {
+                                rewardGiven = true;
+                                executeGiftReward();
+                            }
+                            cancel();
+                            return;
+                        }
+                    } catch (IllegalArgumentException ignored) {
+                        // Mondes différents - ignorer
+                    }
+                }
+
+                // Si le cadeau a disparu sans être ramassé par le joueur (hopper, despawn, etc.) - pas de récompense
+                if (droppedGift.isDead() || !droppedGift.isValid()) {
                     cancel();
                     return;
                 }
@@ -325,13 +344,6 @@ public class BlizzardAnimation {
                     Location giftLoc = droppedGift.getLocation();
                     owner.spawnParticle(Particle.END_ROD, giftLoc, 3, 0.3, 0.3, 0.3, 0.02);
                     owner.spawnParticle(Particle.SNOWFLAKE, giftLoc.clone().add(0, 0.5, 0), 2, 0.2, 0.2, 0.2, 0);
-                }
-
-                // Vérifier si le joueur est proche (ramassage manuel)
-                if (owner.getLocation().distance(droppedGift.getLocation()) < 1.5) {
-                    droppedGift.remove();
-                    executeGiftReward();
-                    cancel();
                 }
             }
         }.runTaskTimer(plugin, 0L, 1L);

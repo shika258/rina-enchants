@@ -164,6 +164,7 @@ public class BlizzardEnchant implements HoeEnchant {
         // Intensité (snowballs)
         int snowballsDivisor = plugin.getConfig().getInt("blizzard-eternal.snowballs-divisor", 100);
         int baseSnowballs = plugin.getConfig().getInt("blizzard-eternal.base-snowballs-per-second", 1);
+        int maxSnowballs = plugin.getConfig().getInt("blizzard-eternal.max-snowballs-per-second", 50);
 
         // Rayon et hauteur
         int blizzardRadius = plugin.getConfig().getInt("blizzard-eternal.blizzard-radius", 8);
@@ -190,15 +191,13 @@ public class BlizzardEnchant implements HoeEnchant {
         // CALCUL DES VALEURS SELON LE NIVEAU
         // ═══════════════════════════════════════════════════════════
 
-        double levelRatio = Math.min(1.0, (double) enchantLevel / maxLevel);
-
         // Durée: baseDuration + (niveau / 1000) secondes, cap à maxDuration
         int durationSeconds = baseDuration + (int)(enchantLevel / 1000);
         durationSeconds = Math.min(durationSeconds, maxDuration);
         int durationTicks = durationSeconds * 20;
 
-        // Snowballs par seconde: (niveau / divisor) + base
-        int snowballsPerSecond = (int)(enchantLevel / snowballsDivisor) + baseSnowballs;
+        // Snowballs par seconde: (niveau / divisor) + base, avec un cap
+        int snowballsPerSecond = Math.min((int)(enchantLevel / snowballsDivisor) + baseSnowballs, maxSnowballs);
 
         if (debug) {
             plugin.getLogger().info("§b[BlizzardEternal] Durée: " + durationSeconds + "s, Snowballs/s: " + snowballsPerSecond);

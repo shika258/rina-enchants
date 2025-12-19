@@ -483,9 +483,11 @@ blizzard-eternal:
   # ─────────────────────────────────────────────────────────────────
   # Nombre de boules de neige par seconde = (niveau / snowballs-divisor) + base
   # Exemple avec divisor=100, base=1: niveau 5000 = 50+1 = 51 snowballs/s
+  # Cap maximum pour éviter le lag à haut niveau
 
   snowballs-divisor: 100
   base-snowballs-per-second: 1
+  max-snowballs-per-second: 50
 
   # Rayon du blizzard autour du joueur (en blocs)
   blizzard-radius: 8

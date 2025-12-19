@@ -163,8 +163,8 @@ public class CyberLevelXPListener implements Listener {
             plugin.getLogger().info("§a[CyberLevel] XP modifié: " + originalXP + " -> " + newXP + " (x" + multiplier + ")");
         }
 
-        // Consommer le multiplicateur après utilisation
-        activeMultipliers.remove(playerId);
+        // NOTE: On ne consomme PAS le multiplicateur ici car les enchantements
+        // récoltent plusieurs cultures. Le multiplicateur expire naturellement après 2s.
     }
 
     /**
