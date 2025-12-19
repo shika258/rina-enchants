@@ -451,9 +451,10 @@ public class RinaEnchantsPlugin extends JavaPlugin implements Listener {
      *
      * @param player Le joueur qui "casse" la culture
      * @param cropLocation La location de la culture
+     * @param enchantId L'ID de la section d'enchantement (ex: "panda-roll", "bee-collector")
      * @return true si le bloc a été cassé
      */
-    public boolean safeBreakCrop(Player player, Location cropLocation) {
+    public boolean safeBreakCrop(Player player, Location cropLocation, String enchantId) {
         org.bukkit.block.Block block = cropLocation.getBlock();
         org.bukkit.Material blockType = block.getType();
 
@@ -598,13 +599,13 @@ public class RinaEnchantsPlugin extends JavaPlugin implements Listener {
 
         // ═══════════════════════════════════════════════════════════════════════
         // DONNER L'XP CYBERLEVEL APRÈS AVOIR CASSÉ LE BLOC
-        // Chaque bloc cassé donne l'XP configuré dans cyber-level-xp-per-block
+        // L'XP est configuré dans <enchant-id>.cyber-level-xp-per-block
         // ═══════════════════════════════════════════════════════════════════════
-        if (cropBroken && cyberLevelListener != null) {
+        if (cropBroken && cyberLevelListener != null && enchantId != null) {
             if (debug) {
-                getLogger().info("§a[safeBreakCrop] Appel queueXPForCrop pour " + player.getName());
+                getLogger().info("§a[safeBreakCrop] Appel queueXPForCrop (" + enchantId + ") pour " + player.getName());
             }
-            cyberLevelListener.queueXPForCrop(player);
+            cyberLevelListener.queueXPForCrop(player, enchantId);
         }
 
         return cropBroken;

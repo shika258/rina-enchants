@@ -228,7 +228,7 @@ public class BeeCollectorEnchant implements HoeEnchant, Listener {
                 animation.setOnCropReached((cropLoc) -> {
                     Block block = cropLoc.getBlock();
                     if (CROPS.contains(block.getType())) {
-                        plugin.safeBreakCrop(player, cropLoc);
+                        plugin.safeBreakCrop(player, cropLoc, "bee-collector");
                     }
                     
                     if (showParticles) {

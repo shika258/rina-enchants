@@ -160,7 +160,7 @@ public class AllayLaserEnchant implements HoeEnchant, Listener {
         animation.setOnCropHit((loc) -> {
             Block block = loc.getBlock();
             if (isMatureCrop(block)) {
-                plugin.safeBreakCrop(player, loc);
+                plugin.safeBreakCrop(player, loc, "allay-laser");
             }
         });
         

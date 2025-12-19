@@ -221,7 +221,7 @@ public class RavagerStampedeEnchant implements HoeEnchant {
         animation.setOnCropHit((loc) -> {
             Block block = loc.getBlock();
             if (isMatureCrop(block)) {
-                plugin.safeBreakCrop(player, loc);
+                plugin.safeBreakCrop(player, loc, "ravager-stampede");
             }
         });
         
