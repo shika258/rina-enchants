@@ -15,14 +15,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
- * Listener pour le système de multiplicateur d'XP CyberLevel
+ * Listener pour le système d'XP CyberLevel des enchantements
  *
  * Fonctionnement:
- * 1. Quand un enchantement proc, on enregistre le multiplicateur pour le joueur
- * 2. Quand HoeXPGainEvent est déclenché, on applique le multiplicateur
- * 3. Le multiplicateur expire après 500ms (pour éviter les fuites mémoire)
+ * 1. Quand un enchantement casse une culture, on ajoute l'XP à une queue async
+ * 2. Une tâche périodique (sync) donne l'XP accumulée par batch
+ * 3. Cela évite les lags sur les serveurs avec beaucoup de joueurs
+ *
+ * NOTE: RivalHarvesterHoes ne donne PAS l'XP CyberLevel quand les enchantements
+ * cassent les cultures. Ce système gère l'XP de façon indépendante.
  */
 public class CyberLevelXPListener implements Listener {
 
@@ -31,9 +35,21 @@ public class CyberLevelXPListener implements Listener {
     // XP de base par type de culture (chargé depuis la config)
     private final Map<Material, Double> cropXpValues = new HashMap<>();
 
-    // Multiplicateurs actifs par joueur
-    // Format: UUID -> {enchantId, multiplier, timestamp, location}
+    // Multiplicateurs actifs par joueur (legacy, gardé pour compatibilité)
     private final ConcurrentHashMap<UUID, XPMultiplierData> activeMultipliers = new ConcurrentHashMap<>();
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // SYSTÈME DE QUEUE ASYNC POUR L'XP
+    // ═══════════════════════════════════════════════════════════════════════
+
+    // Queue des XP à donner (thread-safe)
+    private final ConcurrentLinkedQueue<XPQueueEntry> xpQueue = new ConcurrentLinkedQueue<>();
+
+    // XP accumulé par joueur (pour batch processing)
+    private final ConcurrentHashMap<UUID, Integer> accumulatedXP = new ConcurrentHashMap<>();
+
+    // Intervalle de processing en ticks (5 ticks = 250ms)
+    private static final long XP_PROCESS_INTERVAL = 5L;
 
     // Durée de validité d'un multiplicateur (en ms)
     private static final long MULTIPLIER_EXPIRY_MS = 2000;
@@ -45,7 +61,44 @@ public class CyberLevelXPListener implements Listener {
         // Task de nettoyage des multiplicateurs expirés (toutes les 2 secondes)
         plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, this::cleanupExpiredMultipliers, 40L, 40L);
 
+        // ═══════════════════════════════════════════════════════════════════════
+        // TASK ASYNC: Traite la queue d'XP et accumule par joueur
+        // ═══════════════════════════════════════════════════════════════════════
+        plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, () -> {
+            XPQueueEntry entry;
+            while ((entry = xpQueue.poll()) != null) {
+                accumulatedXP.merge(entry.playerId, entry.xpAmount, Integer::sum);
+            }
+        }, XP_PROCESS_INTERVAL, XP_PROCESS_INTERVAL);
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // TASK SYNC: Donne l'XP accumulé via la commande CyberLevel
+        // ═══════════════════════════════════════════════════════════════════════
+        plugin.getServer().getScheduler().runTaskTimer(plugin, () -> {
+            if (accumulatedXP.isEmpty()) return;
+
+            // Copier et vider l'accumulation
+            Map<UUID, Integer> toProcess = new HashMap<>(accumulatedXP);
+            accumulatedXP.clear();
+
+            for (Map.Entry<UUID, Integer> xpEntry : toProcess.entrySet()) {
+                Player player = Bukkit.getPlayer(xpEntry.getKey());
+                if (player != null && player.isOnline()) {
+                    int xp = xpEntry.getValue();
+                    if (xp > 0) {
+                        String command = "cyberlevel giveExp " + xp + " " + player.getName();
+                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
+
+                        if (plugin.getConfig().getBoolean("debug", false)) {
+                            plugin.getLogger().info("§a[CyberLevel] XP batch donné: " + xp + " à " + player.getName());
+                        }
+                    }
+                }
+            }
+        }, XP_PROCESS_INTERVAL * 2, XP_PROCESS_INTERVAL * 2);
+
         plugin.getLogger().info("§a[CyberLevel] Listener XP initialisé avec " + cropXpValues.size() + " cultures configurées");
+        plugin.getLogger().info("§a[CyberLevel] Système de queue async activé (batch processing)");
     }
 
     /**
@@ -135,23 +188,45 @@ public class CyberLevelXPListener implements Listener {
     }
 
     /**
-     * Donne l'XP CyberLevel directement au joueur pour une culture cassée.
-     * Cette méthode est utilisée quand HellRainAbility.replaceWithDrops ne déclenche pas HoeXPGainEvent.
+     * ═══════════════════════════════════════════════════════════════════════
+     * MÉTHODE PRINCIPALE: Queue l'XP pour une culture cassée par un enchantement
+     * ═══════════════════════════════════════════════════════════════════════
+     *
+     * Cette méthode est appelée par safeBreakCrop APRÈS avoir cassé la culture.
+     * Le type de culture doit être détecté AVANT de casser le bloc.
      *
      * @param player Le joueur qui reçoit l'XP
-     * @param cropType Le type de culture cassée
-     * @param multiplier Le multiplicateur de l'enchantement (1.0 = pas de multiplicateur)
+     * @param cropType Le type de culture cassée (détecté AVANT le cassage)
+     * @param multiplier Le multiplicateur de l'enchantement (ex: 2.0 pour Bee Collector)
      */
-    public void giveDirectXP(Player player, Material cropType, double multiplier) {
+    public void queueXPForCrop(Player player, Material cropType, double multiplier) {
         if (!plugin.getConfig().getBoolean("cyberlevels-hook.enabled", false)) {
+            if (plugin.getConfig().getBoolean("debug", false)) {
+                plugin.getLogger().info("§c[CyberLevel] Hook désactivé, XP ignoré");
+            }
             return;
         }
 
+        if (player == null || !player.isOnline()) {
+            return;
+        }
+
+        // Récupérer l'XP de base pour ce type de culture
         double baseXP = getCropBaseXP(cropType);
+
+        if (plugin.getConfig().getBoolean("debug", false)) {
+            plugin.getLogger().info("§e[CyberLevel] queueXPForCrop appelé: crop=" + cropType +
+                ", baseXP=" + baseXP + ", multi=" + multiplier);
+        }
+
         if (baseXP <= 0) {
+            if (plugin.getConfig().getBoolean("debug", false)) {
+                plugin.getLogger().info("§c[CyberLevel] Pas d'XP configuré pour: " + cropType);
+            }
             return;
         }
 
+        // Calculer l'XP final avec le multiplicateur
         double finalXP = baseXP * multiplier;
         int xpToGive = (int) Math.round(finalXP);
 
@@ -159,14 +234,26 @@ public class CyberLevelXPListener implements Listener {
             return;
         }
 
-        // Exécuter la commande CyberLevel pour donner l'XP
-        String command = "cyberlevel giveExp " + xpToGive + " " + player.getName();
-        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
+        // Ajouter à la queue (thread-safe, sera traité en batch)
+        xpQueue.offer(new XPQueueEntry(player.getUniqueId(), xpToGive, cropType));
 
         if (plugin.getConfig().getBoolean("debug", false)) {
-            plugin.getLogger().info("§a[CyberLevel] XP donné: " + xpToGive + " à " + player.getName() +
-                " (base: " + baseXP + ", multi: x" + multiplier + ", crop: " + cropType + ")");
+            plugin.getLogger().info("§a[CyberLevel] XP ajouté à la queue: " + xpToGive +
+                " pour " + player.getName() + " (crop: " + cropType + ", multi: x" + multiplier + ")");
         }
+    }
+
+    /**
+     * Donne l'XP CyberLevel directement au joueur (méthode synchrone legacy).
+     * Préférez queueXPForCrop pour les performances.
+     *
+     * @param player Le joueur qui reçoit l'XP
+     * @param cropType Le type de culture cassée
+     * @param multiplier Le multiplicateur de l'enchantement (1.0 = pas de multiplicateur)
+     */
+    public void giveDirectXP(Player player, Material cropType, double multiplier) {
+        // Utiliser la nouvelle méthode de queue
+        queueXPForCrop(player, cropType, multiplier);
     }
 
     /**
@@ -223,7 +310,7 @@ public class CyberLevelXPListener implements Listener {
     }
 
     /**
-     * Données d'un multiplicateur actif
+     * Données d'un multiplicateur actif (legacy)
      */
     private static class XPMultiplierData {
         final String enchantId;
@@ -236,6 +323,21 @@ public class CyberLevelXPListener implements Listener {
             this.multiplier = multiplier;
             this.timestamp = timestamp;
             this.location = location;
+        }
+    }
+
+    /**
+     * Entrée dans la queue d'XP à donner
+     */
+    private static class XPQueueEntry {
+        final UUID playerId;
+        final int xpAmount;
+        final Material cropType;
+
+        XPQueueEntry(UUID playerId, int xpAmount, Material cropType) {
+            this.playerId = playerId;
+            this.xpAmount = xpAmount;
+            this.cropType = cropType;
         }
     }
 }

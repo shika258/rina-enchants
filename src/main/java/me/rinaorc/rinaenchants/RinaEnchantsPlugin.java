@@ -456,8 +456,9 @@ public class RinaEnchantsPlugin extends JavaPlugin implements Listener {
 
     /**
      * Casse une culture de manière sécurisée avec un multiplicateur CyberLevel.
-     * Le multiplicateur est enregistré JUSTE AVANT de casser le bloc pour
-     * garantir qu'il est actif quand l'événement XP est déclenché.
+     *
+     * IMPORTANT: Le type de bloc est détecté AVANT de casser le bloc pour
+     * garantir que l'XP CyberLevel est correctement calculé.
      *
      * @param player Le joueur qui "casse" la culture
      * @param cropLocation La location de la culture
@@ -467,17 +468,36 @@ public class RinaEnchantsPlugin extends JavaPlugin implements Listener {
      */
     public boolean safeBreakCrop(Player player, Location cropLocation, String enchantId, double cyberLevelMulti) {
         org.bukkit.block.Block block = cropLocation.getBlock();
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // DÉTECTION DU TYPE DE CULTURE AVANT LE CASSAGE
+        // C'est CRITIQUE pour le calcul de l'XP CyberLevel
+        // ═══════════════════════════════════════════════════════════════════════
         org.bukkit.Material blockType = block.getType();
-        if (blockType.isAir()) return false;
+
+        if (blockType.isAir()) {
+            return false;
+        }
+
+        boolean debug = getConfig().getBoolean("debug", false);
+        if (debug) {
+            getLogger().info("§e[safeBreakCrop] Type détecté: " + blockType + " à " + cropLocation.toVector());
+        }
 
         // Vérifier si c'est une culture mature
         // Pour les NO_AGE_CROPS (coraux, saplings, etc.), pas besoin de vérifier l'âge
         if (!NO_AGE_CROPS.contains(blockType)) {
             if (!(block.getBlockData() instanceof org.bukkit.block.data.Ageable)) {
+                if (debug) {
+                    getLogger().info("§c[safeBreakCrop] Bloc non-Ageable ignoré: " + blockType);
+                }
                 return false;
             }
             org.bukkit.block.data.Ageable ageable = (org.bukkit.block.data.Ageable) block.getBlockData();
             if (ageable.getAge() < ageable.getMaximumAge()) {
+                if (debug) {
+                    getLogger().info("§c[safeBreakCrop] Bloc non mature ignoré: " + blockType);
+                }
                 return false;
             }
         }
@@ -499,44 +519,44 @@ public class RinaEnchantsPlugin extends JavaPlugin implements Listener {
                 hellRainReplaceCropsde = hellRainClass.getMethod("replaceCropsde",
                     Player.class, Location.class, double.class, org.bukkit.Material.class, long.class);
 
-                if (getConfig().getBoolean("debug", false)) {
+                if (debug) {
                     getLogger().info("§a[RinaEnchants] HellRainAbility méthodes trouvées!");
                 }
             } catch (Exception e) {
-                if (getConfig().getBoolean("debug", false)) {
+                if (debug) {
                     getLogger().warning("§e[RinaEnchants] HellRainAbility non trouvé: " + e.getMessage());
                 }
             }
         }
 
+        // Variable pour tracker si le bloc a été cassé avec succès
+        boolean cropBroken = false;
+
         // Utiliser HellRainAbility.replaceWithDrops (comme AirStrike)
         if (hellRainReplaceWithDrops != null) {
             try {
-                // Rayon de 1.0 = bloc central + croix adjacente
-                // C'est le minimum qui fonctionne avec la logique interne de RivalHarvesterHoes
-                hellRainReplaceWithDrops.invoke(null, player, cropLocation, 1.0, blockType, 1L);
+                // Rayon de 0.5 = seulement le bloc central (évite de casser les blocs adjacents)
+                hellRainReplaceWithDrops.invoke(null, player, cropLocation, 0.5, blockType, 1L);
+                cropBroken = true;
 
-                // Donner l'XP CyberLevel directement après avoir cassé le bloc
-                if (cyberLevelListener != null) {
-                    cyberLevelListener.giveDirectXP(player, blockType, cyberLevelMulti);
+                if (debug) {
+                    getLogger().info("§a[safeBreakCrop] Bloc cassé via HellRainAbility: " + blockType);
                 }
-                return true;
             } catch (Exception e) {
-                if (getConfig().getBoolean("debug", false)) {
+                if (debug) {
                     getLogger().warning("§e[RinaEnchants] Erreur replaceWithDrops: " + e.getMessage());
                 }
                 // Essayer replaceCropsde comme backup
                 if (hellRainReplaceCropsde != null) {
                     try {
-                        hellRainReplaceCropsde.invoke(null, player, cropLocation, 1.0, blockType, 1L);
+                        hellRainReplaceCropsde.invoke(null, player, cropLocation, 0.5, blockType, 1L);
+                        cropBroken = true;
 
-                        // Donner l'XP CyberLevel directement après avoir cassé le bloc
-                        if (cyberLevelListener != null) {
-                            cyberLevelListener.giveDirectXP(player, blockType, cyberLevelMulti);
+                        if (debug) {
+                            getLogger().info("§a[safeBreakCrop] Bloc cassé via HellRainAbility (backup): " + blockType);
                         }
-                        return true;
                     } catch (Exception e2) {
-                        if (getConfig().getBoolean("debug", false)) {
+                        if (debug) {
                             getLogger().warning("§e[RinaEnchants] Erreur replaceCropsde: " + e2.getMessage());
                         }
                     }
@@ -544,25 +564,39 @@ public class RinaEnchantsPlugin extends JavaPlugin implements Listener {
             }
         }
 
-        // Fallback: casser manuellement avec drops (sans multiplicateurs RivalHarvesterHoes)
-        java.util.Collection<org.bukkit.inventory.ItemStack> drops = block.getDrops(
-            player.getInventory().getItemInMainHand()
-        );
-        block.setType(org.bukkit.Material.AIR);
+        // Fallback: casser manuellement avec drops si HellRainAbility n'a pas fonctionné
+        if (!cropBroken) {
+            java.util.Collection<org.bukkit.inventory.ItemStack> drops = block.getDrops(
+                player.getInventory().getItemInMainHand()
+            );
+            block.setType(org.bukkit.Material.AIR);
 
-        org.bukkit.Location dropLoc = cropLocation.clone().add(0.5, 0.5, 0.5);
-        for (org.bukkit.inventory.ItemStack drop : drops) {
-            java.util.HashMap<Integer, org.bukkit.inventory.ItemStack> leftover =
-                player.getInventory().addItem(drop);
-            for (org.bukkit.inventory.ItemStack item : leftover.values()) {
-                block.getWorld().dropItemNaturally(dropLoc, item);
+            org.bukkit.Location dropLoc = cropLocation.clone().add(0.5, 0.5, 0.5);
+            for (org.bukkit.inventory.ItemStack drop : drops) {
+                java.util.HashMap<Integer, org.bukkit.inventory.ItemStack> leftover =
+                    player.getInventory().addItem(drop);
+                for (org.bukkit.inventory.ItemStack item : leftover.values()) {
+                    block.getWorld().dropItemNaturally(dropLoc, item);
+                }
+            }
+            cropBroken = true;
+
+            if (debug) {
+                getLogger().info("§e[safeBreakCrop] Bloc cassé manuellement (fallback): " + blockType);
             }
         }
 
-        // Donner l'XP CyberLevel directement même en fallback
-        if (cyberLevelListener != null) {
-            cyberLevelListener.giveDirectXP(player, blockType, cyberLevelMulti);
+        // ═══════════════════════════════════════════════════════════════════════
+        // DONNER L'XP CYBERLEVEL APRÈS AVOIR CASSÉ LE BLOC
+        // Le type de bloc a été détecté AVANT le cassage (blockType)
+        // ═══════════════════════════════════════════════════════════════════════
+        if (cropBroken && cyberLevelListener != null) {
+            if (debug) {
+                getLogger().info("§a[safeBreakCrop] Appel queueXPForCrop: type=" + blockType + ", multi=" + cyberLevelMulti);
+            }
+            cyberLevelListener.queueXPForCrop(player, blockType, cyberLevelMulti);
         }
-        return true;
+
+        return cropBroken;
     }
 }
