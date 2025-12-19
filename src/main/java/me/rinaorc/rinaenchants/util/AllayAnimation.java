@@ -84,12 +84,17 @@ public class AllayAnimation {
             allayEntity.setCollidable(false);
             allayEntity.setCanPickupItems(false);
             allayEntity.setRemoveWhenFarAway(false);
-            
+
+            // ═══════════════════════════════════════════════════════════
+            // MARQUER L'ENTITÉ pour cleanup après reboot
+            // ═══════════════════════════════════════════════════════════
+            plugin.markAsEnchantEntity(allayEntity);
+
             // Client-side
             if (clientSideOnly) {
                 plugin.makeEntityClientSide(allayEntity, owner);
             }
-            
+
         } catch (Exception e) {
             plugin.getLogger().warning("§e[RinaEnchants] Impossible de spawn l'Allay: " + e.getMessage());
             return;

@@ -123,20 +123,30 @@ public class BeeCollectorEnchant implements HoeEnchant, Listener {
                               String enchantId, Location cropLocation, boolean isMultiHarvest) {
         
         boolean debug = plugin.getConfig().getBoolean("debug", false);
-        
-        // LOG TOUJOURS pour diagnostic
-        plugin.getLogger().info("§a[BeeCollector] onEnchantProc appelé! Joueur: " + player.getName() + ", Niveau: " + enchantLevel);
-        
+
+        if (debug) {
+            plugin.getLogger().info("§a[BeeCollector] onEnchantProc appelé! Joueur: " + player.getName() + ", Niveau: " + enchantLevel);
+        }
+
         // ═══════════════════════════════════════════════════════════
         // VÉRIFICATION ANTI-CASCADE: Empêche les proc récursifs
         // Si une entité (abeille/panda/allay) casse cette culture, on ignore
         // ═══════════════════════════════════════════════════════════
         if (plugin.isEntityBreakingLocation(cropLocation)) {
-            plugin.getLogger().info("§c[BeeCollector] Bloqué - isEntityBreakingLocation=true");
+            if (debug) {
+                plugin.getLogger().info("§c[BeeCollector] Bloqué - isEntityBreakingLocation=true");
+            }
             return;
         }
-        
-        plugin.getLogger().info("§a[BeeCollector] Vérification passée, continuation...");
+
+        // ═══════════════════════════════════════════════════════════
+        // ENREGISTREMENT DU MULTIPLICATEUR CYBERLEVEL
+        // ═══════════════════════════════════════════════════════════
+        double cyberLevelMulti = plugin.getConfig().getDouble("bee-collector.cyber-level-multi", 1.0);
+        if (cyberLevelMulti > 1.0 && plugin.getCyberLevelListener() != null) {
+            plugin.getCyberLevelListener().registerMultiplier(
+                player.getUniqueId(), getEnchantId(), cyberLevelMulti, cropLocation);
+        }
 
         // Récupérer les paramètres de config
         int baseRadius = plugin.getConfig().getInt("bee-collector.radius", 3);
@@ -153,17 +163,17 @@ public class BeeCollectorEnchant implements HoeEnchant, Listener {
 
         // Trouver les cultures matures à proximité
         List<Location> matureCrops = findMatureCrops(cropLocation, radius, maxCropsToHarvest);
-        
-        plugin.getLogger().info("§a[BeeCollector] Cultures trouvées: " + matureCrops.size() + " (rayon: " + radius + ")");
-        
+
+        if (debug) {
+            plugin.getLogger().info("§a[BeeCollector] Cultures trouvées: " + matureCrops.size() + " (rayon: " + radius + ")");
+        }
+
         if (matureCrops.isEmpty()) {
-            plugin.getLogger().info("§e[BeeCollector] Aucune culture mature trouvée, abandon");
             return; // Pas de cultures à récolter
         }
 
         World world = cropLocation.getWorld();
         if (world == null) {
-            plugin.getLogger().info("§c[BeeCollector] World est null, abandon");
             return;
         }
         

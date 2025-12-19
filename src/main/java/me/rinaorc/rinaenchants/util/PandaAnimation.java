@@ -127,27 +127,32 @@ public class PandaAnimation {
             pandaEntity.setCollidable(false);
             pandaEntity.setCanPickupItems(false);
             pandaEntity.setRemoveWhenFarAway(false);
-            
+
             // Type de panda aléatoire
             Panda.Gene[] genes = Panda.Gene.values();
             pandaEntity.setMainGene(genes[random.nextInt(genes.length)]);
             pandaEntity.setHiddenGene(genes[random.nextInt(genes.length)]);
-            
+
+            // ═══════════════════════════════════════════════════════════
+            // MARQUER L'ENTITÉ pour cleanup après reboot
+            // ═══════════════════════════════════════════════════════════
+            plugin.markAsEnchantEntity(pandaEntity);
+
             // ═══════════════════════════════════════════════════════════
             // ANIMATION DE ROULADE NATIVE!
             // ═══════════════════════════════════════════════════════════
             pandaEntity.setRolling(true);
-            
+
             // Orienter le panda
             Location oriented = startPos.clone();
             oriented.setDirection(rollDirection);
             pandaEntity.teleport(oriented);
-            
+
             // Client-side: cacher aux autres joueurs
             if (clientSideOnly) {
                 plugin.makeEntityClientSide(pandaEntity, owner);
             }
-            
+
         } catch (Exception e) {
             plugin.getLogger().warning("§e[RinaEnchants] Impossible de spawn le panda: " + e.getMessage());
             return;

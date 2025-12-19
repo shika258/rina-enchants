@@ -13,18 +13,72 @@ debug: false
 
 
 # ═══════════════════════════════════════════════════════════════════
+#                     💎 CYBERLEVELS HOOK
+# ═══════════════════════════════════════════════════════════════════
+# Intégration avec CyberLevel pour l'XP
+# Quand un enchantement proc, l'XP CyberLevel est multipliée
+
+cyberlevels-hook:
+  # Activer l'intégration CyberLevel
+  enabled: true
+
+  # ─────────────────────────────────────────────────────────────────
+  #                      XP PAR TYPE DE CULTURE
+  # ─────────────────────────────────────────────────────────────────
+  # Définit l'XP de base par type de bloc
+  # Format: MATERIAL_NAME:xp_value
+
+  xp-settings:
+    specific:
+      crops:
+        - "WHEAT:50"
+        - "CARROTS:50"
+        - "POTATOES:50"
+        - "BEETROOTS:55"
+        - "NETHER_WART:60"
+        - "COCOA:45"
+        - "SWEET_BERRY_BUSH:40"
+        - "TUBE_CORAL:146"
+        - "BUBBLE_CORAL:146"
+        - "BRAIN_CORAL:146"
+        - "FIRE_CORAL:146"
+        - "HORN_CORAL:146"
+        - "TUBE_CORAL_BLOCK:150"
+        - "BUBBLE_CORAL_BLOCK:150"
+        - "BRAIN_CORAL_BLOCK:150"
+        - "FIRE_CORAL_BLOCK:150"
+        - "HORN_CORAL_BLOCK:150"
+        - "WARPED_ROOTS:35"
+        - "CRIMSON_ROOTS:35"
+        - "NETHER_SPROUTS:30"
+        - "TWISTING_VINES:40"
+        - "WEEPING_VINES:40"
+        - "MELON:80"
+        - "PUMPKIN:80"
+        - "SUGAR_CANE:45"
+        - "CACTUS:50"
+        - "BAMBOO:30"
+        - "KELP:35"
+
+
+# ═══════════════════════════════════════════════════════════════════
 #                     🐝 BEE COLLECTOR / APICULTEUR
 # ═══════════════════════════════════════════════════════════════════
 # Des abeilles apparaissent et récoltent les cultures automatiquement.
 # Chaque abeille a un comportement unique et aléatoire.
 
 bee-collector:
-  
+
   enabled: true
   enchant-id: "bee_collector"
-  
+
   # Visible uniquement par le joueur (recommandé pour 500+ joueurs)
   client-side-only: true
+
+  # Multiplicateur d'XP CyberLevel quand l'enchantement proc
+  # L'XP de base de la culture est multipliée par cette valeur
+  # Exemple: TUBE_CORAL (146 XP) * 2.0 = 292 XP
+  cyber-level-multi: 2.0
   
   # ─────────────────────────────────────────────────────────────────
   #                         PARAMÈTRES DE BASE
@@ -66,12 +120,15 @@ bee-collector:
 #   - Niveau 400: 100% de combo (capped)
 
 panda-roll:
-  
+
   enabled: true
   enchant-id: "panda_roll"
-  
+
   # Visible uniquement par le joueur (recommandé pour 500+ joueurs)
   client-side-only: true
+
+  # Multiplicateur d'XP CyberLevel quand l'enchantement proc
+  cyber-level-multi: 1.5
   
   # ─────────────────────────────────────────────────────────────────
   #                         PARAMÈTRES DE BASE
@@ -123,12 +180,15 @@ panda-roll:
 # - Durée: base-duration → max-duration (interpolé)
 
 allay-laser:
-  
+
   enabled: true
   enchant-id: "allay_laser"
-  
+
   # Visible uniquement par le joueur (recommandé pour 500+ joueurs)
   client-side-only: true
+
+  # Multiplicateur d'XP CyberLevel quand l'enchantement proc
+  cyber-level-multi: 2.5
   
   # ─────────────────────────────────────────────────────────────────
   #                         PARAMÈTRES DE BASE
@@ -307,12 +367,15 @@ allay-laser:
 # Tous les paramètres augmentent avec le niveau de l'enchantement.
 
 ravager-stampede:
-  
+
   enabled: true
   enchant-id: "ravager_stampede"
-  
+
   # Visible uniquement par le joueur (recommandé pour 500+ joueurs)
   client-side-only: true
+
+  # Multiplicateur d'XP CyberLevel quand l'enchantement proc
+  cyber-level-multi: 3.0
   
   # ─────────────────────────────────────────────────────────────────
   #                         PARAMÈTRES DE BASE
@@ -370,3 +433,110 @@ ravager-stampede:
   # Message de fin (statistiques de récolte)
   message: true
   message-text: "&c&l⚔ &4Le Ravageur a dévasté &c{count} &4cultures avec &c{stomps} &4piétinements!"
+
+
+# ═══════════════════════════════════════════════════════════════════
+#                  ❄ BLIZZARD ÉTERNEL / ETERNAL BLIZZARD
+# ═══════════════════════════════════════════════════════════════════
+# Un blizzard magique envahit la zone!
+#
+# FONCTIONNALITÉS:
+# 1. BLIZZARD - Des boules de neige tombent du ciel de façon chaotique
+# 2. EXPLOSION - Micro-chance que les boules explosent et récoltent (3x3)
+# 3. CADEAUX - Chance rare qu'un cadeau de Noël tombe du ciel!
+#
+# SCALING (10 000 niveaux max):
+# - Durée: 5s + (niveau / 1000)s → max 15s au niveau 10000
+# - Snowballs/seconde: (niveau / 100) + 1 → max 101 au niveau 10000
+# - Chance d'explosion: 0.1% par boule de neige
+# - Chance de cadeau: configurable
+
+blizzard-eternal:
+
+  enabled: true
+  enchant-id: "blizzard_eternal"
+
+  # Visible uniquement par le joueur (recommandé pour 500+ joueurs)
+  client-side-only: true
+
+  # Multiplicateur d'XP CyberLevel quand l'enchantement proc
+  cyber-level-multi: 2.0
+
+  # ─────────────────────────────────────────────────────────────────
+  #                         PARAMÈTRES DE BASE
+  # ─────────────────────────────────────────────────────────────────
+
+  # Niveau maximum
+  max-level: 10000
+
+  # ─────────────────────────────────────────────────────────────────
+  #                      DURÉE DU BLIZZARD
+  # ─────────────────────────────────────────────────────────────────
+  # Durée = base-duration + (niveau / 1000) secondes
+  # Exemple: niveau 5000 = 5 + 5 = 10 secondes
+
+  base-duration: 5
+  max-duration: 15
+
+  # ─────────────────────────────────────────────────────────────────
+  #                      INTENSITÉ (SNOWBALLS)
+  # ─────────────────────────────────────────────────────────────────
+  # Nombre de boules de neige par seconde = (niveau / snowballs-divisor) + base
+  # Exemple avec divisor=100, base=1: niveau 5000 = 50+1 = 51 snowballs/s
+  # Cap maximum pour éviter le lag à haut niveau
+
+  snowballs-divisor: 100
+  base-snowballs-per-second: 1
+  max-snowballs-per-second: 50
+
+  # Rayon du blizzard autour du joueur (en blocs)
+  blizzard-radius: 8
+
+  # Hauteur de spawn des snowballs au-dessus du joueur
+  spawn-height: 10
+
+  # ─────────────────────────────────────────────────────────────────
+  #                      EXPLOSIONS DE RÉCOLTE
+  # ─────────────────────────────────────────────────────────────────
+  # Chance qu'une boule de neige déclenche une explosion de récolte
+  # En pourcentage (0.1 = 0.1%)
+
+  explosion-chance: 0.1
+  explosion-radius: 3
+
+  # ─────────────────────────────────────────────────────────────────
+  #                      SYSTÈME DE CADEAUX
+  # ─────────────────────────────────────────────────────────────────
+  # Chance qu'un cadeau tombe du ciel pendant le blizzard
+  # En pourcentage (0.5 = 0.5% par tick)
+
+  gift:
+    enabled: true
+    chance: 0.5
+
+    # Texture de la tête du cadeau (base64)
+    texture: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTI5MTljNjczMTdjNzY3ODQzOGZmNTIwYzk4ZGRlMGUzYjRkNjg3NjljODkzOGE1YTNkZTI5NjhlZGZjNzMxNCJ9fX0="
+
+    # Commandes exécutées quand le joueur ramasse le cadeau
+    # %player% sera remplacé par le nom du joueur
+    commands:
+      - "cyberlevel giveExp 200 %player%"
+      - "tellraw %player% {\"text\":\"§b❄ §fVous avez reçu un §6Cadeau de Noël §f! §a+200 XP CyberLevel\"}"
+
+    # Message affiché au ramassage
+    pickup-message: "&b❄ &fVous avez trouvé un &6Cadeau de Noël&f!"
+
+  # ─────────────────────────────────────────────────────────────────
+  #                         EFFETS
+  # ─────────────────────────────────────────────────────────────────
+
+  particles: true
+  sound: true
+
+  # Message de début (quand le blizzard commence)
+  start-message: true
+  start-message-text: "&b❄ &fUn &bBlizzard Éternel &fenvahit la zone!"
+
+  # Message de fin
+  message: true
+  message-text: "&b❄ &fLe blizzard a récolté &b{count} &fcultures!"

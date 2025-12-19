@@ -99,6 +99,11 @@ public class RavagerAnimation {
             ravagerEntity.setCollidable(false);
             ravagerEntity.setRemoveWhenFarAway(false);
 
+            // ═══════════════════════════════════════════════════════════
+            // MARQUER L'ENTITÉ pour cleanup après reboot
+            // ═══════════════════════════════════════════════════════════
+            plugin.markAsEnchantEntity(ravagerEntity);
+
             // Orienter le Ravageur dans la direction de charge
             Location lookAt = startLocation.clone().add(direction);
             ravagerEntity.teleport(startLocation.setDirection(direction));

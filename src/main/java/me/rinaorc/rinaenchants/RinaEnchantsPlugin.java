@@ -3,18 +3,23 @@ package me.rinaorc.rinaenchants;
 import me.rinaorc.rinaenchants.command.ReloadCommand;
 import me.rinaorc.rinaenchants.enchant.AllayLaserEnchant;
 import me.rinaorc.rinaenchants.enchant.BeeCollectorEnchant;
+import me.rinaorc.rinaenchants.enchant.BlizzardEnchant;
 import me.rinaorc.rinaenchants.enchant.PandaRollEnchant;
 import me.rinaorc.rinaenchants.enchant.RavagerStampedeEnchant;
+import me.rinaorc.rinaenchants.listener.CyberLevelXPListener;
 import me.rivaldev.harvesterhoes.api.events.HoeEnchant;
 import me.rivaldev.harvesterhoes.api.events.RivalHarvesterHoesAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
+import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginEnableEvent;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -27,9 +32,17 @@ public class RinaEnchantsPlugin extends JavaPlugin implements Listener {
 
     private static RinaEnchantsPlugin instance;
     private RivalHarvesterHoesAPI hoesAPI;
+    private CyberLevelXPListener cyberLevelListener;
 
     // Liste des enchantements enregistrés
     private final List<HoeEnchant> registeredEnchants = new ArrayList<>();
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // SYSTÈME DE CLEANUP DES ENTITÉS APRÈS REBOOT
+    // ═══════════════════════════════════════════════════════════════════════
+
+    // Clé pour marquer les entités spawned par ce plugin (PersistentDataContainer)
+    private NamespacedKey enchantEntityKey;
 
     // ═══════════════════════════════════════════════════════════════════════
     // SYSTÈME DE TRACKING POUR EMPÊCHER LES PROC EN CASCADE
@@ -46,11 +59,23 @@ public class RinaEnchantsPlugin extends JavaPlugin implements Listener {
     public void onEnable() {
         instance = this;
 
+        // Initialiser la clé pour marquer les entités du plugin
+        enchantEntityKey = new NamespacedKey(this, "enchant_entity");
+
         // Sauvegarder la config par défaut
         saveDefaultConfig();
 
+        // ═══════════════════════════════════════════════════════════════════════
+        // NETTOYAGE DES ENTITÉS SURVIVANTES D'UN REBOOT/CRASH
+        // ═══════════════════════════════════════════════════════════════════════
+        cleanupEnchantEntities();
+
         // Enregistrer les listeners
         Bukkit.getPluginManager().registerEvents(this, this);
+
+        // Initialiser et enregistrer le listener CyberLevel XP
+        cyberLevelListener = new CyberLevelXPListener(this);
+        Bukkit.getPluginManager().registerEvents(cyberLevelListener, this);
 
         // Enregistrer la commande reload
         getCommand("rinaenchants").setExecutor(new ReloadCommand(this));
@@ -138,6 +163,17 @@ public class RinaEnchantsPlugin extends JavaPlugin implements Listener {
             getLogger().info("§c✓ Enchantement Ravager Stampede enregistré!");
         }
 
+        // ═══════════════════════════════════════════════════════════
+        // ENCHANTEMENT BLIZZARD ÉTERNEL
+        // ═══════════════════════════════════════════════════════════
+        if (getConfig().getBoolean("blizzard-eternal.enabled", true)) {
+            BlizzardEnchant blizzardEnchant = new BlizzardEnchant(this);
+            hoesAPI.registerEnchant(blizzardEnchant);
+            registeredEnchants.add(blizzardEnchant);
+
+            getLogger().info("§b✓ Enchantement Blizzard Éternel enregistré!");
+        }
+
         getLogger().info("§a✓ " + registeredEnchants.size() + " enchantement(s) chargé(s)!");
     }
 
@@ -147,6 +183,11 @@ public class RinaEnchantsPlugin extends JavaPlugin implements Listener {
     public void reload() {
         getLogger().info("§eRechargement de RinaEnchants...");
         reloadConfig();
+
+        // Recharger le listener CyberLevel
+        if (cyberLevelListener != null) {
+            cyberLevelListener.reload();
+        }
 
         if (hoesAPI != null) {
             registerAllEnchants();
@@ -230,9 +271,60 @@ public class RinaEnchantsPlugin extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
+        // Nettoyer toutes les entités spawned par les enchantements
+        cleanupEnchantEntities();
+
         entityBreakingLocations.clear();
         playerClientEntities.clear();
         getLogger().info("§6RinaEnchants §cdésactivé!");
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // SYSTÈME DE CLEANUP DES ENTITÉS D'ENCHANTEMENT
+    // ═══════════════════════════════════════════════════════════════════════
+
+    /**
+     * Nettoie toutes les entités spawned par les enchantements dans tous les mondes.
+     * Appelé au démarrage pour nettoyer les survivants d'un crash/reboot,
+     * et à l'arrêt pour nettoyer proprement.
+     */
+    private void cleanupEnchantEntities() {
+        int cleaned = 0;
+
+        for (World world : Bukkit.getWorlds()) {
+            for (Entity entity : world.getEntities()) {
+                if (isEnchantEntity(entity)) {
+                    entity.remove();
+                    cleaned++;
+                }
+            }
+        }
+
+        if (cleaned > 0) {
+            getLogger().info("§a✓ Nettoyage de " + cleaned + " entité(s) d'enchantement orpheline(s)");
+        }
+    }
+
+    /**
+     * Marque une entité comme appartenant à ce plugin.
+     * Utilisé par les animations pour identifier leurs entités.
+     */
+    public void markAsEnchantEntity(Entity entity) {
+        entity.getPersistentDataContainer().set(enchantEntityKey, PersistentDataType.BYTE, (byte) 1);
+    }
+
+    /**
+     * Vérifie si une entité a été spawned par ce plugin.
+     */
+    public boolean isEnchantEntity(Entity entity) {
+        return entity.getPersistentDataContainer().has(enchantEntityKey, PersistentDataType.BYTE);
+    }
+
+    /**
+     * Retourne la clé utilisée pour marquer les entités (pour les animations).
+     */
+    public NamespacedKey getEnchantEntityKey() {
+        return enchantEntityKey;
     }
 
     public static RinaEnchantsPlugin getInstance() {
@@ -241,6 +333,10 @@ public class RinaEnchantsPlugin extends JavaPlugin implements Listener {
 
     public RivalHarvesterHoesAPI getHoesAPI() {
         return hoesAPI;
+    }
+
+    public CyberLevelXPListener getCyberLevelListener() {
+        return cyberLevelListener;
     }
 
     // ═══════════════════════════════════════════════════════════════════════
