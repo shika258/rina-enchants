@@ -433,3 +433,108 @@ ravager-stampede:
   # Message de fin (statistiques de récolte)
   message: true
   message-text: "&c&l⚔ &4Le Ravageur a dévasté &c{count} &4cultures avec &c{stomps} &4piétinements!"
+
+
+# ═══════════════════════════════════════════════════════════════════
+#                  ❄ BLIZZARD ÉTERNEL / ETERNAL BLIZZARD
+# ═══════════════════════════════════════════════════════════════════
+# Un blizzard magique envahit la zone!
+#
+# FONCTIONNALITÉS:
+# 1. BLIZZARD - Des boules de neige tombent du ciel de façon chaotique
+# 2. EXPLOSION - Micro-chance que les boules explosent et récoltent (3x3)
+# 3. CADEAUX - Chance rare qu'un cadeau de Noël tombe du ciel!
+#
+# SCALING (10 000 niveaux max):
+# - Durée: 5s + (niveau / 1000)s → max 15s au niveau 10000
+# - Snowballs/seconde: (niveau / 100) + 1 → max 101 au niveau 10000
+# - Chance d'explosion: 0.1% par boule de neige
+# - Chance de cadeau: configurable
+
+blizzard-eternal:
+
+  enabled: true
+  enchant-id: "blizzard_eternal"
+
+  # Visible uniquement par le joueur (recommandé pour 500+ joueurs)
+  client-side-only: true
+
+  # Multiplicateur d'XP CyberLevel quand l'enchantement proc
+  cyber-level-multi: 2.0
+
+  # ─────────────────────────────────────────────────────────────────
+  #                         PARAMÈTRES DE BASE
+  # ─────────────────────────────────────────────────────────────────
+
+  # Niveau maximum
+  max-level: 10000
+
+  # ─────────────────────────────────────────────────────────────────
+  #                      DURÉE DU BLIZZARD
+  # ─────────────────────────────────────────────────────────────────
+  # Durée = base-duration + (niveau / 1000) secondes
+  # Exemple: niveau 5000 = 5 + 5 = 10 secondes
+
+  base-duration: 5
+  max-duration: 15
+
+  # ─────────────────────────────────────────────────────────────────
+  #                      INTENSITÉ (SNOWBALLS)
+  # ─────────────────────────────────────────────────────────────────
+  # Nombre de boules de neige par seconde = (niveau / snowballs-divisor) + base
+  # Exemple avec divisor=100, base=1: niveau 5000 = 50+1 = 51 snowballs/s
+
+  snowballs-divisor: 100
+  base-snowballs-per-second: 1
+
+  # Rayon du blizzard autour du joueur (en blocs)
+  blizzard-radius: 8
+
+  # Hauteur de spawn des snowballs au-dessus du joueur
+  spawn-height: 10
+
+  # ─────────────────────────────────────────────────────────────────
+  #                      EXPLOSIONS DE RÉCOLTE
+  # ─────────────────────────────────────────────────────────────────
+  # Chance qu'une boule de neige déclenche une explosion de récolte
+  # En pourcentage (0.1 = 0.1%)
+
+  explosion-chance: 0.1
+  explosion-radius: 3
+
+  # ─────────────────────────────────────────────────────────────────
+  #                      SYSTÈME DE CADEAUX
+  # ─────────────────────────────────────────────────────────────────
+  # Chance qu'un cadeau tombe du ciel pendant le blizzard
+  # En pourcentage (0.5 = 0.5% par tick)
+
+  gift:
+    enabled: true
+    chance: 0.5
+
+    # Texture de la tête du cadeau (base64)
+    texture: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTI5MTljNjczMTdjNzY3ODQzOGZmNTIwYzk4ZGRlMGUzYjRkNjg3NjljODkzOGE1YTNkZTI5NjhlZGZjNzMxNCJ9fX0="
+
+    # Commandes exécutées quand le joueur ramasse le cadeau
+    # %player% sera remplacé par le nom du joueur
+    commands:
+      - "cyberlevel giveExp 200 %player%"
+      - "tellraw %player% {\"text\":\"§b❄ §fVous avez reçu un §6Cadeau de Noël §f! §a+200 XP CyberLevel\"}"
+
+    # Message affiché au ramassage
+    pickup-message: "&b❄ &fVous avez trouvé un &6Cadeau de Noël&f!"
+
+  # ─────────────────────────────────────────────────────────────────
+  #                         EFFETS
+  # ─────────────────────────────────────────────────────────────────
+
+  particles: true
+  sound: true
+
+  # Message de début (quand le blizzard commence)
+  start-message: true
+  start-message-text: "&b❄ &fUn &bBlizzard Éternel &fenvahit la zone!"
+
+  # Message de fin
+  message: true
+  message-text: "&b❄ &fLe blizzard a récolté &b{count} &fcultures!"

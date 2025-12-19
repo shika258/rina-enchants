@@ -3,6 +3,7 @@ package me.rinaorc.rinaenchants;
 import me.rinaorc.rinaenchants.command.ReloadCommand;
 import me.rinaorc.rinaenchants.enchant.AllayLaserEnchant;
 import me.rinaorc.rinaenchants.enchant.BeeCollectorEnchant;
+import me.rinaorc.rinaenchants.enchant.BlizzardEnchant;
 import me.rinaorc.rinaenchants.enchant.PandaRollEnchant;
 import me.rinaorc.rinaenchants.enchant.RavagerStampedeEnchant;
 import me.rinaorc.rinaenchants.listener.CyberLevelXPListener;
@@ -160,6 +161,17 @@ public class RinaEnchantsPlugin extends JavaPlugin implements Listener {
             registeredEnchants.add(ravagerEnchant);
 
             getLogger().info("§c✓ Enchantement Ravager Stampede enregistré!");
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // ENCHANTEMENT BLIZZARD ÉTERNEL
+        // ═══════════════════════════════════════════════════════════
+        if (getConfig().getBoolean("blizzard-eternal.enabled", true)) {
+            BlizzardEnchant blizzardEnchant = new BlizzardEnchant(this);
+            hoesAPI.registerEnchant(blizzardEnchant);
+            registeredEnchants.add(blizzardEnchant);
+
+            getLogger().info("§b✓ Enchantement Blizzard Éternel enregistré!");
         }
 
         getLogger().info("§a✓ " + registeredEnchants.size() + " enchantement(s) chargé(s)!");
