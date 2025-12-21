@@ -6,8 +6,8 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Ageable;
-import org.bukkit.boss.DragonBattle;
-import org.bukkit.entity.EnderDragon;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Phantom;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
@@ -17,16 +17,16 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
- * Animation du Souffle du Dragon Ender
+ * Animation du Phantom Géant
  *
- * Un mini Ender Dragon (scale 0.4) apparaît et survole le champ
- * en soufflant des nuages de dragon breath qui récoltent les cultures.
+ * Un Phantom géant (scale x2) apparaît et survole le champ
+ * en effectuant des passes rasantes et des piqués pour récolter.
  *
  * Mécaniques:
- * - Vol en spirale autour du point de départ
- * - Souffle périodique créant des zones de récolte
- * - Les zones persistent et continuent de récolter
- * - Effet visuel spectaculaire avec particules violettes
+ * - Vol en figure-8 avec passes rasantes
+ * - Piqués d'attaque sur les cultures
+ * - Traînée d'ombre et de particules d'âme
+ * - Cri strident lors des attaques
  */
 public class EnderDragonBreathAnimation {
 
@@ -76,7 +76,7 @@ public class EnderDragonBreathAnimation {
     }
 
     // Paramètres de l'animation
-    private final double dragonScale;
+    private final double phantomScale;
     private final int flightDuration;
     private final double spiralRadius;
     private final double spiralSpeed;
@@ -87,15 +87,14 @@ public class EnderDragonBreathAnimation {
     private final boolean clientSideOnly;
 
     // État de l'animation
-    private EnderDragon dragon;
-    private double spiralAngle = 0;
-    private double currentHeight;
+    private Phantom phantom;
+    private double flightAngle = 0;
     private int ticksElapsed = 0;
     private int totalCropsHarvested = 0;
     private int totalBreathClouds = 0;
-
-    // Zones de souffle actives (location -> ticks restants)
-    private final Map<Location, Integer> activeBreathZones = new HashMap<>();
+    private boolean isDiving = false;
+    private Location diveTarget = null;
+    private int diveTicks = 0;
 
     // Tracking des blocs déjà récoltés
     private final Set<String> harvestedBlocks = new HashSet<>();
@@ -107,6 +106,10 @@ public class EnderDragonBreathAnimation {
 
     private final Random random = new Random();
 
+    // Couleurs pour particules
+    private static final Color PHANTOM_DARK = Color.fromRGB(20, 20, 40);
+    private static final Color PHANTOM_PURPLE = Color.fromRGB(100, 50, 150);
+
     public EnderDragonBreathAnimation(RinaEnchantsPlugin plugin, Location startLocation, Player player,
                                        double dragonScale, int flightDuration, double spiralRadius,
                                        double spiralSpeed, int breathInterval, double breathRadius,
@@ -116,7 +119,8 @@ public class EnderDragonBreathAnimation {
         this.player = player;
         this.world = startLocation.getWorld();
 
-        this.dragonScale = dragonScale;
+        // Scale x2 par rapport au paramètre original
+        this.phantomScale = dragonScale * 5.0; // Phantom de base est petit, on multiplie plus
         this.flightDuration = flightDuration;
         this.spiralRadius = spiralRadius;
         this.spiralSpeed = spiralSpeed;
@@ -125,8 +129,6 @@ public class EnderDragonBreathAnimation {
         this.breathDuration = breathDuration;
         this.showParticles = showParticles;
         this.clientSideOnly = clientSideOnly;
-
-        this.currentHeight = 5.0; // Hauteur initiale
     }
 
     public void setOnCropHit(Consumer<Location> callback) {
@@ -142,64 +144,62 @@ public class EnderDragonBreathAnimation {
     }
 
     public void start() {
-        // Spawn le dragon au-dessus du point de départ
-        Location spawnLoc = startLocation.clone().add(0, currentHeight, 0);
+        // Spawn le phantom au-dessus du point de départ
+        Location spawnLoc = startLocation.clone().add(0, 8, 0);
 
-        dragon = world.spawn(spawnLoc, EnderDragon.class, d -> {
-            d.setSilent(true);
-            d.setInvulnerable(true);
-            d.setGravity(false);
-            d.setPersistent(false);
-            d.setCollidable(false);
+        try {
+            phantom = (Phantom) world.spawnEntity(spawnLoc, EntityType.PHANTOM);
+            phantom.setSilent(false);
+            phantom.setInvulnerable(true);
+            phantom.setGravity(false);
+            phantom.setCollidable(false);
+            phantom.setAI(false);
+            phantom.setSize(4); // Taille du phantom (affecte la hitbox et l'apparence)
 
             // ═══════════════════════════════════════════════════════════
-            // APPLIQUER L'ÉCHELLE (mini-dragon)
+            // APPLIQUER L'ÉCHELLE x2 (Phantom géant)
             // ═══════════════════════════════════════════════════════════
             try {
-                AttributeInstance scaleAttr = d.getAttribute(Attribute.SCALE);
+                AttributeInstance scaleAttr = phantom.getAttribute(Attribute.SCALE);
                 if (scaleAttr != null) {
-                    scaleAttr.setBaseValue(dragonScale);
+                    scaleAttr.setBaseValue(phantomScale);
                 }
             } catch (Exception e) {
-                // Attribut scale non disponible (version < 1.20.5)
-                plugin.getLogger().warning("§e[EnderDragon] Attribut SCALE non disponible");
+                plugin.getLogger().warning("§e[Phantom] Attribut SCALE non disponible");
             }
 
             // Marquer l'entité pour cleanup
-            plugin.markAsEnchantEntity(d);
-        });
+            plugin.markAsEnchantEntity(phantom);
 
-        if (dragon == null) {
+            // Rendre client-side si configuré
+            if (clientSideOnly) {
+                plugin.makeEntityClientSide(phantom, player);
+            }
+
+        } catch (Exception e) {
+            plugin.getLogger().warning("§e[Phantom] Impossible de spawn le Phantom: " + e.getMessage());
             return;
         }
 
-        // Supprimer/cacher la boss bar
-        try {
-            DragonBattle battle = dragon.getDragonBattle();
-            if (battle != null && battle.getBossBar() != null) {
-                battle.getBossBar().setVisible(false);
-                battle.getBossBar().removeAll();
-            }
-        } catch (Exception ignored) {
-            // Pas de DragonBattle disponible (normal hors de l'End)
-        }
-
-        // Désactiver l'IA après le spawn pour éviter les comportements par défaut
-        dragon.setAI(false);
-
-        // Rendre client-side si configuré
-        if (clientSideOnly) {
-            plugin.makeEntityClientSide(dragon, player);
-        }
-
         // Jouer le son d'apparition
-        player.playSound(startLocation, Sound.ENTITY_ENDER_DRAGON_AMBIENT, 0.6f, 1.2f);
+        player.playSound(startLocation, Sound.ENTITY_PHANTOM_AMBIENT, 1.0f, 0.7f);
+
+        // Effet d'apparition
+        if (showParticles) {
+            for (int i = 0; i < 20; i++) {
+                double ox = (random.nextDouble() - 0.5) * 3;
+                double oy = random.nextDouble() * 2;
+                double oz = (random.nextDouble() - 0.5) * 3;
+                player.spawnParticle(Particle.PORTAL, spawnLoc.clone().add(ox, oy, oz), 1, 0, 0, 0, 0);
+            }
+            player.spawnParticle(Particle.SOUL, spawnLoc, 10, 1, 1, 1, 0.05);
+        }
 
         // Démarrer l'animation
         new BukkitRunnable() {
             @Override
             public void run() {
-                if (dragon == null || dragon.isDead() || !player.isOnline()) {
+                if (phantom == null || phantom.isDead() || !player.isOnline()) {
                     cleanup();
                     cancel();
                     return;
@@ -207,26 +207,27 @@ public class EnderDragonBreathAnimation {
 
                 ticksElapsed++;
 
-                // Mettre à jour la position du dragon (vol en spirale)
-                updateDragonPosition();
+                if (isDiving) {
+                    // Animation de piqué
+                    updateDiveMovement();
+                } else {
+                    // Vol normal en figure-8
+                    updateFlightMovement();
 
-                // Vérifier si c'est le moment de souffler
-                if (ticksElapsed % breathInterval == 0) {
-                    createBreathCloud();
+                    // Vérifier si c'est le moment de plonger
+                    if (ticksElapsed % breathInterval == 0) {
+                        startDive();
+                    }
                 }
 
-                // Mettre à jour les zones de souffle actives
-                updateBreathZones();
-
-                // Particules de traînée du dragon
+                // Particules de traînée
                 if (showParticles && ticksElapsed % 2 == 0) {
-                    spawnDragonTrailParticles();
+                    spawnTrailParticles();
                 }
 
                 // Vérifier la fin de l'animation
                 if (ticksElapsed >= flightDuration) {
-                    // Animation finale: le dragon s'envole
-                    performFinalDive();
+                    performFinalSweep();
                     cleanup();
                     cancel();
                 }
@@ -234,111 +235,177 @@ public class EnderDragonBreathAnimation {
         }.runTaskTimer(plugin, 0L, 1L);
     }
 
-    private void updateDragonPosition() {
-        if (dragon == null || dragon.isDead()) return;
+    /**
+     * Vol en figure-8 dynamique
+     */
+    private void updateFlightMovement() {
+        if (phantom == null || phantom.isDead()) return;
 
-        // Mouvement en spirale
-        spiralAngle += spiralSpeed;
+        flightAngle += spiralSpeed;
 
-        // Variation de hauteur sinusoïdale
-        double heightVariation = Math.sin(ticksElapsed * 0.05) * 2.0;
-        currentHeight = 5.0 + heightVariation;
+        // Figure-8 (lemniscate de Bernoulli)
+        double t = flightAngle;
+        double scale = spiralRadius;
 
-        // Position sur la spirale
-        double x = startLocation.getX() + Math.cos(spiralAngle) * spiralRadius;
-        double z = startLocation.getZ() + Math.sin(spiralAngle) * spiralRadius;
-        double y = startLocation.getY() + currentHeight;
+        // Paramètres de la figure-8
+        double x = scale * Math.sin(t);
+        double z = scale * Math.sin(t) * Math.cos(t);
 
-        Location newLoc = new Location(world, x, y, z);
+        // Hauteur variable avec oscillation
+        double heightBase = 6.0;
+        double heightWave = Math.sin(t * 0.5) * 2.0;
+        double y = heightBase + heightWave;
 
-        // Calculer le yaw basé sur la direction de vol (tangente à la spirale)
-        double tangentX = -Math.sin(spiralAngle);
-        double tangentZ = Math.cos(spiralAngle);
-        float yaw = (float) Math.toDegrees(Math.atan2(-tangentX, tangentZ));
-        newLoc.setYaw(yaw);
-        newLoc.setPitch(-10); // Légère inclinaison vers le bas
+        Location newLoc = startLocation.clone().add(x, y, z);
 
-        // Utiliser velocity pour un mouvement plus fluide
-        Location currentLoc = dragon.getLocation();
-        Vector velocity = newLoc.toVector().subtract(currentLoc.toVector()).multiply(0.5);
-        dragon.setVelocity(velocity);
+        // Calculer la direction de vol
+        Location currentLoc = phantom.getLocation();
+        Vector direction = newLoc.toVector().subtract(currentLoc.toVector());
 
-        // Téléporter pour la rotation et position exacte
-        Location teleportLoc = currentLoc.clone().add(velocity);
-        teleportLoc.setYaw(yaw);
-        teleportLoc.setPitch(-10);
-        dragon.teleport(teleportLoc);
+        if (direction.lengthSquared() > 0.01) {
+            direction.normalize();
+
+            // Calculer yaw et pitch
+            float yaw = (float) Math.toDegrees(Math.atan2(-direction.getX(), direction.getZ()));
+            float pitch = (float) Math.toDegrees(-Math.asin(direction.getY()));
+
+            newLoc.setYaw(yaw);
+            newLoc.setPitch(pitch);
+        }
+
+        // Mouvement fluide
+        phantom.teleport(newLoc);
     }
 
-    private void createBreathCloud() {
-        // Position du souffle (sous le dragon)
-        Location breathLoc = dragon.getLocation().clone().subtract(0, 3, 0);
+    /**
+     * Démarre un piqué d'attaque
+     */
+    private void startDive() {
+        isDiving = true;
+        diveTicks = 0;
 
-        // S'assurer que c'est au niveau du sol
-        breathLoc.setY(startLocation.getY());
+        // Trouver une cible (culture mature ou position aléatoire)
+        diveTarget = findDiveTarget();
 
-        // Ajouter la zone de souffle active
-        activeBreathZones.put(breathLoc.clone(), breathDuration);
+        // Son de début de piqué
+        player.playSound(phantom.getLocation(), Sound.ENTITY_PHANTOM_SWOOP, 1.0f, 0.8f);
+
         totalBreathClouds++;
-
-        // Callback
         if (onBreathCloud != null) {
             onBreathCloud.accept(totalBreathClouds);
         }
-
-        // Effets visuels du souffle
-        if (showParticles) {
-            // Particules de dragon breath
-            for (int i = 0; i < 15; i++) {
-                double offsetX = (random.nextDouble() - 0.5) * breathRadius * 2;
-                double offsetZ = (random.nextDouble() - 0.5) * breathRadius * 2;
-                Location particleLoc = breathLoc.clone().add(offsetX, 0.5, offsetZ);
-
-                player.spawnParticle(Particle.DRAGON_BREATH, particleLoc, 2, 0.2, 0.2, 0.2, 0.01);
-            }
-
-            // Nuage violet au centre
-            player.spawnParticle(Particle.ENTITY_EFFECT, breathLoc.clone().add(0, 0.5, 0),
-                10, breathRadius * 0.5, 0.3, breathRadius * 0.5, 0);
-        }
-
-        // Son du souffle
-        player.playSound(breathLoc, Sound.ENTITY_ENDER_DRAGON_GROWL, 0.4f, 1.5f);
-
-        // Récolter immédiatement les cultures dans la zone
-        harvestInRadius(breathLoc, breathRadius);
     }
 
-    private void updateBreathZones() {
-        Iterator<Map.Entry<Location, Integer>> iterator = activeBreathZones.entrySet().iterator();
+    /**
+     * Trouve une cible pour le piqué
+     */
+    private Location findDiveTarget() {
+        // Chercher une culture à proximité
+        int searchRadius = (int) spiralRadius;
 
-        while (iterator.hasNext()) {
-            Map.Entry<Location, Integer> entry = iterator.next();
-            Location zoneLoc = entry.getKey();
-            int ticksRemaining = entry.getValue() - 1;
+        for (int attempt = 0; attempt < 5; attempt++) {
+            int dx = random.nextInt(searchRadius * 2) - searchRadius;
+            int dz = random.nextInt(searchRadius * 2) - searchRadius;
 
-            if (ticksRemaining <= 0) {
-                iterator.remove();
-                continue;
-            }
+            Location checkLoc = startLocation.clone().add(dx, 0, dz);
 
-            entry.setValue(ticksRemaining);
-
-            // Récolter périodiquement dans les zones actives
-            if (ticksRemaining % 10 == 0) {
-                harvestInRadius(zoneLoc, breathRadius * 0.7);
-
-                // Particules persistantes
-                if (showParticles) {
-                    for (int i = 0; i < 3; i++) {
-                        double offsetX = (random.nextDouble() - 0.5) * breathRadius;
-                        double offsetZ = (random.nextDouble() - 0.5) * breathRadius;
-                        Location particleLoc = zoneLoc.clone().add(offsetX, 0.3, offsetZ);
-
-                        player.spawnParticle(Particle.DRAGON_BREATH, particleLoc, 1, 0.1, 0.1, 0.1, 0);
-                    }
+            // Chercher une culture à cette position
+            for (int dy = -2; dy <= 2; dy++) {
+                Location cropLoc = checkLoc.clone().add(0, dy, 0);
+                if (isMatureCrop(cropLoc.getBlock())) {
+                    return cropLoc;
                 }
             }
+        }
+
+        // Position aléatoire si pas de culture trouvée
+        double angle = random.nextDouble() * Math.PI * 2;
+        double dist = random.nextDouble() * spiralRadius;
+        return startLocation.clone().add(
+            Math.cos(angle) * dist,
+            0,
+            Math.sin(angle) * dist
+        );
+    }
+
+    /**
+     * Animation du piqué
+     */
+    private void updateDiveMovement() {
+        diveTicks++;
+
+        Location currentLoc = phantom.getLocation();
+        Location targetLoc = diveTarget.clone().add(0, 1, 0);
+
+        // Phase 1: Descente rapide (20 ticks)
+        if (diveTicks <= 20) {
+            double progress = diveTicks / 20.0;
+            double easeProgress = 1 - Math.pow(1 - progress, 3); // Ease out cubic
+
+            // Interpolation vers la cible
+            double x = currentLoc.getX() + (targetLoc.getX() - currentLoc.getX()) * 0.2;
+            double z = currentLoc.getZ() + (targetLoc.getZ() - currentLoc.getZ()) * 0.2;
+            double y = currentLoc.getY() - 0.4; // Descente rapide
+
+            Location newLoc = new Location(world, x, Math.max(y, targetLoc.getY()), z);
+
+            // Direction vers le bas
+            Vector dir = targetLoc.toVector().subtract(newLoc.toVector());
+            if (dir.lengthSquared() > 0) {
+                dir.normalize();
+                newLoc.setYaw((float) Math.toDegrees(Math.atan2(-dir.getX(), dir.getZ())));
+                newLoc.setPitch(45); // Plongeon
+            }
+
+            phantom.teleport(newLoc);
+
+            // Effet de vitesse
+            if (showParticles && diveTicks % 2 == 0) {
+                player.spawnParticle(Particle.SOUL, currentLoc, 3, 0.3, 0.3, 0.3, 0.02);
+            }
+        }
+        // Phase 2: Impact et récolte
+        else if (diveTicks == 21) {
+            // Récolter autour du point d'impact
+            harvestInRadius(diveTarget, breathRadius);
+
+            // Effet d'impact
+            if (showParticles) {
+                Location impactLoc = diveTarget.clone().add(0, 0.5, 0);
+
+                // Onde de choc circulaire
+                for (int i = 0; i < 16; i++) {
+                    double angle = (Math.PI * 2 / 16) * i;
+                    for (int r = 1; r <= (int) breathRadius; r++) {
+                        double px = Math.cos(angle) * r;
+                        double pz = Math.sin(angle) * r;
+                        player.spawnParticle(Particle.SOUL_FIRE_FLAME,
+                            impactLoc.clone().add(px, 0, pz), 1, 0.1, 0.1, 0.1, 0.01);
+                    }
+                }
+
+                // Particules centrales
+                player.spawnParticle(Particle.DRAGON_BREATH, impactLoc, 15, breathRadius * 0.3, 0.2, breathRadius * 0.3, 0.02);
+                player.spawnParticle(Particle.PORTAL, impactLoc, 20, breathRadius * 0.5, 0.5, breathRadius * 0.5, 0.5);
+            }
+
+            // Son d'impact
+            player.playSound(diveTarget, Sound.ENTITY_PHANTOM_BITE, 1.0f, 0.6f);
+            player.playSound(diveTarget, Sound.ENTITY_WITHER_BREAK_BLOCK, 0.3f, 1.5f);
+        }
+        // Phase 3: Remontée (25 ticks)
+        else if (diveTicks <= 45) {
+            double y = phantom.getLocation().getY() + 0.35;
+            Location newLoc = phantom.getLocation().clone();
+            newLoc.setY(y);
+            newLoc.setPitch(-30); // Remontée
+
+            phantom.teleport(newLoc);
+        }
+        // Fin du piqué
+        else {
+            isDiving = false;
+            diveTarget = null;
         }
     }
 
@@ -347,15 +414,12 @@ public class EnderDragonBreathAnimation {
 
         for (int dx = -radiusInt; dx <= radiusInt; dx++) {
             for (int dz = -radiusInt; dz <= radiusInt; dz++) {
-                // Vérifier si dans le rayon circulaire
                 if (dx * dx + dz * dz > radius * radius) continue;
 
-                // Vérifier plusieurs niveaux de hauteur
                 for (int dy = -1; dy <= 2; dy++) {
                     Location cropLoc = center.clone().add(dx, dy, dz);
                     String key = cropLoc.getBlockX() + ":" + cropLoc.getBlockY() + ":" + cropLoc.getBlockZ();
 
-                    // Éviter de récolter deux fois le même bloc
                     if (harvestedBlocks.contains(key)) continue;
 
                     Block block = cropLoc.getBlock();
@@ -367,9 +431,8 @@ public class EnderDragonBreathAnimation {
                             onCropHit.accept(cropLoc);
                         }
 
-                        // Effet visuel de récolte
                         if (showParticles) {
-                            player.spawnParticle(Particle.DRAGON_BREATH,
+                            player.spawnParticle(Particle.SOUL,
                                 cropLoc.clone().add(0.5, 0.5, 0.5), 2, 0.1, 0.1, 0.1, 0.02);
                         }
                     }
@@ -391,71 +454,80 @@ public class EnderDragonBreathAnimation {
         return true;
     }
 
-    private void spawnDragonTrailParticles() {
-        Location dragonLoc = dragon.getLocation();
+    /**
+     * Particules de traînée sombre
+     */
+    private void spawnTrailParticles() {
+        Location phantomLoc = phantom.getLocation();
 
-        // Particules violettes derrière le dragon
-        for (int i = 0; i < 3; i++) {
-            double offsetX = (random.nextDouble() - 0.5) * 2;
-            double offsetY = (random.nextDouble() - 0.5) * 1;
-            double offsetZ = (random.nextDouble() - 0.5) * 2;
+        // Traînée d'âme
+        for (int i = 0; i < 2; i++) {
+            double ox = (random.nextDouble() - 0.5) * 1.5;
+            double oy = (random.nextDouble() - 0.5) * 0.5;
+            double oz = (random.nextDouble() - 0.5) * 1.5;
 
-            Location particleLoc = dragonLoc.clone().add(offsetX, offsetY, offsetZ);
-            player.spawnParticle(Particle.DRAGON_BREATH, particleLoc, 1, 0, 0, 0, 0);
+            player.spawnParticle(Particle.SOUL, phantomLoc.clone().add(ox, oy, oz), 1, 0, 0, 0, 0);
         }
 
-        // Particules d'End autour du dragon
-        player.spawnParticle(Particle.PORTAL, dragonLoc, 2, 1, 0.5, 1, 0);
+        // Particules de portail
+        player.spawnParticle(Particle.PORTAL, phantomLoc, 2, 0.8, 0.3, 0.8, 0);
+
+        // Dust sombre
+        if (ticksElapsed % 4 == 0) {
+            Particle.DustOptions dust = new Particle.DustOptions(PHANTOM_DARK, 1.5f);
+            player.spawnParticle(Particle.DUST, phantomLoc.clone().add(0, -0.5, 0), 2, 0.5, 0.2, 0.5, 0, dust);
+        }
     }
 
-    private void performFinalDive() {
+    /**
+     * Attaque finale en balayage
+     */
+    private void performFinalSweep() {
         if (showParticles) {
-            // Explosion de particules finale
-            Location dragonLoc = dragon.getLocation();
+            Location phantomLoc = phantom.getLocation();
 
-            for (int i = 0; i < 25; i++) {
-                double offsetX = (random.nextDouble() - 0.5) * 4;
-                double offsetY = (random.nextDouble() - 0.5) * 2;
-                double offsetZ = (random.nextDouble() - 0.5) * 4;
+            // Explosion de particules d'âme
+            for (int i = 0; i < 30; i++) {
+                double ox = (random.nextDouble() - 0.5) * 4;
+                double oy = (random.nextDouble() - 0.5) * 2;
+                double oz = (random.nextDouble() - 0.5) * 4;
 
-                player.spawnParticle(Particle.DRAGON_BREATH, dragonLoc.clone().add(offsetX, offsetY, offsetZ),
-                    1, 0.1, 0.1, 0.1, 0.05);
-                player.spawnParticle(Particle.PORTAL, dragonLoc.clone().add(offsetX, offsetY, offsetZ),
-                    1, 0, 0, 0, 0.5);
+                player.spawnParticle(Particle.SOUL_FIRE_FLAME, phantomLoc.clone().add(ox, oy, oz), 1, 0, 0, 0, 0.05);
+                player.spawnParticle(Particle.PORTAL, phantomLoc.clone().add(ox, oy, oz), 1, 0, 0, 0, 0.3);
             }
 
-            // Dernier souffle massif
-            Location finalBreathLoc = startLocation.clone();
-            double finalRadius = breathRadius * 1.5;
-
-            for (int i = 0; i < 30; i++) {
+            // Balayage final au sol
+            double finalRadius = breathRadius * 2;
+            for (int i = 0; i < 40; i++) {
                 double angle = random.nextDouble() * Math.PI * 2;
                 double dist = random.nextDouble() * finalRadius;
                 double x = Math.cos(angle) * dist;
                 double z = Math.sin(angle) * dist;
 
-                player.spawnParticle(Particle.DRAGON_BREATH,
-                    finalBreathLoc.clone().add(x, 0.5, z), 1, 0.1, 0.2, 0.1, 0.02);
+                player.spawnParticle(Particle.SOUL,
+                    startLocation.clone().add(x, 0.5, z), 1, 0.1, 0.2, 0.1, 0.01);
             }
 
-            // Récolte finale massive
-            harvestInRadius(finalBreathLoc, finalRadius);
+            // Récolte finale
+            harvestInRadius(startLocation, finalRadius);
         }
 
         // Son de départ
-        player.playSound(dragon.getLocation(), Sound.ENTITY_ENDER_DRAGON_FLAP, 0.8f, 1.0f);
+        player.playSound(phantom.getLocation(), Sound.ENTITY_PHANTOM_DEATH, 0.8f, 1.2f);
     }
 
     private void cleanup() {
-        // Supprimer le dragon
-        if (dragon != null && !dragon.isDead()) {
-            dragon.remove();
+        if (phantom != null && !phantom.isDead()) {
+            // Effet de disparition
+            if (showParticles && player.isOnline()) {
+                Location loc = phantom.getLocation();
+                player.spawnParticle(Particle.SOUL, loc, 15, 1, 0.5, 1, 0.1);
+                player.spawnParticle(Particle.PORTAL, loc, 20, 1, 1, 1, 0.5);
+            }
+
+            phantom.remove();
         }
 
-        // Nettoyer les zones de souffle
-        activeBreathZones.clear();
-
-        // Callback de fin
         if (onFinish != null) {
             onFinish.accept(totalCropsHarvested, totalBreathClouds);
         }

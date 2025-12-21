@@ -155,16 +155,18 @@ public class GolemFactoryAnimation {
         World world = centerLocation.getWorld();
         if (world == null) return;
 
-        // Spawner les mini-golems
+        // Spawner les mini-golems en cercle pour éviter les fusions immédiates
+        double angleStep = (2 * Math.PI) / golemCount;
+        double spawnRadius = Math.max(3.0, patrolRadius * 0.4); // Minimum 3 blocs du centre
+
         for (int i = 0; i < golemCount; i++) {
-            // Position aléatoire autour du centre
-            double angle = random.nextDouble() * Math.PI * 2;
-            double dist = random.nextDouble() * patrolRadius * 0.5;
+            // Position espacée uniformément en cercle
+            double angle = i * angleStep;
 
             Location spawnLoc = centerLocation.clone().add(
-                Math.cos(angle) * dist,
+                Math.cos(angle) * spawnRadius,
                 0,
-                Math.sin(angle) * dist
+                Math.sin(angle) * spawnRadius
             );
 
             // Trouver le sol
@@ -240,7 +242,7 @@ public class GolemFactoryAnimation {
         private int ticksAlive = 0;
         private final Set<String> harvestedBlocks = new HashSet<>();
         private static final double MOVE_SPEED = 0.15; // Vitesse augmentée pour mouvement visible
-        private static final double MERGE_DISTANCE = 1.5;
+        private static final double MERGE_DISTANCE = 2.5; // Distance augmentée pour éviter fusions trop faciles
 
         @Override
         public void run() {
@@ -448,7 +450,6 @@ public class GolemFactoryAnimation {
                 Particle.DustOptions goldDust = new Particle.DustOptions(MERGE_GOLD, 2.0f);
                 owner.spawnParticle(Particle.DUST, mergeLoc.clone().add(0, 1, 0), 15, 0.5, 0.5, 0.5, 0, goldDust);
                 owner.spawnParticle(Particle.TOTEM_OF_UNDYING, mergeLoc.clone().add(0, 1, 0), 10, 0.3, 0.3, 0.3, 0.2);
-                owner.spawnParticle(Particle.FLASH, mergeLoc.clone().add(0, 1, 0), 1, 0, 0, 0, 0);
             }
 
             owner.playSound(mergeLoc, Sound.BLOCK_ANVIL_USE, 1.0f, 0.8f);

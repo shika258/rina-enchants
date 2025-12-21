@@ -44,7 +44,12 @@ public class CyberLevelXPListener implements Listener {
         "panda-roll",
         "allay-laser",
         "ravager-stampede",
-        "blizzard-eternal"
+        "blizzard-eternal",
+        "ender-dragon-breath",
+        "axolotl-tsunami",
+        "golem-factory",
+        "warden-pulse",
+        "frog-tongue-lash"
     };
 
     public CyberLevelXPListener(RinaEnchantsPlugin plugin) {
