@@ -10,6 +10,7 @@ import me.rinaorc.rinaenchants.enchant.PandaRollEnchant;
 import me.rinaorc.rinaenchants.enchant.RavagerStampedeEnchant;
 import me.rinaorc.rinaenchants.enchant.WardenPulseEnchant;
 import me.rinaorc.rinaenchants.enchant.AxolotlTsunamiEnchant;
+import me.rinaorc.rinaenchants.enchant.EnderDragonBreathEnchant;
 import me.rinaorc.rinaenchants.listener.CyberLevelXPListener;
 import me.rivaldev.harvesterhoes.api.events.HoeEnchant;
 import me.rivaldev.harvesterhoes.api.events.RivalBlockBreakEvent;
@@ -242,6 +243,17 @@ public class RinaEnchantsPlugin extends JavaPlugin implements Listener {
             registeredEnchants.add(axolotlEnchant);
 
             getLogger().info("§b✓ Enchantement Axolotl Tsunami enregistré!");
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // ENCHANTEMENT ENDER DRAGON BREATH
+        // ═══════════════════════════════════════════════════════════
+        if (getConfig().getBoolean("ender-dragon-breath.enabled", true)) {
+            EnderDragonBreathEnchant dragonEnchant = new EnderDragonBreathEnchant(this);
+            hoesAPI.registerEnchant(dragonEnchant);
+            registeredEnchants.add(dragonEnchant);
+
+            getLogger().info("§5✓ Enchantement Ender Dragon Breath enregistré!");
         }
 
         getLogger().info("§a✓ " + registeredEnchants.size() + " enchantement(s) chargé(s)!");
