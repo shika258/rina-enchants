@@ -54,6 +54,10 @@
             <id>papermc</id>
             <url>https://repo.papermc.io/repository/maven-public/</url>
         </repository>
+        <repository>
+            <id>local-repo</id>
+            <url>file://${project.basedir}/repo</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -69,8 +73,7 @@
             <groupId>me.rivaldev</groupId>
             <artifactId>rivalharvesterhoes-api</artifactId>
             <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/libs/RivalHarvesterHoesAPI.jar</systemPath>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>
