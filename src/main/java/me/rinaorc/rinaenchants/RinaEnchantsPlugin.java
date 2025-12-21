@@ -20,6 +20,7 @@ import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -425,7 +426,9 @@ public class RinaEnchantsPlugin extends JavaPlugin implements Listener {
                     // Si elle est là depuis plus de 5 minutes, c'est un orphelin
                     // Note: on ne peut pas facilement tracker le temps de vie,
                     // donc on nettoie les entités sans AI qui sont immobiles
-                    if (!entity.hasAI() && entity.getVelocity().lengthSquared() < 0.01) {
+                    // hasAI() n'existe que sur LivingEntity, les autres entités n'ont pas d'AI
+                    boolean hasNoAI = !(entity instanceof LivingEntity) || !((LivingEntity) entity).hasAI();
+                    if (hasNoAI && entity.getVelocity().lengthSquared() < 0.01) {
                         entity.remove();
                         cleaned++;
 
