@@ -3,6 +3,7 @@ package me.rinaorc.rinaenchants.util;
 import me.rinaorc.rinaenchants.RinaEnchantsPlugin;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Ageable;
 import org.bukkit.boss.DragonBattle;
@@ -151,9 +152,17 @@ public class EnderDragonBreathAnimation {
             d.setPersistent(false);
             d.setCollidable(false);
 
-            // Appliquer le scale réduit (0.4 par défaut)
-            if (d.getAttribute(Attribute.SCALE) != null) {
-                d.getAttribute(Attribute.SCALE).setBaseValue(dragonScale);
+            // ═══════════════════════════════════════════════════════════
+            // APPLIQUER L'ÉCHELLE (mini-dragon)
+            // ═══════════════════════════════════════════════════════════
+            try {
+                AttributeInstance scaleAttr = d.getAttribute(Attribute.SCALE);
+                if (scaleAttr != null) {
+                    scaleAttr.setBaseValue(dragonScale);
+                }
+            } catch (Exception e) {
+                // Attribut scale non disponible (version < 1.20.5)
+                plugin.getLogger().warning("§e[EnderDragon] Attribut SCALE non disponible");
             }
 
             // Marquer l'entité pour cleanup
