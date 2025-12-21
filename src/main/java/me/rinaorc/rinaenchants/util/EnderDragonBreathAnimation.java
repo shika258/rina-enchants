@@ -3,6 +3,8 @@ package me.rinaorc.rinaenchants.util;
 import me.rinaorc.rinaenchants.RinaEnchantsPlugin;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.block.Block;
+import org.bukkit.block.data.Ageable;
 import org.bukkit.entity.EnderDragon;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -31,6 +33,46 @@ public class EnderDragonBreathAnimation {
     private final Player player;
     private final World world;
 
+    // Set des cultures
+    private static final Set<Material> CROPS = new HashSet<>();
+    private static final Set<Material> NO_AGE_CROPS = new HashSet<>();
+
+    static {
+        CROPS.addAll(Arrays.asList(
+            Material.WHEAT, Material.CARROTS, Material.POTATOES, Material.BEETROOTS,
+            Material.NETHER_WART, Material.COCOA, Material.SWEET_BERRY_BUSH,
+            Material.MELON, Material.PUMPKIN, Material.SUGAR_CANE, Material.CACTUS,
+            Material.BAMBOO, Material.KELP, Material.KELP_PLANT,
+            Material.TUBE_CORAL, Material.BUBBLE_CORAL, Material.BRAIN_CORAL,
+            Material.FIRE_CORAL, Material.HORN_CORAL,
+            Material.TUBE_CORAL_BLOCK, Material.BUBBLE_CORAL_BLOCK, Material.BRAIN_CORAL_BLOCK,
+            Material.FIRE_CORAL_BLOCK, Material.HORN_CORAL_BLOCK,
+            Material.WARPED_ROOTS, Material.CRIMSON_ROOTS, Material.NETHER_SPROUTS,
+            Material.TWISTING_VINES, Material.WEEPING_VINES,
+            Material.LILAC, Material.ROSE_BUSH, Material.PEONY, Material.SUNFLOWER,
+            Material.TALL_GRASS, Material.LARGE_FERN,
+            Material.OAK_SAPLING, Material.BIRCH_SAPLING, Material.JUNGLE_SAPLING,
+            Material.SPRUCE_SAPLING, Material.CHERRY_SAPLING, Material.ACACIA_SAPLING,
+            Material.DARK_OAK_SAPLING, Material.MANGROVE_PROPAGULE,
+            Material.SEA_PICKLE, Material.CHORUS_FLOWER, Material.CHORUS_PLANT
+        ));
+
+        NO_AGE_CROPS.addAll(Arrays.asList(
+            Material.MELON, Material.PUMPKIN, Material.SUGAR_CANE, Material.CACTUS,
+            Material.BAMBOO, Material.KELP, Material.KELP_PLANT,
+            Material.TUBE_CORAL, Material.BUBBLE_CORAL, Material.BRAIN_CORAL,
+            Material.FIRE_CORAL, Material.HORN_CORAL,
+            Material.TUBE_CORAL_BLOCK, Material.BUBBLE_CORAL_BLOCK, Material.BRAIN_CORAL_BLOCK,
+            Material.FIRE_CORAL_BLOCK, Material.HORN_CORAL_BLOCK,
+            Material.WARPED_ROOTS, Material.CRIMSON_ROOTS, Material.NETHER_SPROUTS,
+            Material.LILAC, Material.ROSE_BUSH, Material.PEONY, Material.SUNFLOWER,
+            Material.OAK_SAPLING, Material.BIRCH_SAPLING, Material.JUNGLE_SAPLING,
+            Material.SPRUCE_SAPLING, Material.CHERRY_SAPLING, Material.ACACIA_SAPLING,
+            Material.DARK_OAK_SAPLING, Material.MANGROVE_PROPAGULE,
+            Material.CHORUS_FLOWER, Material.CHORUS_PLANT, Material.SEA_PICKLE
+        ));
+    }
+
     // Paramètres de l'animation
     private final double dragonScale;
     private final int flightDuration;
@@ -52,6 +94,9 @@ public class EnderDragonBreathAnimation {
 
     // Zones de souffle actives (location -> ticks restants)
     private final Map<Location, Integer> activeBreathZones = new HashMap<>();
+
+    // Tracking des blocs déjà récoltés
+    private final Set<String> harvestedBlocks = new HashSet<>();
 
     // Callbacks
     private Consumer<Location> onCropHit;
@@ -268,14 +313,42 @@ public class EnderDragonBreathAnimation {
                 // Vérifier plusieurs niveaux de hauteur
                 for (int dy = -1; dy <= 2; dy++) {
                     Location cropLoc = center.clone().add(dx, dy, dz);
+                    String key = cropLoc.getBlockX() + ":" + cropLoc.getBlockY() + ":" + cropLoc.getBlockZ();
 
-                    if (onCropHit != null) {
-                        onCropHit.accept(cropLoc);
+                    // Éviter de récolter deux fois le même bloc
+                    if (harvestedBlocks.contains(key)) continue;
+
+                    Block block = cropLoc.getBlock();
+                    if (isMatureCrop(block)) {
+                        harvestedBlocks.add(key);
                         totalCropsHarvested++;
+
+                        if (onCropHit != null) {
+                            onCropHit.accept(cropLoc);
+                        }
+
+                        // Effet visuel de récolte
+                        if (showParticles) {
+                            player.spawnParticle(Particle.DRAGON_BREATH,
+                                cropLoc.clone().add(0.5, 0.5, 0.5), 3, 0.1, 0.1, 0.1, 0.02);
+                        }
                     }
                 }
             }
         }
+    }
+
+    private boolean isMatureCrop(Block block) {
+        Material type = block.getType();
+
+        if (!CROPS.contains(type)) return false;
+        if (NO_AGE_CROPS.contains(type)) return true;
+
+        if (block.getBlockData() instanceof Ageable ageable) {
+            return ageable.getAge() >= ageable.getMaximumAge();
+        }
+
+        return true;
     }
 
     private void spawnDragonTrailParticles() {

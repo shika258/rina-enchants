@@ -219,12 +219,9 @@ public class EnderDragonBreathEnchant implements HoeEnchant, Listener {
             showParticles, clientSideOnly
         );
 
-        // Callback quand une culture est récoltée
+        // Callback quand une culture est récoltée (déjà vérifiée comme mature par l'animation)
         animation.setOnCropHit((cropLoc) -> {
-            Block block = cropLoc.getBlock();
-            if (isMatureCrop(block)) {
-                plugin.safeBreakCrop(player, cropLoc, "ender-dragon-breath");
-            }
+            plugin.safeBreakCrop(player, cropLoc, "ender-dragon-breath");
         });
 
         // Callback nuage de souffle
