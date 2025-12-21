@@ -6,7 +6,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.data.Ageable;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Frog;
-import org.bukkit.entity.MagmaCube;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
@@ -318,19 +317,7 @@ public class FrogTongueAnimation {
         private void updateFrog(FrogInstance frog, World world) {
             frog.ticksSinceLastLick++;
 
-            // ═══════════════════════════════════════════════════════════
-            // Téléporter la grenouille à sa position de spawn pour éviter qu'elle se déplace
-            // ═══════════════════════════════════════════════════════════
-
-            Location frogPos = frog.spawnLocation;
-            Location currentLoc = frog.entity.getLocation();
-
-            // Si la grenouille s'est trop éloignée, la ramener
-            if (currentLoc.distanceSquared(frogPos) > 1.0) {
-                Location teleportLoc = frogPos.clone();
-                teleportLoc.setDirection(currentLoc.getDirection()); // Garder l'orientation
-                frog.entity.teleport(teleportLoc);
-            }
+            Location frogPos = frog.entity.getLocation();
 
             // ═══════════════════════════════════════════════════════════
             // TIR DE LANGUE vers les cultures (animation native)
@@ -392,7 +379,7 @@ public class FrogTongueAnimation {
         }
 
         /**
-         * Tire une langue vers une cible en utilisant l'animation native de la grenouille
+         * Tire une langue vers une cible
          */
         private void fireTongue(FrogInstance frog, Location from, Location to, World world) {
             String key = to.getBlockX() + ":" + to.getBlockY() + ":" + to.getBlockZ();
@@ -402,35 +389,24 @@ public class FrogTongueAnimation {
             // Vérifier le combo (zone)
             checkAndTriggerCombo(to);
 
-            // Créer un MagmaCube temporaire invisible comme cible pour l'animation
+            // Orienter la grenouille vers la cible
             Location targetLoc = to.clone().add(0.5, 0.5, 0.5);
-            MagmaCube targetEntity = (MagmaCube) world.spawnEntity(targetLoc, EntityType.MAGMA_CUBE);
-            targetEntity.setSize(1);
-            targetEntity.setInvulnerable(true);
-            targetEntity.setAI(false);
-            targetEntity.setGravity(false);
-            targetEntity.setSilent(true);
-            targetEntity.setInvisible(true);
-            targetEntity.setCollidable(false);
-
-            // Marquer pour cleanup
-            plugin.markAsEnchantEntity(targetEntity);
-            if (clientSideOnly) {
-                plugin.makeEntityClientSide(targetEntity, owner);
+            Vector lookDir = targetLoc.toVector().subtract(from.toVector());
+            if (lookDir.lengthSquared() > 0) {
+                Location newLoc = frog.entity.getLocation();
+                newLoc.setDirection(lookDir);
+                frog.entity.teleport(newLoc);
             }
 
-            // Déclencher l'animation native de la langue
-            frog.entity.setTongueTarget(targetEntity);
+            // Son de langue
+            owner.playSound(from, Sound.ENTITY_FROG_EAT, 0.6f, 1.0f);
 
-            // Supprimer le MagmaCube après l'animation et récolter
+            // Récolter après un petit délai
             Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                targetEntity.remove();
-
-                // Callback pour récolter
                 if (onCropHit != null) {
                     onCropHit.accept(to);
                 }
-            }, 10L);
+            }, 5L);
 
             // Si cette grenouille a le rebond, chercher une 2ème cible
             if (frog.type.hasBounce) {
@@ -441,39 +417,21 @@ public class FrogTongueAnimation {
                         harvestedBlocks.add(bounceKey);
                         totalCropsHarvested++;
 
-                        // Créer un second MagmaCube pour le rebond
-                        Location bounceTargetLoc = bounceTarget.clone().add(0.5, 0.5, 0.5);
-                        MagmaCube bounceEntity = (MagmaCube) world.spawnEntity(bounceTargetLoc, EntityType.MAGMA_CUBE);
-                        bounceEntity.setSize(1);
-                        bounceEntity.setInvulnerable(true);
-                        bounceEntity.setAI(false);
-                        bounceEntity.setGravity(false);
-                        bounceEntity.setSilent(true);
-                        bounceEntity.setInvisible(true);
-                        bounceEntity.setCollidable(false);
-                        plugin.markAsEnchantEntity(bounceEntity);
-                        if (clientSideOnly) {
-                            plugin.makeEntityClientSide(bounceEntity, owner);
-                        }
-
                         // Orienter la grenouille vers la nouvelle cible
-                        Vector lookDir = bounceTargetLoc.toVector().subtract(from.toVector());
-                        if (lookDir.lengthSquared() > 0) {
+                        Location bounceTargetLoc = bounceTarget.clone().add(0.5, 0.5, 0.5);
+                        Vector bounceLookDir = bounceTargetLoc.toVector().subtract(from.toVector());
+                        if (bounceLookDir.lengthSquared() > 0) {
                             Location newLoc = frog.entity.getLocation();
-                            newLoc.setDirection(lookDir);
+                            newLoc.setDirection(bounceLookDir);
                             frog.entity.teleport(newLoc);
                         }
 
-                        // Déclencher l'animation de rebond
-                        frog.entity.setTongueTarget(bounceEntity);
-
-                        // Supprimer et récolter
+                        // Récolter le rebond
                         Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                            bounceEntity.remove();
                             if (onCropHit != null) {
                                 onCropHit.accept(bounceTarget);
                             }
-                        }, 10L);
+                        }, 5L);
 
                         owner.playSound(bounceTargetLoc, Sound.ENTITY_FROG_EAT, 0.6f, 1.5f);
                     }
@@ -508,7 +466,6 @@ public class FrogTongueAnimation {
                     owner.spawnParticle(Particle.TOTEM_OF_UNDYING, comboLoc, 15, 0.5, 0.5, 0.5, 0.3);
                 }
 
-                owner.playSound(target, Sound.ENTITY_PLAYER_LEVELUP, 0.8f, 1.5f);
                 owner.playSound(target, Sound.ENTITY_FROG_EAT, 1.0f, 0.8f);
 
                 // Reset la zone pour permettre un nouveau combo
