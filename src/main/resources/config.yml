@@ -45,14 +45,14 @@ bee-collector:
   #                         PARAMÈTRES DE BASE
   # ─────────────────────────────────────────────────────────────────
 
-  # Rayon de base (blocs). Rayon réel = radius + (niveau / 3)
-  radius: 3
-  
+  # Rayon de base (blocs). Rayon réel = radius + (niveau / 2)
+  radius: 5
+
   # Nombre d'abeilles de base. Réel = bee-count + (niveau / 2)
-  bee-count: 3
-  
-  # Max cultures par activation. Réel = max-crops + (niveau * 2)
-  max-crops: 10
+  bee-count: 5
+
+  # Max cultures par activation. Réel = max-crops + (niveau * 3)
+  max-crops: 20
   
   # ─────────────────────────────────────────────────────────────────
   #                         EFFETS
@@ -290,9 +290,9 @@ allay-laser:
 # ═══════════════════════════════════════════════════════════════════
 #
 # BEE COLLECTOR (max level 10):
-#   Niveau 1:  Rayon 3, 3 abeilles, max 12 cultures
-#   Niveau 5:  Rayon 4, 5 abeilles, max 20 cultures
-#   Niveau 10: Rayon 6, 8 abeilles, max 30 cultures
+#   Niveau 1:  Rayon 5, 5 abeilles, max 23 cultures
+#   Niveau 5:  Rayon 7, 7 abeilles, max 35 cultures
+#   Niveau 10: Rayon 10, 10 abeilles, max 50 cultures
 #
 # PANDA ROLL (combo-chance-per-level: 0.25):
 #   Niveau 1:   0.25% chance de combo

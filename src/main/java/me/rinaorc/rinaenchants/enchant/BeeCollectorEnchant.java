@@ -147,10 +147,10 @@ public class BeeCollectorEnchant implements HoeEnchant, Listener {
         boolean playSound = plugin.getConfig().getBoolean("bee-collector.sound", true);
         boolean clientSideOnly = plugin.getConfig().getBoolean("bee-collector.client-side-only", true);
         
-        // Bonus basé sur le niveau de l'enchant
-        int radius = baseRadius + (int)(enchantLevel / 3);
+        // Bonus basé sur le niveau de l'enchant (amélioré pour récolter plus)
+        int radius = baseRadius + (int)(enchantLevel / 2);
         int beeCount = baseBeeCount + (int)(enchantLevel / 2);
-        int maxCropsToHarvest = maxCrops + (int)(enchantLevel * 2);
+        int maxCropsToHarvest = maxCrops + (int)(enchantLevel * 3);
 
         // Trouver les cultures matures à proximité
         List<Location> matureCrops = findMatureCrops(cropLocation, radius, maxCropsToHarvest);
