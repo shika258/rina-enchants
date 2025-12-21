@@ -7,6 +7,7 @@ import me.rinaorc.rinaenchants.enchant.BlizzardEnchant;
 import me.rinaorc.rinaenchants.enchant.FrogTongueLashEnchant;
 import me.rinaorc.rinaenchants.enchant.PandaRollEnchant;
 import me.rinaorc.rinaenchants.enchant.RavagerStampedeEnchant;
+import me.rinaorc.rinaenchants.enchant.WardenPulseEnchant;
 import me.rinaorc.rinaenchants.listener.CyberLevelXPListener;
 import me.rivaldev.harvesterhoes.api.events.HoeEnchant;
 import me.rivaldev.harvesterhoes.api.events.RivalBlockBreakEvent;
@@ -206,6 +207,17 @@ public class RinaEnchantsPlugin extends JavaPlugin implements Listener {
             registeredEnchants.add(frogEnchant);
 
             getLogger().info("§a✓ Enchantement Frog Tongue Lash enregistré!");
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // ENCHANTEMENT WARDEN PULSE
+        // ═══════════════════════════════════════════════════════════
+        if (getConfig().getBoolean("warden-pulse.enabled", true)) {
+            WardenPulseEnchant wardenEnchant = new WardenPulseEnchant(this);
+            hoesAPI.registerEnchant(wardenEnchant);
+            registeredEnchants.add(wardenEnchant);
+
+            getLogger().info("§8✓ Enchantement Warden Pulse enregistré!");
         }
 
         getLogger().info("§a✓ " + registeredEnchants.size() + " enchantement(s) chargé(s)!");

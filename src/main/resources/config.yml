@@ -604,10 +604,102 @@ frog-tongue-lash:
 
 
 # ═══════════════════════════════════════════════════════════════════
-#                   CONFIGURATION FROG TONGUE LASH
+#                  🔊 WARDEN PULSE / ONDE DU WARDEN
+# ═══════════════════════════════════════════════════════════════════
+# Le Warden émerge du sol et émet des ondes soniques concentriques
+# qui récoltent les cultures en vagues successives!
+#
+# MÉCANIQUE:
+# 1. ÉMERGENCE - Le Warden sort du sol avec animation sculk
+# 2. PULSES - Ondes soniques concentriques qui s'étendent
+# 3. RÉSONANCE - Zone touchée 2+ fois = bonus!
+#
+# L'effet est purement visuel: les cercles de particules sculk
+# s'étendent et récoltent tout sur leur passage.
+#
+# SCALING (2000 niveaux max):
+# - Nombre de pulses: 3 → 10
+# - Rayon max: 8 → 25 blocs
+# - Intervalle: 1.5s → 0.5s (plus rapide)
+# - Vitesse d'expansion: 8 → 20 blocs/s
+
+warden-pulse:
+
+  enabled: true
+  enchant-id: "warden_pulse"
+
+  # XP CyberLevel par culture récoltée
+  cyber-level-xp-per-block: 225
+
+  # Visible uniquement par le joueur (recommandé pour 500+ joueurs)
+  client-side-only: true
+
+  # ─────────────────────────────────────────────────────────────────
+  #                         PARAMÈTRES DE BASE
+  # ─────────────────────────────────────────────────────────────────
+
+  # Niveau maximum (2000 recommandé pour cet enchantement)
+  max-level: 2000
+
+  # ─────────────────────────────────────────────────────────────────
+  #                      NOMBRE DE PULSES
+  # ─────────────────────────────────────────────────────────────────
+  # Nombre d'ondes soniques émises par le Warden
+
+  base-pulse-count: 3
+  max-pulse-count: 10
+
+  # ─────────────────────────────────────────────────────────────────
+  #                      INTERVALLE ENTRE PULSES (ticks)
+  # ─────────────────────────────────────────────────────────────────
+  # Temps entre chaque émission de pulse
+  # Plus le niveau est haut, plus les pulses sont rapprochés
+
+  base-pulse-interval: 30
+  min-pulse-interval: 10
+
+  # ─────────────────────────────────────────────────────────────────
+  #                      RAYON MAXIMUM DES PULSES
+  # ─────────────────────────────────────────────────────────────────
+  # Distance maximale atteinte par chaque onde sonique (en blocs)
+
+  base-max-radius: 8
+  max-max-radius: 25
+
+  # ─────────────────────────────────────────────────────────────────
+  #                      VITESSE D'EXPANSION (blocs/seconde)
+  # ─────────────────────────────────────────────────────────────────
+  # Vitesse à laquelle les ondes se propagent
+
+  base-expand-speed: 8
+  max-expand-speed: 20
+
+  # ─────────────────────────────────────────────────────────────────
+  #                         EFFETS
+  # ─────────────────────────────────────────────────────────────────
+
+  particles: true
+  sound: true
+
+  # Message de début (quand le Warden émerge)
+  start-message: true
+  start-message-text: "&8&l🔊 &7Le &8Warden &7émerge des profondeurs..."
+
+  # Message de fin (statistiques de récolte)
+  message: true
+  message-text: "&8&l🔊 &7Les ondes du Warden ont récolté &8{count} &7cultures!"
+  resonance-suffix: " &7(&5{resonances} résonances&7)"
+
+  # Message de résonance (affiché toutes les 5 résonances)
+  resonance-message: true
+  resonance-message-text: "&8&l🔊 &5RÉSONANCE! &7x{count}"
+
+
+# ═══════════════════════════════════════════════════════════════════
+#                   CONFIGURATION RIVALHARVESTERHOES
 # ═══════════════════════════════════════════════════════════════════
 #
-# Pour RivalHarvesterHoes enchants.yml:
+# Pour RivalHarvesterHoes enchants.yml, ajoutez:
 #
 # frog_tongue_lash:
 #   enabled: true
@@ -621,5 +713,18 @@ frog-tongue-lash:
 #   base-chance: 2.0
 #   cost-per-level: 2000
 #   base-cost: 4000
+#
+# warden_pulse:
+#   enabled: true
+#   name: "&8🔊 Onde du Warden"
+#   description:
+#     - "&7Le Warden émet des ondes soniques"
+#     - "&7qui récoltent tout sur leur passage!"
+#     - "&5Système de résonance inclus!"
+#   max-level: 2000
+#   chance-per-level: 0.05
+#   base-chance: 1.0
+#   cost-per-level: 500
+#   base-cost: 5000
 #
 # ═══════════════════════════════════════════════════════════════════
