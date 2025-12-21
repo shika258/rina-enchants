@@ -318,19 +318,7 @@ public class FrogTongueAnimation {
         private void updateFrog(FrogInstance frog, World world) {
             frog.ticksSinceLastLick++;
 
-            // ═══════════════════════════════════════════════════════════
-            // Téléporter la grenouille à sa position de spawn pour éviter qu'elle se déplace
-            // ═══════════════════════════════════════════════════════════
-
-            Location frogPos = frog.spawnLocation;
-            Location currentLoc = frog.entity.getLocation();
-
-            // Si la grenouille s'est trop éloignée, la ramener
-            if (currentLoc.distanceSquared(frogPos) > 1.0) {
-                Location teleportLoc = frogPos.clone();
-                teleportLoc.setDirection(currentLoc.getDirection()); // Garder l'orientation
-                frog.entity.teleport(teleportLoc);
-            }
+            Location frogPos = frog.entity.getLocation();
 
             // ═══════════════════════════════════════════════════════════
             // TIR DE LANGUE vers les cultures (animation native)
