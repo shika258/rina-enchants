@@ -9,6 +9,7 @@ import me.rinaorc.rinaenchants.enchant.GolemFactoryEnchant;
 import me.rinaorc.rinaenchants.enchant.PandaRollEnchant;
 import me.rinaorc.rinaenchants.enchant.RavagerStampedeEnchant;
 import me.rinaorc.rinaenchants.enchant.WardenPulseEnchant;
+import me.rinaorc.rinaenchants.enchant.AxolotlTsunamiEnchant;
 import me.rinaorc.rinaenchants.listener.CyberLevelXPListener;
 import me.rivaldev.harvesterhoes.api.events.HoeEnchant;
 import me.rivaldev.harvesterhoes.api.events.RivalBlockBreakEvent;
@@ -230,6 +231,17 @@ public class RinaEnchantsPlugin extends JavaPlugin implements Listener {
             registeredEnchants.add(golemEnchant);
 
             getLogger().info("§7✓ Enchantement Golem Factory enregistré!");
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // ENCHANTEMENT AXOLOTL TSUNAMI
+        // ═══════════════════════════════════════════════════════════
+        if (getConfig().getBoolean("axolotl-tsunami.enabled", true)) {
+            AxolotlTsunamiEnchant axolotlEnchant = new AxolotlTsunamiEnchant(this);
+            hoesAPI.registerEnchant(axolotlEnchant);
+            registeredEnchants.add(axolotlEnchant);
+
+            getLogger().info("§b✓ Enchantement Axolotl Tsunami enregistré!");
         }
 
         getLogger().info("§a✓ " + registeredEnchants.size() + " enchantement(s) chargé(s)!");
