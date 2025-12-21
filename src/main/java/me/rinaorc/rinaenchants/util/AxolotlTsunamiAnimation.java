@@ -232,10 +232,10 @@ public class AxolotlTsunamiAnimation {
 
                 // Effet de spawn
                 if (showParticles) {
-                    owner.spawnParticle(Particle.SPLASH, spawnLoc, 10, 0.3, 0.2, 0.3, 0.1);
+                    owner.spawnParticle(Particle.SPLASH, spawnLoc, 5, 0.3, 0.2, 0.3, 0.1);
                     if (instance.isBlue) {
                         // Effet spécial pour le bleu (rare!)
-                        owner.spawnParticle(Particle.END_ROD, spawnLoc.clone().add(0, 0.5, 0), 10, 0.2, 0.2, 0.2, 0.05);
+                        owner.spawnParticle(Particle.END_ROD, spawnLoc.clone().add(0, 0.5, 0), 5, 0.2, 0.2, 0.2, 0.05);
                     }
                 }
 
@@ -255,11 +255,11 @@ public class AxolotlTsunamiAnimation {
 
         // Effet de vague au départ
         if (showParticles) {
-            for (int i = 0; i < 20; i++) {
+            for (int i = 0; i < 10; i++) {
                 Location waveLoc = waveStart.clone().add(
                     perpendicular.clone().multiply((random.nextDouble() - 0.5) * waveWidth)
                 );
-                owner.spawnParticle(Particle.SPLASH, waveLoc.clone().add(0, 0.5, 0), 5, 0.3, 0.2, 0.3, 0.1);
+                owner.spawnParticle(Particle.SPLASH, waveLoc.clone().add(0, 0.5, 0), 3, 0.3, 0.2, 0.3, 0.1);
             }
         }
 
@@ -348,9 +348,9 @@ public class AxolotlTsunamiAnimation {
             // ═══════════════════════════════════════════════════════════
             // PARTICULES DE VAGUE
             // ═══════════════════════════════════════════════════════════
-            if (showParticles && ticksAlive % 2 == 0) {
-                // Ligne de vague avec mouvement ondulé
-                for (int i = 0; i < waveWidth; i++) {
+            if (showParticles && ticksAlive % 3 == 0) {
+                // Ligne de vague avec mouvement ondulé (un point sur 2)
+                for (int i = 0; i < waveWidth; i += 2) {
                     double offset = -waveWidth / 2.0 + i;
                     double waveHeight = Math.sin(wavePhase + i * 0.5) * 0.3 + 0.5;
 
@@ -359,21 +359,21 @@ public class AxolotlTsunamiAnimation {
                         .add(0, waveHeight, 0);
 
                     // Particules d'eau
-                    owner.spawnParticle(Particle.SPLASH, waveLoc, 2, 0.1, 0.1, 0.1, 0.05);
+                    owner.spawnParticle(Particle.SPLASH, waveLoc, 1, 0.1, 0.1, 0.1, 0.05);
 
                     // Écume (moins fréquent)
-                    if (i % 3 == 0) {
+                    if (i % 4 == 0) {
                         Particle.DustOptions foam = new Particle.DustOptions(FOAM_WHITE, 1.0f);
                         owner.spawnParticle(Particle.DUST, waveLoc.clone().add(0, 0.2, 0), 1, 0.1, 0.1, 0.1, 0, foam);
                     }
                 }
 
                 // Bulles derrière la vague
-                if (ticksAlive % 4 == 0) {
+                if (ticksAlive % 6 == 0) {
                     Location bubbleLoc = waveCenter.clone()
                         .add(direction.clone().multiply(-1))
                         .add(perpendicular.clone().multiply((random.nextDouble() - 0.5) * waveWidth));
-                    owner.spawnParticle(Particle.BUBBLE_POP, bubbleLoc, 3, 0.3, 0.2, 0.3, 0.02);
+                    owner.spawnParticle(Particle.BUBBLE_POP, bubbleLoc, 2, 0.3, 0.2, 0.3, 0.02);
                 }
             }
 
@@ -434,7 +434,7 @@ public class AxolotlTsunamiAnimation {
 
                 // Effet visuel
                 if (showParticles) {
-                    owner.spawnParticle(Particle.HEART, targetLoc.clone().add(0, 0.5, 0), 3, 0.2, 0.2, 0.2, 0);
+                    owner.spawnParticle(Particle.HEART, targetLoc.clone().add(0, 0.5, 0), 2, 0.2, 0.2, 0.2, 0);
                 }
                 owner.playSound(targetLoc, Sound.ENTITY_AXOLOTL_HURT, 0.5f, 1.5f);
             }
@@ -474,14 +474,14 @@ public class AxolotlTsunamiAnimation {
                                 // Effet spécial bleu
                                 if (showParticles) {
                                     owner.spawnParticle(Particle.END_ROD,
-                                        blockLoc.clone().add(0.5, 0.5, 0.5), 3, 0.1, 0.1, 0.1, 0.02);
+                                        blockLoc.clone().add(0.5, 0.5, 0.5), 2, 0.1, 0.1, 0.1, 0.02);
                                 }
                             }
 
                             // Effet de récolte
                             if (showParticles) {
                                 owner.spawnParticle(Particle.SPLASH,
-                                    blockLoc.clone().add(0.5, 0.5, 0.5), 5, 0.2, 0.2, 0.2, 0.05);
+                                    blockLoc.clone().add(0.5, 0.5, 0.5), 2, 0.2, 0.2, 0.2, 0.05);
                             }
                         }
                     }
@@ -489,13 +489,13 @@ public class AxolotlTsunamiAnimation {
             }
 
             // Particules autour de l'axolotl
-            if (showParticles && ticksAlive % 3 == 0) {
-                owner.spawnParticle(Particle.SPLASH, targetLoc, 2, 0.2, 0.1, 0.2, 0.02);
+            if (showParticles && ticksAlive % 5 == 0) {
+                owner.spawnParticle(Particle.SPLASH, targetLoc, 1, 0.2, 0.1, 0.2, 0.02);
 
                 // Particules spéciales pour le bleu
-                if (axolotl.isBlue && ticksAlive % 6 == 0) {
+                if (axolotl.isBlue && ticksAlive % 10 == 0) {
                     Particle.DustOptions blueDust = new Particle.DustOptions(WAVE_CYAN, 1.2f);
-                    owner.spawnParticle(Particle.DUST, targetLoc.clone().add(0, 0.3, 0), 3, 0.2, 0.2, 0.2, 0, blueDust);
+                    owner.spawnParticle(Particle.DUST, targetLoc.clone().add(0, 0.3, 0), 2, 0.2, 0.2, 0.2, 0, blueDust);
                 }
             }
         }
@@ -506,8 +506,8 @@ public class AxolotlTsunamiAnimation {
                     Location loc = axolotl.entity.getLocation();
 
                     if (showParticles && owner.isOnline()) {
-                        owner.spawnParticle(Particle.SPLASH, loc, 15, 0.3, 0.3, 0.3, 0.1);
-                        owner.spawnParticle(Particle.BUBBLE_POP, loc, 10, 0.2, 0.2, 0.2, 0.05);
+                        owner.spawnParticle(Particle.SPLASH, loc, 8, 0.3, 0.3, 0.3, 0.1);
+                        owner.spawnParticle(Particle.BUBBLE_POP, loc, 5, 0.2, 0.2, 0.2, 0.05);
                     }
 
                     axolotl.entity.remove();

@@ -223,9 +223,9 @@ public class FrogTongueAnimation {
 
                 // Effet de spawn
                 if (showParticles) {
-                    owner.spawnParticle(Particle.HAPPY_VILLAGER, spawnLoc, 10, 0.3, 0.3, 0.3, 0);
+                    owner.spawnParticle(Particle.HAPPY_VILLAGER, spawnLoc, 5, 0.3, 0.3, 0.3, 0);
                     Particle.DustOptions dust = new Particle.DustOptions(type.tongueColor, 1.5f);
-                    owner.spawnParticle(Particle.DUST, spawnLoc.clone().add(0, 0.5, 0), 15, 0.3, 0.3, 0.3, 0, dust);
+                    owner.spawnParticle(Particle.DUST, spawnLoc.clone().add(0, 0.5, 0), 8, 0.3, 0.3, 0.3, 0, dust);
                 }
 
             } catch (Exception e) {
@@ -415,7 +415,7 @@ public class FrogTongueAnimation {
 
                         // Effet spécial de rebond
                         if (showParticles) {
-                            owner.spawnParticle(Particle.ENCHANT, to.clone().add(0.5, 0.5, 0.5), 15, 0.3, 0.3, 0.3, 0.5);
+                            owner.spawnParticle(Particle.ENCHANT, to.clone().add(0.5, 0.5, 0.5), 8, 0.3, 0.3, 0.3, 0.5);
                         }
                         owner.playSound(to, Sound.ENTITY_SLIME_SQUISH, 0.6f, 1.5f);
                     }
@@ -447,7 +447,7 @@ public class FrogTongueAnimation {
                 // Effet de combo spectaculaire
                 if (showParticles) {
                     Location comboLoc = target.clone().add(0.5, 0.5, 0.5);
-                    owner.spawnParticle(Particle.TOTEM_OF_UNDYING, comboLoc, 30, 0.5, 0.5, 0.5, 0.3);
+                    owner.spawnParticle(Particle.TOTEM_OF_UNDYING, comboLoc, 15, 0.5, 0.5, 0.5, 0.3);
                     owner.spawnParticle(Particle.FLASH, comboLoc, 1, 0, 0, 0, 0);
                 }
 
@@ -466,8 +466,8 @@ public class FrogTongueAnimation {
 
                     if (showParticles && owner.isOnline()) {
                         Particle.DustOptions dust = new Particle.DustOptions(frog.type.tongueColor, 1.5f);
-                        owner.spawnParticle(Particle.DUST, loc, 20, 0.4, 0.4, 0.4, 0, dust);
-                        owner.spawnParticle(Particle.POOF, loc, 15, 0.3, 0.3, 0.3, 0.1);
+                        owner.spawnParticle(Particle.DUST, loc, 10, 0.4, 0.4, 0.4, 0, dust);
+                        owner.spawnParticle(Particle.POOF, loc, 8, 0.3, 0.3, 0.3, 0.1);
                     }
 
                     frog.entity.remove();
@@ -559,8 +559,8 @@ public class FrogTongueAnimation {
 
                 // À l'extension maximale, effet d'impact
                 if (tick == EXTEND_TICKS) {
-                    owner.spawnParticle(Particle.HAPPY_VILLAGER, to, 8, 0.2, 0.2, 0.2, 0);
-                    owner.spawnParticle(Particle.ITEM_SLIME, to, 5, 0.2, 0.2, 0.2, 0.1);
+                    owner.spawnParticle(Particle.HAPPY_VILLAGER, to, 4, 0.2, 0.2, 0.2, 0);
+                    owner.spawnParticle(Particle.ITEM_SLIME, to, 3, 0.2, 0.2, 0.2, 0.1);
                 }
             }
 

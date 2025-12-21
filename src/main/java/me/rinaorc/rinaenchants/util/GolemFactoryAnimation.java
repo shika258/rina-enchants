@@ -210,8 +210,8 @@ public class GolemFactoryAnimation {
                 // Effet de spawn
                 if (showParticles) {
                     Particle.DustOptions dust = new Particle.DustOptions(IRON_GRAY, 2.0f);
-                    owner.spawnParticle(Particle.DUST, spawnLoc.clone().add(0, 0.5, 0), 15, 0.3, 0.3, 0.3, 0, dust);
-                    owner.spawnParticle(Particle.BLOCK, spawnLoc, 10, 0.3, 0.1, 0.3, 0.1,
+                    owner.spawnParticle(Particle.DUST, spawnLoc.clone().add(0, 0.5, 0), 8, 0.3, 0.3, 0.3, 0, dust);
+                    owner.spawnParticle(Particle.BLOCK, spawnLoc, 5, 0.3, 0.1, 0.3, 0.1,
                         Material.IRON_BLOCK.createBlockData());
                 }
 
@@ -354,8 +354,8 @@ public class GolemFactoryAnimation {
             // EFFETS VISUELS DE MARCHE
             // ═══════════════════════════════════════════════════════════
 
-            if (showParticles && ticksAlive % 5 == 0) {
-                owner.spawnParticle(Particle.BLOCK, currentLoc, 2, 0.2, 0, 0.2, 0,
+            if (showParticles && ticksAlive % 8 == 0) {
+                owner.spawnParticle(Particle.BLOCK, currentLoc, 1, 0.2, 0, 0.2, 0,
                     Material.IRON_BLOCK.createBlockData());
             }
         }
@@ -387,7 +387,7 @@ public class GolemFactoryAnimation {
 
                             if (showParticles) {
                                 owner.spawnParticle(Particle.HAPPY_VILLAGER,
-                                    blockLoc.clone().add(0.5, 0.5, 0.5), 5, 0.2, 0.2, 0.2, 0);
+                                    blockLoc.clone().add(0.5, 0.5, 0.5), 2, 0.2, 0.2, 0.2, 0);
                             }
                         }
                     }
@@ -431,8 +431,8 @@ public class GolemFactoryAnimation {
             // Effet de fusion
             if (showParticles) {
                 Particle.DustOptions goldDust = new Particle.DustOptions(MERGE_GOLD, 2.0f);
-                owner.spawnParticle(Particle.DUST, mergeLoc.clone().add(0, 1, 0), 30, 0.5, 0.5, 0.5, 0, goldDust);
-                owner.spawnParticle(Particle.TOTEM_OF_UNDYING, mergeLoc.clone().add(0, 1, 0), 20, 0.3, 0.3, 0.3, 0.2);
+                owner.spawnParticle(Particle.DUST, mergeLoc.clone().add(0, 1, 0), 15, 0.5, 0.5, 0.5, 0, goldDust);
+                owner.spawnParticle(Particle.TOTEM_OF_UNDYING, mergeLoc.clone().add(0, 1, 0), 10, 0.3, 0.3, 0.3, 0.2);
                 owner.spawnParticle(Particle.FLASH, mergeLoc.clone().add(0, 1, 0), 1, 0, 0, 0, 0);
             }
 
@@ -493,9 +493,9 @@ public class GolemFactoryAnimation {
 
                 // Effet d'apparition du géant
                 if (showParticles) {
-                    owner.spawnParticle(Particle.EXPLOSION, loc.clone().add(0, 1.5, 0), 3, 0.5, 0.5, 0.5, 0);
+                    owner.spawnParticle(Particle.EXPLOSION, loc.clone().add(0, 1.5, 0), 2, 0.5, 0.5, 0.5, 0);
                     Particle.DustOptions ironDust = new Particle.DustOptions(IRON_GRAY, 3.0f);
-                    owner.spawnParticle(Particle.DUST, loc.clone().add(0, 1, 0), 40, 0.8, 0.8, 0.8, 0, ironDust);
+                    owner.spawnParticle(Particle.DUST, loc.clone().add(0, 1, 0), 20, 0.8, 0.8, 0.8, 0, ironDust);
                 }
 
                 owner.playSound(loc, Sound.ENTITY_IRON_GOLEM_HURT, 1.0f, 0.5f);
@@ -529,15 +529,15 @@ public class GolemFactoryAnimation {
                     Bukkit.getScheduler().runTaskLater(plugin, () -> {
                         if (!owner.isOnline()) return;
 
-                        int points = radius * 8;
+                        int points = radius * 4;
                         for (int i = 0; i < points; i++) {
                             double angle = (Math.PI * 2 / points) * i;
                             Location ringLoc = slamLoc.clone().add(
                                 Math.cos(angle) * radius, 0.1, Math.sin(angle) * radius
                             );
-                            owner.spawnParticle(Particle.BLOCK, ringLoc, 3, 0.1, 0.1, 0.1, 0.1,
+                            owner.spawnParticle(Particle.BLOCK, ringLoc, 2, 0.1, 0.1, 0.1, 0.1,
                                 Material.DIRT.createBlockData());
-                            owner.spawnParticle(Particle.DUST, ringLoc, 2, 0.1, 0.1, 0.1, 0,
+                            owner.spawnParticle(Particle.DUST, ringLoc, 1, 0.1, 0.1, 0.1, 0,
                                 new Particle.DustOptions(IRON_DARK, 1.5f));
                         }
                     }, (r - 1) * 2L);
@@ -545,7 +545,7 @@ public class GolemFactoryAnimation {
 
                 // Impact central
                 owner.spawnParticle(Particle.EXPLOSION, slamLoc, 1, 0, 0, 0, 0);
-                owner.spawnParticle(Particle.BLOCK, slamLoc, 30, 0.5, 0.2, 0.5, 0.2,
+                owner.spawnParticle(Particle.BLOCK, slamLoc, 15, 0.5, 0.2, 0.5, 0.2,
                     Material.IRON_BLOCK.createBlockData());
             }
 
@@ -587,8 +587,8 @@ public class GolemFactoryAnimation {
                 if (giant.entity != null && !giant.entity.isDead()) {
                     if (showParticles && owner.isOnline()) {
                         Location loc = giant.entity.getLocation();
-                        owner.spawnParticle(Particle.POOF, loc.clone().add(0, 1, 0), 30, 0.5, 1, 0.5, 0.1);
-                        owner.spawnParticle(Particle.BLOCK, loc, 20, 0.5, 0.5, 0.5, 0.1,
+                        owner.spawnParticle(Particle.POOF, loc.clone().add(0, 1, 0), 15, 0.5, 1, 0.5, 0.1);
+                        owner.spawnParticle(Particle.BLOCK, loc, 10, 0.5, 0.5, 0.5, 0.1,
                             Material.IRON_BLOCK.createBlockData());
                     }
                     giant.entity.remove();
@@ -603,8 +603,8 @@ public class GolemFactoryAnimation {
                     Location loc = golem.entity.getLocation();
 
                     if (showParticles && owner.isOnline()) {
-                        owner.spawnParticle(Particle.POOF, loc.clone().add(0, 0.5, 0), 15, 0.3, 0.3, 0.3, 0.1);
-                        owner.spawnParticle(Particle.BLOCK, loc, 10, 0.3, 0.3, 0.3, 0.1,
+                        owner.spawnParticle(Particle.POOF, loc.clone().add(0, 0.5, 0), 8, 0.3, 0.3, 0.3, 0.1);
+                        owner.spawnParticle(Particle.BLOCK, loc, 5, 0.3, 0.3, 0.3, 0.1,
                             Material.IRON_BLOCK.createBlockData());
                     }
 

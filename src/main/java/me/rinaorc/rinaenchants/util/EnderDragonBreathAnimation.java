@@ -249,17 +249,17 @@ public class EnderDragonBreathAnimation {
         // Effets visuels du souffle
         if (showParticles) {
             // Particules de dragon breath
-            for (int i = 0; i < 30; i++) {
+            for (int i = 0; i < 15; i++) {
                 double offsetX = (random.nextDouble() - 0.5) * breathRadius * 2;
                 double offsetZ = (random.nextDouble() - 0.5) * breathRadius * 2;
                 Location particleLoc = breathLoc.clone().add(offsetX, 0.5, offsetZ);
 
-                player.spawnParticle(Particle.DRAGON_BREATH, particleLoc, 3, 0.2, 0.2, 0.2, 0.01);
+                player.spawnParticle(Particle.DRAGON_BREATH, particleLoc, 2, 0.2, 0.2, 0.2, 0.01);
             }
 
             // Nuage violet au centre
             player.spawnParticle(Particle.ENTITY_EFFECT, breathLoc.clone().add(0, 0.5, 0),
-                20, breathRadius * 0.5, 0.3, breathRadius * 0.5, 0);
+                10, breathRadius * 0.5, 0.3, breathRadius * 0.5, 0);
         }
 
         // Son du souffle
@@ -290,7 +290,7 @@ public class EnderDragonBreathAnimation {
 
                 // Particules persistantes
                 if (showParticles) {
-                    for (int i = 0; i < 5; i++) {
+                    for (int i = 0; i < 3; i++) {
                         double offsetX = (random.nextDouble() - 0.5) * breathRadius;
                         double offsetZ = (random.nextDouble() - 0.5) * breathRadius;
                         Location particleLoc = zoneLoc.clone().add(offsetX, 0.3, offsetZ);
@@ -330,7 +330,7 @@ public class EnderDragonBreathAnimation {
                         // Effet visuel de récolte
                         if (showParticles) {
                             player.spawnParticle(Particle.DRAGON_BREATH,
-                                cropLoc.clone().add(0.5, 0.5, 0.5), 3, 0.1, 0.1, 0.1, 0.02);
+                                cropLoc.clone().add(0.5, 0.5, 0.5), 2, 0.1, 0.1, 0.1, 0.02);
                         }
                     }
                 }
@@ -355,7 +355,7 @@ public class EnderDragonBreathAnimation {
         Location dragonLoc = dragon.getLocation();
 
         // Particules violettes derrière le dragon
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 3; i++) {
             double offsetX = (random.nextDouble() - 0.5) * 2;
             double offsetY = (random.nextDouble() - 0.5) * 1;
             double offsetZ = (random.nextDouble() - 0.5) * 2;
@@ -365,7 +365,7 @@ public class EnderDragonBreathAnimation {
         }
 
         // Particules d'End autour du dragon
-        player.spawnParticle(Particle.PORTAL, dragonLoc, 3, 1, 0.5, 1, 0);
+        player.spawnParticle(Particle.PORTAL, dragonLoc, 2, 1, 0.5, 1, 0);
     }
 
     private void performFinalDive() {
@@ -373,13 +373,13 @@ public class EnderDragonBreathAnimation {
             // Explosion de particules finale
             Location dragonLoc = dragon.getLocation();
 
-            for (int i = 0; i < 50; i++) {
+            for (int i = 0; i < 25; i++) {
                 double offsetX = (random.nextDouble() - 0.5) * 4;
                 double offsetY = (random.nextDouble() - 0.5) * 2;
                 double offsetZ = (random.nextDouble() - 0.5) * 4;
 
                 player.spawnParticle(Particle.DRAGON_BREATH, dragonLoc.clone().add(offsetX, offsetY, offsetZ),
-                    2, 0.1, 0.1, 0.1, 0.05);
+                    1, 0.1, 0.1, 0.1, 0.05);
                 player.spawnParticle(Particle.PORTAL, dragonLoc.clone().add(offsetX, offsetY, offsetZ),
                     1, 0, 0, 0, 0.5);
             }
@@ -388,14 +388,14 @@ public class EnderDragonBreathAnimation {
             Location finalBreathLoc = startLocation.clone();
             double finalRadius = breathRadius * 1.5;
 
-            for (int i = 0; i < 60; i++) {
+            for (int i = 0; i < 30; i++) {
                 double angle = random.nextDouble() * Math.PI * 2;
                 double dist = random.nextDouble() * finalRadius;
                 double x = Math.cos(angle) * dist;
                 double z = Math.sin(angle) * dist;
 
                 player.spawnParticle(Particle.DRAGON_BREATH,
-                    finalBreathLoc.clone().add(x, 0.5, z), 2, 0.1, 0.2, 0.1, 0.02);
+                    finalBreathLoc.clone().add(x, 0.5, z), 1, 0.1, 0.2, 0.1, 0.02);
             }
 
             // Récolte finale massive

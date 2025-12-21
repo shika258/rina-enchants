@@ -140,7 +140,7 @@ public class WardenPulseAnimation {
 
         // Effet d'émergence (particules sculk remontant du sol)
         if (showParticles) {
-            for (int i = 0; i < 30; i++) {
+            for (int i = 0; i < 15; i++) {
                 double angle = random.nextDouble() * Math.PI * 2;
                 double dist = random.nextDouble() * 1.5;
                 Location particleLoc = spawnLoc.clone().add(
@@ -150,7 +150,7 @@ public class WardenPulseAnimation {
                 );
                 owner.spawnParticle(Particle.SCULK_SOUL, particleLoc, 1, 0, 0.5, 0, 0.05);
             }
-            owner.spawnParticle(Particle.SCULK_CHARGE_POP, spawnLoc, 20, 0.5, 0.5, 0.5, 0.1);
+            owner.spawnParticle(Particle.SCULK_CHARGE_POP, spawnLoc, 10, 0.5, 0.5, 0.5, 0.1);
         }
 
         // Son d'émergence
@@ -246,20 +246,20 @@ public class WardenPulseAnimation {
                 if (showParticles) {
                     Location wardenLoc = wardenEntity.getLocation();
                     owner.spawnParticle(Particle.SONIC_BOOM, wardenLoc.clone().add(0, 1.5, 0), 1, 0, 0, 0, 0);
-                    owner.spawnParticle(Particle.SCULK_SOUL, wardenLoc, 15, 0.5, 1, 0.5, 0.1);
+                    owner.spawnParticle(Particle.SCULK_SOUL, wardenLoc, 8, 0.5, 1, 0.5, 0.1);
                 }
 
                 owner.playSound(wardenEntity.getLocation(), Sound.ENTITY_WARDEN_SONIC_BOOM, 0.6f, 1.2f);
 
                 // Animation de "roar" visuel (particules autour du Warden)
                 if (showParticles) {
-                    for (int i = 0; i < 8; i++) {
-                        double angle = (Math.PI * 2 / 8) * i;
+                    for (int i = 0; i < 6; i++) {
+                        double angle = (Math.PI * 2 / 6) * i;
                         Location ringLoc = wardenEntity.getLocation().clone().add(
                             Math.cos(angle) * 0.8, 1.5, Math.sin(angle) * 0.8
                         );
                         Particle.DustOptions dust = new Particle.DustOptions(SCULK_BLUE, 1.5f);
-                        owner.spawnParticle(Particle.DUST, ringLoc, 3, 0.1, 0.1, 0.1, 0, dust);
+                        owner.spawnParticle(Particle.DUST, ringLoc, 2, 0.1, 0.1, 0.1, 0, dust);
                     }
                 }
             }
@@ -282,10 +282,10 @@ public class WardenPulseAnimation {
             // AMBIANCE DU WARDEN
             // ═══════════════════════════════════════════════════════════
 
-            if (ticksAlive % 30 == 0 && showParticles) {
+            if (ticksAlive % 40 == 0 && showParticles) {
                 // Particules d'aura sculk autour du Warden
                 Location wardenLoc = wardenEntity.getLocation();
-                for (int i = 0; i < 5; i++) {
+                for (int i = 0; i < 3; i++) {
                     Location auraLoc = wardenLoc.clone().add(
                         (random.nextDouble() - 0.5) * 1.5,
                         random.nextDouble() * 2.5,
@@ -341,8 +341,8 @@ public class WardenPulseAnimation {
 
                 if (showParticles) {
                     // Nombre de points sur le cercle (plus grand rayon = plus de points)
-                    int points = (int) (currentRadius * 8);
-                    points = Math.max(8, Math.min(points, 64));
+                    int points = (int) (currentRadius * 4);
+                    points = Math.max(6, Math.min(points, 32));
 
                     Particle.DustOptions pulseDust = new Particle.DustOptions(SCULK_BLUE, 1.0f);
                     Particle.DustOptions pulseGlow = new Particle.DustOptions(SCULK_DARK, 1.5f);
@@ -419,7 +419,7 @@ public class WardenPulseAnimation {
                                 // Effet de récolte
                                 if (showParticles) {
                                     owner.spawnParticle(Particle.SCULK_CHARGE_POP, blockLoc.clone().add(0.5, 0.5, 0.5),
-                                        5, 0.2, 0.2, 0.2, 0.05);
+                                        2, 0.2, 0.2, 0.2, 0.05);
                                 }
                             }
                         }
@@ -468,17 +468,17 @@ public class WardenPulseAnimation {
 
                 // Explosion de particules cyan
                 Particle.DustOptions resonanceDust = new Particle.DustOptions(RESONANCE_CYAN, 2.0f);
-                owner.spawnParticle(Particle.DUST, effectLoc, 20, 0.3, 0.3, 0.3, 0, resonanceDust);
+                owner.spawnParticle(Particle.DUST, effectLoc, 10, 0.3, 0.3, 0.3, 0, resonanceDust);
 
                 // Cercle de particules
-                for (int i = 0; i < 12; i++) {
-                    double angle = (Math.PI * 2 / 12) * i;
+                for (int i = 0; i < 6; i++) {
+                    double angle = (Math.PI * 2 / 6) * i;
                     Location ringLoc = effectLoc.clone().add(Math.cos(angle) * 0.5, 0, Math.sin(angle) * 0.5);
                     owner.spawnParticle(Particle.END_ROD, ringLoc, 1, 0, 0.5, 0, 0.05);
                 }
 
                 // Particules sculk
-                owner.spawnParticle(Particle.SCULK_SOUL, effectLoc, 10, 0.3, 0.5, 0.3, 0.1);
+                owner.spawnParticle(Particle.SCULK_SOUL, effectLoc, 5, 0.3, 0.5, 0.3, 0.1);
             }
 
             // Son de résonance
@@ -494,15 +494,15 @@ public class WardenPulseAnimation {
 
                 // Effet de disparition (retourne dans le sol)
                 if (showParticles && owner.isOnline()) {
-                    owner.spawnParticle(Particle.SCULK_SOUL, loc, 30, 0.5, 1, 0.5, 0.1);
-                    owner.spawnParticle(Particle.SCULK_CHARGE_POP, loc, 25, 0.5, 0.5, 0.5, 0.1);
+                    owner.spawnParticle(Particle.SCULK_SOUL, loc, 15, 0.5, 1, 0.5, 0.1);
+                    owner.spawnParticle(Particle.SCULK_CHARGE_POP, loc, 12, 0.5, 0.5, 0.5, 0.1);
 
                     // Cercle de disparition
-                    for (int i = 0; i < 16; i++) {
-                        double angle = (Math.PI * 2 / 16) * i;
+                    for (int i = 0; i < 8; i++) {
+                        double angle = (Math.PI * 2 / 8) * i;
                         Location ringLoc = loc.clone().add(Math.cos(angle) * 1.5, 0.1, Math.sin(angle) * 1.5);
                         Particle.DustOptions dust = new Particle.DustOptions(SCULK_DARK, 2.0f);
-                        owner.spawnParticle(Particle.DUST, ringLoc, 3, 0.1, 0, 0.1, 0, dust);
+                        owner.spawnParticle(Particle.DUST, ringLoc, 2, 0.1, 0, 0.1, 0, dust);
                     }
                 }
 
