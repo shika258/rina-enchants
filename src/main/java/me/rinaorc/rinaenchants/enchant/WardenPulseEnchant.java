@@ -151,22 +151,12 @@ public class WardenPulseEnchant implements HoeEnchant, Listener {
         int maxLevel = plugin.getConfig().getInt("warden-pulse.max-level", 2000);
         double levelRatio = Math.min(1.0, (double) enchantLevel / maxLevel);
 
-        // Nombre de pulses émis
-        int basePulseCount = plugin.getConfig().getInt("warden-pulse.base-pulse-count", 3);
-        int maxPulseCount = plugin.getConfig().getInt("warden-pulse.max-pulse-count", 10);
-        int pulseCount = (int) (basePulseCount + levelRatio * (maxPulseCount - basePulseCount));
-
-        // Intervalle entre les pulses (ticks)
-        int basePulseInterval = plugin.getConfig().getInt("warden-pulse.base-pulse-interval", 30);
-        int minPulseInterval = plugin.getConfig().getInt("warden-pulse.min-pulse-interval", 10);
-        int pulseInterval = (int) (basePulseInterval - levelRatio * (basePulseInterval - minPulseInterval));
-
-        // Rayon maximum des pulses
+        // Rayon maximum de l'onde unique
         int baseMaxRadius = plugin.getConfig().getInt("warden-pulse.base-max-radius", 8);
         int maxMaxRadius = plugin.getConfig().getInt("warden-pulse.max-max-radius", 25);
         int maxPulseRadius = (int) (baseMaxRadius + levelRatio * (maxMaxRadius - baseMaxRadius));
 
-        // Vitesse d'expansion des pulses (blocs par seconde)
+        // Vitesse d'expansion de l'onde (blocs par seconde)
         int baseExpandSpeed = plugin.getConfig().getInt("warden-pulse.base-expand-speed", 8);
         int maxExpandSpeed = plugin.getConfig().getInt("warden-pulse.max-expand-speed", 20);
         int pulseExpandSpeed = (int) (baseExpandSpeed + levelRatio * (maxExpandSpeed - baseExpandSpeed));
@@ -176,8 +166,7 @@ public class WardenPulseEnchant implements HoeEnchant, Listener {
         boolean clientSideOnly = plugin.getConfig().getBoolean("warden-pulse.client-side-only", true);
 
         if (debug) {
-            plugin.getLogger().info("§e[DEBUG] WardenPulse - Pulses: " + pulseCount +
-                ", Intervalle: " + pulseInterval + "t, Rayon max: " + maxPulseRadius +
+            plugin.getLogger().info("§e[DEBUG] WardenPulse - Rayon max: " + maxPulseRadius +
                 ", Vitesse: " + pulseExpandSpeed + " blocs/s");
         }
 
@@ -196,12 +185,12 @@ public class WardenPulseEnchant implements HoeEnchant, Listener {
         }
 
         // ═══════════════════════════════════════════════════════════
-        // CRÉER L'ANIMATION DU WARDEN
+        // CRÉER L'ANIMATION DU WARDEN (onde unique avec glowing cyan)
         // ═══════════════════════════════════════════════════════════
 
         WardenPulseAnimation animation = new WardenPulseAnimation(
             plugin, cropLocation, player,
-            pulseCount, pulseInterval, maxPulseRadius, pulseExpandSpeed,
+            maxPulseRadius, pulseExpandSpeed,
             showParticles, clientSideOnly
         );
 
