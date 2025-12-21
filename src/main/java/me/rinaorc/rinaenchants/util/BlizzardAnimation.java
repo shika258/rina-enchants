@@ -95,8 +95,8 @@ public class BlizzardAnimation {
 
         // Particules de spawn initiales
         if (showParticles) {
-            owner.spawnParticle(Particle.SNOWFLAKE, centerLocation.clone().add(0, 2, 0), 100, 3, 2, 3, 0.1);
-            owner.spawnParticle(Particle.END_ROD, centerLocation.clone().add(0, 3, 0), 30, 2, 1, 2, 0.05);
+            owner.spawnParticle(Particle.SNOWFLAKE, centerLocation.clone().add(0, 2, 0), 50, 3, 2, 3, 0.1);
+            owner.spawnParticle(Particle.END_ROD, centerLocation.clone().add(0, 3, 0), 15, 2, 1, 2, 0.05);
         }
 
         // Son de début
@@ -134,8 +134,8 @@ public class BlizzardAnimation {
                 // ═══════════════════════════════════════════════════════════
                 // PARTICULES AMBIANTES
                 // ═══════════════════════════════════════════════════════════
-                if (showParticles && ticksElapsed % 5 == 0) {
-                    for (int i = 0; i < 10; i++) {
+                if (showParticles && ticksElapsed % 8 == 0) {
+                    for (int i = 0; i < 5; i++) {
                         double offsetX = (random.nextDouble() - 0.5) * blizzardRadius * 2;
                         double offsetY = random.nextDouble() * spawnHeight;
                         double offsetZ = (random.nextDouble() - 0.5) * blizzardRadius * 2;
@@ -261,8 +261,8 @@ public class BlizzardAnimation {
         // Effets visuels
         if (showParticles) {
             owner.spawnParticle(Particle.EXPLOSION, center, 1, 0, 0, 0, 0);
-            owner.spawnParticle(Particle.SNOWFLAKE, center, 50, 2, 2, 2, 0.1);
-            owner.spawnParticle(Particle.END_ROD, center, 20, 1, 1, 1, 0.05);
+            owner.spawnParticle(Particle.SNOWFLAKE, center, 25, 2, 2, 2, 0.1);
+            owner.spawnParticle(Particle.END_ROD, center, 10, 1, 1, 1, 0.05);
         }
 
         // Son d'explosion
@@ -289,7 +289,7 @@ public class BlizzardAnimation {
 
                         // Particules de récolte
                         if (showParticles) {
-                            owner.spawnParticle(Particle.HAPPY_VILLAGER, cropLoc.clone().add(0.5, 0.5, 0.5), 5, 0.3, 0.3, 0.3, 0);
+                            owner.spawnParticle(Particle.HAPPY_VILLAGER, cropLoc.clone().add(0.5, 0.5, 0.5), 2, 0.3, 0.3, 0.3, 0);
                         }
                     }
                 }
@@ -327,7 +327,7 @@ public class BlizzardAnimation {
 
         // Effets visuels
         if (showParticles) {
-            owner.spawnParticle(Particle.TOTEM_OF_UNDYING, spawnLoc, 30, 1, 1, 1, 0.1);
+            owner.spawnParticle(Particle.TOTEM_OF_UNDYING, spawnLoc, 15, 1, 1, 1, 0.1);
         }
 
         // Son de spawn
@@ -376,10 +376,10 @@ public class BlizzardAnimation {
                 ticks++;
 
                 // Particules autour du cadeau
-                if (showParticles && ticks % 5 == 0) {
+                if (showParticles && ticks % 8 == 0) {
                     Location giftLoc = droppedGift.getLocation();
-                    owner.spawnParticle(Particle.END_ROD, giftLoc, 3, 0.3, 0.3, 0.3, 0.02);
-                    owner.spawnParticle(Particle.SNOWFLAKE, giftLoc.clone().add(0, 0.5, 0), 2, 0.2, 0.2, 0.2, 0);
+                    owner.spawnParticle(Particle.END_ROD, giftLoc, 2, 0.3, 0.3, 0.3, 0.02);
+                    owner.spawnParticle(Particle.SNOWFLAKE, giftLoc.clone().add(0, 0.5, 0), 1, 0.2, 0.2, 0.2, 0);
                 }
             }
         }.runTaskTimer(plugin, 0L, 1L);
@@ -430,7 +430,7 @@ public class BlizzardAnimation {
         owner.playSound(owner.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 1.0f, 1.2f);
 
         if (showParticles) {
-            owner.spawnParticle(Particle.TOTEM_OF_UNDYING, owner.getLocation().add(0, 1, 0), 50, 0.5, 1, 0.5, 0.2);
+            owner.spawnParticle(Particle.TOTEM_OF_UNDYING, owner.getLocation().add(0, 1, 0), 25, 0.5, 1, 0.5, 0.2);
         }
 
         // Exécuter les commandes
@@ -459,7 +459,7 @@ public class BlizzardAnimation {
 
         // Effets de fin
         if (showParticles) {
-            owner.spawnParticle(Particle.SNOWFLAKE, owner.getLocation().add(0, 2, 0), 50, 3, 2, 3, 0.05);
+            owner.spawnParticle(Particle.SNOWFLAKE, owner.getLocation().add(0, 2, 0), 25, 3, 2, 3, 0.05);
         }
 
         owner.playSound(owner.getLocation(), Sound.BLOCK_POWDER_SNOW_BREAK, 1.0f, 0.8f);

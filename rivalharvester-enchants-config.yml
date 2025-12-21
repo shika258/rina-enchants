@@ -1,0 +1,258 @@
+# ═══════════════════════════════════════════════════════════════════
+# CONFIGURATION RIVALHARVESTERHOES - NOUVEAUX ENCHANTEMENTS
+# ═══════════════════════════════════════════════════════════════════
+# Ajoutez ces configurations dans votre fichier enchants.yml
+# de RivalHarvesterHoes pour activer les nouveaux enchantements.
+# ═══════════════════════════════════════════════════════════════════
+
+  # ─────────────────────────────────────────────────────────────────
+  # 🐸 FROG TONGUE LASH / COUP DE LANGUE
+  # ─────────────────────────────────────────────────────────────────
+  frog_tongue_lash:
+    enabled: true
+    disenchanter: false
+    player-only: true
+    slot: 43
+    material: SLIME_BALL
+    base64:
+      enabled: false
+      value: ''
+    name: "&a&lCoup de Langue &8(&7🐸&8)"
+    lore:
+    - '&8ᴄʜᴀɴᴄᴇ ᴅᴇ ᴘʀᴏᴄ : &7%chance-percent%%'
+    - ''
+    - '&7&o(( Des grenouilles affamées apparaissent'
+    - '&7&oet attrapent les cultures avec leur'
+    - '&7&olangue élastique ultra satisfaisante!'
+    - ''
+    - '&7&o🟠 &6Orange&7&o: Langue rapide'
+    - '&7&o⚪ &fBlanc&7&o: Langue longue'
+    - '&7&o🟢 &aVert&7&o: Double récolte + rebond ))'
+    - ' '
+    - ' &e&l| &fPrix : &d%cost% &5❋'
+    - ' &e&l| &fNiveau Max : &e%max_level%'
+    - ' &e&l| &fNiveau Actuel : &e%current_level%'
+    - ' '
+    - '&7&o(( &7&oClic &fGauche &7pour ajouter &ades niveaux. &7&o))'
+    - ' '
+    - '&8[%progress%&8] &f%percentage%%'
+    - '&c&o(( Prestige &b&l%prestige%&r &c&osur votre houe ))'
+    disenchant:
+    - '&7&o(( Des grenouilles attrapent les cultures'
+    - '&7&oavec leur langue élastique! ))'
+    - ''
+    - ' &e&l| &fNiveau Actuel : &e%current_level%'
+    - ''
+    - '&7&o(( &7&oClic &fGauche &7pour ajouter &ades niveaux. &7&o))'
+    required-level: 0
+    required-prestige: 50
+    max-level: 100
+    base-chance: 0
+    increase-per-level: 0.005
+    price: 750000000
+    price-increase: 750000000
+
+  # ─────────────────────────────────────────────────────────────────
+  # 🔊 WARDEN PULSE / ONDE DU WARDEN
+  # ─────────────────────────────────────────────────────────────────
+  warden_pulse:
+    enabled: true
+    disenchanter: false
+    player-only: true
+    slot: 44
+    material: SCULK
+    base64:
+      enabled: false
+      value: ''
+    name: "&8&lOnde du Warden &8(&7🔊&8)"
+    lore:
+    - '&8ᴄʜᴀɴᴄᴇ ᴅᴇ ᴘʀᴏᴄ : &7%chance-percent%%'
+    - ''
+    - '&7&o(( Le Warden émerge des profondeurs'
+    - '&7&oet émet des ondes soniques concentriques'
+    - '&7&oqui récoltent tout sur leur passage!'
+    - ''
+    - '&7&o🔊 &5RÉSONANCE&7&o: Zone touchée 2+ fois'
+    - '&7&o= bonus de récolte! ))'
+    - ' '
+    - ' &e&l| &fPrix : &d%cost% &5❋'
+    - ' &e&l| &fNiveau Max : &e%max_level%'
+    - ' &e&l| &fNiveau Actuel : &e%current_level%'
+    - ' '
+    - '&7&o(( &7&oClic &fGauche &7pour ajouter &ades niveaux. &7&o))'
+    - ' '
+    - '&8[%progress%&8] &f%percentage%%'
+    - '&c&o(( Prestige &b&l%prestige%&r &c&osur votre houe ))'
+    disenchant:
+    - '&7&o(( Le Warden émet des ondes soniques'
+    - '&7&oqui récoltent les cultures en cercles! ))'
+    - ''
+    - ' &e&l| &fNiveau Actuel : &e%current_level%'
+    - ''
+    - '&7&o(( &7&oClic &fGauche &7pour ajouter &ades niveaux. &7&o))'
+    required-level: 0
+    required-prestige: 150
+    max-level: 2000
+    base-chance: 0
+    increase-per-level: 0.000025
+    price: 500000000
+    price-increase: 500000000
+
+  # ─────────────────────────────────────────────────────────────────
+  # 🤖 GOLEM FACTORY / USINE À GOLEMS
+  # ─────────────────────────────────────────────────────────────────
+  golem_factory:
+    enabled: true
+    disenchanter: false
+    player-only: true
+    slot: 45
+    material: IRON_BLOCK
+    base64:
+      enabled: false
+      value: ''
+    name: "&7&lUsine à Golems &8(&7🤖&8)"
+    lore:
+    - '&8ᴄʜᴀɴᴄᴇ ᴅᴇ ᴘʀᴏᴄ : &7%chance-percent%%'
+    - ''
+    - '&7&o(( Des mini-golems patrouillent la zone'
+    - '&7&oet récoltent les cultures!'
+    - ''
+    - '&7&o🤖 &6FUSION&7&o: 2 golems proches peuvent'
+    - '&7&ofusionner en un géant qui fait'
+    - '&7&oun GROUND SLAM dévastateur! ))'
+    - ' '
+    - ' &e&l| &fPrix : &d%cost% &5❋'
+    - ' &e&l| &fNiveau Max : &e%max_level%'
+    - ' &e&l| &fNiveau Actuel : &e%current_level%'
+    - ' '
+    - '&7&o(( &7&oClic &fGauche &7pour ajouter &ades niveaux. &7&o))'
+    - ' '
+    - '&8[%progress%&8] &f%percentage%%'
+    - '&c&o(( Prestige &b&l%prestige%&r &c&osur votre houe ))'
+    disenchant:
+    - '&7&o(( Des mini-golems récoltent et peuvent'
+    - '&7&ofusionner en géant avec ground slam! ))'
+    - ''
+    - ' &e&l| &fNiveau Actuel : &e%current_level%'
+    - ''
+    - '&7&o(( &7&oClic &fGauche &7pour ajouter &ades niveaux. &7&o))'
+    required-level: 0
+    required-prestige: 100
+    max-level: 500
+    base-chance: 0
+    increase-per-level: 0.0001
+    price: 2500000000
+    price-increase: 2500000000
+
+  # ─────────────────────────────────────────────────────────────────
+  # 🌊 AXOLOTL TSUNAMI / TSUNAMI D'AXOLOTLS
+  # ─────────────────────────────────────────────────────────────────
+  axolotl_tsunami:
+    enabled: true
+    disenchanter: false
+    player-only: true
+    slot: 46
+    material: AXOLOTL_BUCKET
+    base64:
+      enabled: false
+      value: ''
+    name: "&b&lTsunami d'Axolotls &8(&7🌊&8)"
+    lore:
+    - '&8ᴄʜᴀɴᴄᴇ ᴅᴇ ᴘʀᴏᴄ : &7%chance-percent%%'
+    - ''
+    - '&7&o(( Une vague d''axolotls colorés déferle'
+    - '&7&odans une direction aléatoire et récolte'
+    - '&7&otout sur son passage!'
+    - ''
+    - '&7&o🌊 &9AXOLOTL BLEU&7&o: Rare = récolte x2!'
+    - '&7&o🌊 &dRETOUR&7&o: La vague revient à haut niveau! ))'
+    - ' '
+    - ' &e&l| &fPrix : &d%cost% &5❋'
+    - ' &e&l| &fNiveau Max : &e%max_level%'
+    - ' &e&l| &fNiveau Actuel : &e%current_level%'
+    - ' '
+    - '&7&o(( &7&oClic &fGauche &7pour ajouter &ades niveaux. &7&o))'
+    - ' '
+    - '&8[%progress%&8] &f%percentage%%'
+    - '&c&o(( Prestige &b&l%prestige%&r &c&osur votre houe ))'
+    disenchant:
+    - '&7&o(( Une vague d''axolotls déferle et récolte!'
+    - '&7&oAxolotl bleu = bonus x2! ))'
+    - ''
+    - ' &e&l| &fNiveau Actuel : &e%current_level%'
+    - ''
+    - '&7&o(( &7&oClic &fGauche &7pour ajouter &ades niveaux. &7&o))'
+    required-level: 0
+    required-prestige: 200
+    max-level: 3000
+    base-chance: 0
+    increase-per-level: 0.000015
+    price: 350000000
+    price-increase: 350000000
+
+  # ─────────────────────────────────────────────────────────────────
+  # 🐉 ENDER DRAGON BREATH / SOUFFLE DU DRAGON
+  # ─────────────────────────────────────────────────────────────────
+  ender_dragon_breath:
+    enabled: true
+    disenchanter: false
+    player-only: true
+    slot: 47
+    material: DRAGON_BREATH
+    base64:
+      enabled: false
+      value: ''
+    name: "&5&lSouffle du Dragon &8(&7🐉&8)"
+    lore:
+    - '&8ᴄʜᴀɴᴄᴇ ᴅᴇ ᴘʀᴏᴄ : &7%chance-percent%%'
+    - ''
+    - '&#FF00E0E&#D900C9n&#B3009Bc&#8C006Dh&#66003Fa&#400010n&#660040t&#8C0070e&#B3009Fm&#D900CFe&#FF00FFn&#D900CFt &#8C006DL&#66003Fé&#400010g&#660040e&#8C0070n&#B3009Fd&#D900CFa&#FF00FFi&#D900CFr&#B3009Fe'
+    - ''
+    - '&7&o(( Un &5mini Ender Dragon &7&o(scale 0.4)'
+    - '&7&osurvole le champ en spirale et crache'
+    - '&7&odes nuages de dragon breath!'
+    - ''
+    - '&7&o🐉 &dZONES PERSISTANTES&7&o: Les nuages'
+    - '&7&ocontinuent de récolter plusieurs secondes!'
+    - '&7&o🐉 &5SOUFFLE FINAL&7&o: Explosion massive! ))'
+    - ' '
+    - ' &e&l| &fPrix : &d%cost% &5❋'
+    - ' &e&l| &fNiveau Max : &e%max_level%'
+    - ' &e&l| &fNiveau Actuel : &e%current_level%'
+    - ' '
+    - '&7&o(( &7&oClic &fGauche &7pour ajouter &ades niveaux. &7&o))'
+    - ' '
+    - '&8[%progress%&8] &f%percentage%%'
+    - '&c&o(( Prestige &b&l%prestige%&r &c&osur votre houe ))'
+    disenchant:
+    - '&7&o(( Un mini Dragon survole et crache des'
+    - '&7&onuages de dragon breath persistants! ))'
+    - ''
+    - ' &e&l| &fNiveau Actuel : &e%current_level%'
+    - ''
+    - '&7&o(( &7&oClic &fGauche &7pour ajouter &ades niveaux. &7&o))'
+    required-level: 0
+    required-prestige: 250
+    max-level: 5000
+    base-chance: 0
+    increase-per-level: 0.00001
+    price: 200000000
+    price-increase: 200000000
+
+
+# ═══════════════════════════════════════════════════════════════════
+# RÉSUMÉ DES ENCHANTEMENTS
+# ═══════════════════════════════════════════════════════════════════
+#
+# | Enchantement          | Max Level | Prestige | Material         |
+# |-----------------------|-----------|----------|------------------|
+# | Frog Tongue Lash      | 100       | 50       | SLIME_BALL       |
+# | Warden Pulse          | 2000      | 150      | SCULK            |
+# | Golem Factory         | 500       | 100      | IRON_BLOCK       |
+# | Axolotl Tsunami       | 3000      | 200      | AXOLOTL_BUCKET   |
+# | Ender Dragon Breath   | 5000      | 250      | DRAGON_BREATH    |
+#
+# ═══════════════════════════════════════════════════════════════════
+# SLOTS UTILISÉS: 43, 44, 45, 46, 47
+# (Assurez-vous qu'ils ne sont pas déjà utilisés!)
+# ═══════════════════════════════════════════════════════════════════

@@ -128,7 +128,7 @@ public class BeeAnimation {
 
         // Particules de spawn (uniquement pour le propriétaire)
         if (showParticles) {
-            owner.spawnParticle(Particle.END_ROD, startLocation, 10 + random.nextInt(8), 0.3, 0.3, 0.3, 0.05);
+            owner.spawnParticle(Particle.END_ROD, startLocation, 5 + random.nextInt(4), 0.3, 0.3, 0.3, 0.05);
         }
 
         // Démarrer l'animation avec délai initial aléatoire
@@ -217,7 +217,7 @@ public class BeeAnimation {
                 }
 
                 if (showParticles) {
-                    owner.spawnParticle(Particle.WAX_ON, current, 5 + random.nextInt(5), 0.2, 0.2, 0.2, 0);
+                    owner.spawnParticle(Particle.WAX_ON, current, 3 + random.nextInt(3), 0.2, 0.2, 0.2, 0);
                 }
 
                 currentTargetIndex++;
@@ -323,12 +323,12 @@ public class BeeAnimation {
         private void cleanup() {
             if (beeEntity != null && !beeEntity.isDead()) {
                 Location loc = beeEntity.getLocation();
-                
+
                 if (showParticles && owner.isOnline()) {
-                    owner.spawnParticle(Particle.POOF, loc, 10 + random.nextInt(8), 0.3, 0.3, 0.3, 0.05);
-                    owner.spawnParticle(Particle.WAX_ON, loc, 5 + random.nextInt(5), 0.2, 0.2, 0.2, 0);
+                    owner.spawnParticle(Particle.POOF, loc, 5 + random.nextInt(4), 0.3, 0.3, 0.3, 0.05);
+                    owner.spawnParticle(Particle.WAX_ON, loc, 3 + random.nextInt(3), 0.2, 0.2, 0.2, 0);
                 }
-                
+
                 beeEntity.remove();
             }
         }

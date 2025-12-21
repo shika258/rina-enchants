@@ -4,8 +4,13 @@ import me.rinaorc.rinaenchants.command.ReloadCommand;
 import me.rinaorc.rinaenchants.enchant.AllayLaserEnchant;
 import me.rinaorc.rinaenchants.enchant.BeeCollectorEnchant;
 import me.rinaorc.rinaenchants.enchant.BlizzardEnchant;
+import me.rinaorc.rinaenchants.enchant.FrogTongueLashEnchant;
+import me.rinaorc.rinaenchants.enchant.GolemFactoryEnchant;
 import me.rinaorc.rinaenchants.enchant.PandaRollEnchant;
 import me.rinaorc.rinaenchants.enchant.RavagerStampedeEnchant;
+import me.rinaorc.rinaenchants.enchant.WardenPulseEnchant;
+import me.rinaorc.rinaenchants.enchant.AxolotlTsunamiEnchant;
+import me.rinaorc.rinaenchants.enchant.EnderDragonBreathEnchant;
 import me.rinaorc.rinaenchants.listener.CyberLevelXPListener;
 import me.rivaldev.harvesterhoes.api.events.HoeEnchant;
 import me.rivaldev.harvesterhoes.api.events.RivalBlockBreakEvent;
@@ -194,6 +199,61 @@ public class RinaEnchantsPlugin extends JavaPlugin implements Listener {
             registeredEnchants.add(blizzardEnchant);
 
             getLogger().info("§b✓ Enchantement Blizzard Éternel enregistré!");
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // ENCHANTEMENT FROG TONGUE LASH
+        // ═══════════════════════════════════════════════════════════
+        if (getConfig().getBoolean("frog-tongue-lash.enabled", true)) {
+            FrogTongueLashEnchant frogEnchant = new FrogTongueLashEnchant(this);
+            hoesAPI.registerEnchant(frogEnchant);
+            registeredEnchants.add(frogEnchant);
+
+            getLogger().info("§a✓ Enchantement Frog Tongue Lash enregistré!");
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // ENCHANTEMENT WARDEN PULSE
+        // ═══════════════════════════════════════════════════════════
+        if (getConfig().getBoolean("warden-pulse.enabled", true)) {
+            WardenPulseEnchant wardenEnchant = new WardenPulseEnchant(this);
+            hoesAPI.registerEnchant(wardenEnchant);
+            registeredEnchants.add(wardenEnchant);
+
+            getLogger().info("§8✓ Enchantement Warden Pulse enregistré!");
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // ENCHANTEMENT GOLEM FACTORY
+        // ═══════════════════════════════════════════════════════════
+        if (getConfig().getBoolean("golem-factory.enabled", true)) {
+            GolemFactoryEnchant golemEnchant = new GolemFactoryEnchant(this);
+            hoesAPI.registerEnchant(golemEnchant);
+            registeredEnchants.add(golemEnchant);
+
+            getLogger().info("§7✓ Enchantement Golem Factory enregistré!");
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // ENCHANTEMENT AXOLOTL TSUNAMI
+        // ═══════════════════════════════════════════════════════════
+        if (getConfig().getBoolean("axolotl-tsunami.enabled", true)) {
+            AxolotlTsunamiEnchant axolotlEnchant = new AxolotlTsunamiEnchant(this);
+            hoesAPI.registerEnchant(axolotlEnchant);
+            registeredEnchants.add(axolotlEnchant);
+
+            getLogger().info("§b✓ Enchantement Axolotl Tsunami enregistré!");
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // ENCHANTEMENT ENDER DRAGON BREATH
+        // ═══════════════════════════════════════════════════════════
+        if (getConfig().getBoolean("ender-dragon-breath.enabled", true)) {
+            EnderDragonBreathEnchant dragonEnchant = new EnderDragonBreathEnchant(this);
+            hoesAPI.registerEnchant(dragonEnchant);
+            registeredEnchants.add(dragonEnchant);
+
+            getLogger().info("§5✓ Enchantement Ender Dragon Breath enregistré!");
         }
 
         getLogger().info("§a✓ " + registeredEnchants.size() + " enchantement(s) chargé(s)!");

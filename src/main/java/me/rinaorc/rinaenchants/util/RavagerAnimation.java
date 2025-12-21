@@ -124,10 +124,10 @@ public class RavagerAnimation {
 
         if (showParticles) {
             // Explosion de particules de terre au spawn
-            owner.spawnParticle(Particle.BLOCK, startLocation, 50, 1, 0.5, 1, 0.1,
+            owner.spawnParticle(Particle.BLOCK, startLocation, 25, 1, 0.5, 1, 0.1,
                 Material.DIRT.createBlockData());
-            owner.spawnParticle(Particle.CAMPFIRE_COSY_SMOKE, startLocation, 20, 0.5, 0.5, 0.5, 0.05);
-            owner.spawnParticle(Particle.EXPLOSION, startLocation, 3, 0.5, 0.5, 0.5, 0);
+            owner.spawnParticle(Particle.CAMPFIRE_COSY_SMOKE, startLocation, 10, 0.5, 0.5, 0.5, 0.05);
+            owner.spawnParticle(Particle.EXPLOSION, startLocation, 2, 0.5, 0.5, 0.5, 0);
         }
 
         // Son de spawn brutal
@@ -215,14 +215,14 @@ public class RavagerAnimation {
             if (showParticles) {
                 // Particules de poussière derrière le Ravageur
                 Location dustLoc = groundPos.clone().subtract(direction.clone().multiply(1.5));
-                owner.spawnParticle(Particle.BLOCK, dustLoc, 8, 0.5, 0.2, 0.5, 0.1,
+                owner.spawnParticle(Particle.BLOCK, dustLoc, 4, 0.5, 0.2, 0.5, 0.1,
                     Material.DIRT.createBlockData());
-                owner.spawnParticle(Particle.CAMPFIRE_COSY_SMOKE, dustLoc, 2, 0.3, 0.1, 0.3, 0.02);
+                owner.spawnParticle(Particle.CAMPFIRE_COSY_SMOKE, dustLoc, 1, 0.3, 0.1, 0.3, 0.02);
 
                 // Particules de rage autour du Ravageur
-                if (distanceTraveled % 3 < CHARGE_SPEED) {
+                if (distanceTraveled % 5 < CHARGE_SPEED) {
                     owner.spawnParticle(Particle.ANGRY_VILLAGER, groundPos.clone().add(0, 1.5, 0),
-                        2, 0.5, 0.3, 0.5, 0);
+                        1, 0.5, 0.3, 0.5, 0);
                 }
             }
 
@@ -269,11 +269,11 @@ public class RavagerAnimation {
 
             if (showParticles) {
                 // Cercle de particules simplifié (moins de particules)
-                for (double angle = 0; angle < Math.PI * 2; angle += Math.PI / 4) {
+                for (double angle = 0; angle < Math.PI * 2; angle += Math.PI / 3) {
                     double x = Math.cos(angle) * stompRadius;
                     double z = Math.sin(angle) * stompRadius;
                     Location particleLoc = center.clone().add(x, 0.1, z);
-                    owner.spawnParticle(Particle.BLOCK, particleLoc, 5, 0.3, 0.1, 0.3, 0,
+                    owner.spawnParticle(Particle.BLOCK, particleLoc, 3, 0.3, 0.1, 0.3, 0,
                         Material.DIRT.createBlockData());
                 }
 
@@ -326,7 +326,7 @@ public class RavagerAnimation {
                 }
 
                 // Quelques particules de rage
-                for (int i = 0; i < 10; i++) {
+                for (int i = 0; i < 5; i++) {
                     double angle = Math.random() * Math.PI * 2;
                     double dist = Math.random() * roarRadius;
                     Location rageLoc = center.clone().add(
@@ -431,10 +431,10 @@ public class RavagerAnimation {
 
                 if (withEffects && showParticles && owner.isOnline()) {
                     // Effet de disparition épique
-                    owner.spawnParticle(Particle.CAMPFIRE_COSY_SMOKE, loc, 30, 1, 1, 1, 0.1);
-                    owner.spawnParticle(Particle.BLOCK, loc, 40, 1, 0.5, 1, 0.1,
+                    owner.spawnParticle(Particle.CAMPFIRE_COSY_SMOKE, loc, 15, 1, 1, 1, 0.1);
+                    owner.spawnParticle(Particle.BLOCK, loc, 20, 1, 0.5, 1, 0.1,
                         Material.DIRT.createBlockData());
-                    owner.spawnParticle(Particle.LARGE_SMOKE, loc, 15, 0.5, 0.5, 0.5, 0.05);
+                    owner.spawnParticle(Particle.LARGE_SMOKE, loc, 8, 0.5, 0.5, 0.5, 0.05);
                 }
 
                 if (owner.isOnline()) {
