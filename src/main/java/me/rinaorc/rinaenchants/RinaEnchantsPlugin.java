@@ -4,6 +4,7 @@ import me.rinaorc.rinaenchants.command.ReloadCommand;
 import me.rinaorc.rinaenchants.enchant.AllayLaserEnchant;
 import me.rinaorc.rinaenchants.enchant.BeeCollectorEnchant;
 import me.rinaorc.rinaenchants.enchant.BlizzardEnchant;
+import me.rinaorc.rinaenchants.enchant.FrogTongueLashEnchant;
 import me.rinaorc.rinaenchants.enchant.PandaRollEnchant;
 import me.rinaorc.rinaenchants.enchant.RavagerStampedeEnchant;
 import me.rinaorc.rinaenchants.listener.CyberLevelXPListener;
@@ -194,6 +195,17 @@ public class RinaEnchantsPlugin extends JavaPlugin implements Listener {
             registeredEnchants.add(blizzardEnchant);
 
             getLogger().info("§b✓ Enchantement Blizzard Éternel enregistré!");
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // ENCHANTEMENT FROG TONGUE LASH
+        // ═══════════════════════════════════════════════════════════
+        if (getConfig().getBoolean("frog-tongue-lash.enabled", true)) {
+            FrogTongueLashEnchant frogEnchant = new FrogTongueLashEnchant(this);
+            hoesAPI.registerEnchant(frogEnchant);
+            registeredEnchants.add(frogEnchant);
+
+            getLogger().info("§a✓ Enchantement Frog Tongue Lash enregistré!");
         }
 
         getLogger().info("§a✓ " + registeredEnchants.size() + " enchantement(s) chargé(s)!");
