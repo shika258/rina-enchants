@@ -53,6 +53,9 @@ bee-collector:
 
   # Max cultures par activation. Réel = max-crops + (niveau * 3)
   max-crops: 20
+
+  # Vitesse des abeilles (multiplicateur). 1.0 = normal, 2.0 = 2x plus rapide, etc.
+  bee-speed: 2.0
   
   # ─────────────────────────────────────────────────────────────────
   #                         EFFETS

@@ -143,6 +143,7 @@ public class BeeCollectorEnchant implements HoeEnchant, Listener {
         int baseRadius = plugin.getConfig().getInt("bee-collector.radius", 3);
         int baseBeeCount = plugin.getConfig().getInt("bee-collector.bee-count", 3);
         int maxCrops = plugin.getConfig().getInt("bee-collector.max-crops", 10);
+        double beeSpeed = plugin.getConfig().getDouble("bee-collector.bee-speed", 1.0);
         boolean showParticles = plugin.getConfig().getBoolean("bee-collector.particles", true);
         boolean playSound = plugin.getConfig().getBoolean("bee-collector.sound", true);
         boolean clientSideOnly = plugin.getConfig().getBoolean("bee-collector.client-side-only", true);
@@ -227,7 +228,7 @@ public class BeeCollectorEnchant implements HoeEnchant, Listener {
 
             Bukkit.getScheduler().runTaskLater(plugin, () -> {
                 // Créer l'animation de l'abeille
-                BeeAnimation animation = new BeeAnimation(plugin, beeSpawn, beeCrops, showParticles, beeIndex, player, clientSideOnly);
+                BeeAnimation animation = new BeeAnimation(plugin, beeSpawn, beeCrops, showParticles, beeIndex, player, clientSideOnly, beeSpeed);
                 
                 // Callback quand l'abeille atteint une culture
                 animation.setOnCropReached((cropLoc) -> {
