@@ -119,8 +119,9 @@ public class RinaEnchantsPlugin extends JavaPlugin implements Listener {
         // TASK DE NETTOYAGE PÉRIODIQUE DES ENTITÉS ORPHELINES (toutes les 2 minutes)
         // Sécurité supplémentaire pour nettoyer les entités qui auraient pu
         // échapper au cleanup normal (crash d'animation, bug, etc.)
+        // OPTIMISATION: Scan async + suppression sync pour éviter les lags
         // ═══════════════════════════════════════════════════════════════════════
-        cleanupTaskId = Bukkit.getScheduler().runTaskTimer(this, this::periodicEntityCleanup, 2400L, 2400L).getTaskId();
+        cleanupTaskId = Bukkit.getScheduler().runTaskTimerAsynchronously(this, this::periodicEntityCleanupAsync, 2400L, 2400L).getTaskId();
 
         // Attendre que RivalHarvesterHoes soit chargé
         Bukkit.getScheduler().runTaskLater(this, this::initializeEnchants, 20L);
@@ -405,44 +406,69 @@ public class RinaEnchantsPlugin extends JavaPlugin implements Listener {
     }
 
     /**
-     * Nettoyage périodique des entités orphelines.
+     * Nettoyage périodique des entités orphelines (VERSION ASYNC).
      * Cette méthode est appelée toutes les 2 minutes pour nettoyer
      * les entités qui auraient pu échapper au cleanup normal.
+     *
+     * OPTIMISATION: Le scan est fait en async, seule la suppression est sync.
      */
-    private void periodicEntityCleanup() {
-        int cleaned = 0;
+    private void periodicEntityCleanupAsync() {
         boolean debug = getConfig().getBoolean("debug", false);
 
+        // Collecter les UUIDs des entités à supprimer (thread-safe)
+        List<UUID> entitiesToRemove = new ArrayList<>();
+
         for (World world : Bukkit.getWorlds()) {
-            for (Entity entity : world.getEntities()) {
-                if (isEnchantEntity(entity)) {
-                    // Vérifier si l'entité est valide et n'est pas déjà morte
-                    if (!entity.isValid() || entity.isDead()) {
-                        continue;
-                    }
+            // Copie de la liste pour éviter ConcurrentModificationException
+            List<Entity> entities = new ArrayList<>(world.getEntities());
 
-                    // L'entité est toujours là mais marquée comme enchantement
-                    // Elle devrait avoir été nettoyée par son animation
-                    // Si elle est là depuis plus de 5 minutes, c'est un orphelin
-                    // Note: on ne peut pas facilement tracker le temps de vie,
-                    // donc on nettoie les entités sans AI qui sont immobiles
-                    // hasAI() n'existe que sur LivingEntity, les autres entités n'ont pas d'AI
-                    boolean hasNoAI = !(entity instanceof LivingEntity) || !((LivingEntity) entity).hasAI();
-                    if (hasNoAI && entity.getVelocity().lengthSquared() < 0.01) {
-                        entity.remove();
-                        cleaned++;
+            for (Entity entity : entities) {
+                try {
+                    if (isEnchantEntity(entity)) {
+                        // Vérifier si l'entité est valide et n'est pas déjà morte
+                        if (!entity.isValid() || entity.isDead()) {
+                            continue;
+                        }
 
-                        if (debug) {
-                            getLogger().info("§e[Cleanup périodique] Entité orpheline supprimée: " +
-                                entity.getType() + " à " + entity.getLocation().toVector());
+                        // L'entité est toujours là mais marquée comme enchantement
+                        // Elle devrait avoir été nettoyée par son animation
+                        // Si elle est là depuis plus de 5 minutes, c'est un orphelin
+                        // hasAI() n'existe que sur LivingEntity, les autres entités n'ont pas d'AI
+                        boolean hasNoAI = !(entity instanceof LivingEntity) || !((LivingEntity) entity).hasAI();
+                        if (hasNoAI && entity.getVelocity().lengthSquared() < 0.01) {
+                            entitiesToRemove.add(entity.getUniqueId());
+
+                            if (debug) {
+                                getLogger().info("§e[Cleanup périodique] Entité orpheline détectée: " +
+                                    entity.getType() + " à " + entity.getLocation().toVector());
+                            }
                         }
                     }
+                } catch (Exception ignored) {
+                    // Entité peut avoir été supprimée entre-temps
                 }
             }
         }
 
-        if (cleaned > 0 && debug) {
-            getLogger().info("§a✓ Nettoyage périodique: " + cleaned + " entité(s) orpheline(s) supprimée(s)");
+        // Supprimer les entités sur le thread principal (requis par Bukkit)
+        if (!entitiesToRemove.isEmpty()) {
+            final List<UUID> toRemove = new ArrayList<>(entitiesToRemove);
+            final boolean debugFinal = debug;
+
+            Bukkit.getScheduler().runTask(this, () -> {
+                int cleaned = 0;
+                for (UUID uuid : toRemove) {
+                    Entity entity = Bukkit.getEntity(uuid);
+                    if (entity != null && !entity.isDead()) {
+                        entity.remove();
+                        cleaned++;
+                    }
+                }
+
+                if (cleaned > 0 && debugFinal) {
+                    getLogger().info("§a✓ Nettoyage périodique: " + cleaned + " entité(s) orpheline(s) supprimée(s)");
+                }
+            });
         }
     }
 
@@ -543,19 +569,36 @@ public class RinaEnchantsPlugin extends JavaPlugin implements Listener {
     // SYSTÈME CLIENT-SIDE (visibilité des entités)
     // ═══════════════════════════════════════════════════════════════════════
 
+    // Distance maximale pour cacher les entités (au-delà, le serveur ne les envoie pas)
+    private static final double HIDE_RADIUS_SQUARED = 128 * 128;
+
     /**
      * Cache une entité à tous les joueurs sauf un (optimisation serveur 500 joueurs)
+     *
+     * OPTIMISATION: Au lieu d'itérer sur tous les 500+ joueurs, on ne cache
+     * qu'aux joueurs proches (dans le rayon de rendu). Les joueurs éloignés
+     * ne recevront de toute façon pas les paquets d'entité.
      */
     public void makeEntityClientSide(Entity entity, Player visibleTo) {
+        Location entityLoc = entity.getLocation();
+        World entityWorld = entityLoc.getWorld();
+
+        // Tracker l'entité pour cleanup (fait en premier pour éviter les race conditions)
+        playerClientEntities.computeIfAbsent(visibleTo.getUniqueId(), k -> ConcurrentHashMap.newKeySet())
+            .add(entity.getEntityId());
+
+        // OPTIMISATION: Ne cacher qu'aux joueurs proches dans le même monde
         for (Player online : Bukkit.getOnlinePlayers()) {
-            if (!online.equals(visibleTo)) {
+            if (online.equals(visibleTo)) continue;
+
+            // Ignorer les joueurs dans un autre monde
+            if (!online.getWorld().equals(entityWorld)) continue;
+
+            // OPTIMISATION: Ne cacher qu'aux joueurs dans le rayon de rendu
+            if (online.getLocation().distanceSquared(entityLoc) <= HIDE_RADIUS_SQUARED) {
                 online.hideEntity(this, entity);
             }
         }
-
-        // Tracker l'entité pour cleanup
-        playerClientEntities.computeIfAbsent(visibleTo.getUniqueId(), k -> ConcurrentHashMap.newKeySet())
-            .add(entity.getEntityId());
     }
 
     /**

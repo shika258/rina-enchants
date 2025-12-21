@@ -266,38 +266,63 @@ public class BeeCollectorEnchant implements HoeEnchant, Listener {
 
     /**
      * Trouve les cultures dans un rayon donné
+     *
+     * OPTIMISATION: Au lieu de créer une liste de tous les offsets et la mélanger
+     * (coûteux en mémoire pour les grands rayons), on utilise un échantillonnage
+     * aléatoire direct avec un parcours en spirale pour une meilleure distribution.
      */
     private List<Location> findMatureCrops(Location center, int radius, int maxCount) {
-        List<Location> crops = new ArrayList<>();
+        List<Location> crops = new ArrayList<>(maxCount);
         World world = center.getWorld();
-        
+
         if (world == null) return crops;
 
         int centerX = center.getBlockX();
         int centerY = center.getBlockY();
         int centerZ = center.getBlockZ();
 
-        // Parcours aléatoire pour éviter de toujours avoir les mêmes cultures
-        List<int[]> offsets = new ArrayList<>();
-        for (int x = -radius; x <= radius; x++) {
-            for (int y = -2; y <= 2; y++) {
-                for (int z = -radius; z <= radius; z++) {
-                    if (x != 0 || y != 0 || z != 0) {
-                        offsets.add(new int[]{x, y, z});
+        // Limiter le rayon pour éviter les calculs excessifs
+        int effectiveRadius = Math.min(radius, 15);
+
+        // Nombre total de blocs à vérifier (approximatif)
+        int totalBlocks = (2 * effectiveRadius + 1) * (2 * effectiveRadius + 1) * 5;
+
+        // Si on cherche moins de cultures qu'il n'y a de blocs, utiliser l'échantillonnage aléatoire
+        if (maxCount < totalBlocks / 4) {
+            // Échantillonnage aléatoire: essayer des positions aléatoires
+            int attempts = Math.min(maxCount * 8, totalBlocks);
+            for (int i = 0; i < attempts && crops.size() < maxCount; i++) {
+                int x = random.nextInt(2 * effectiveRadius + 1) - effectiveRadius;
+                int y = random.nextInt(5) - 2;
+                int z = random.nextInt(2 * effectiveRadius + 1) - effectiveRadius;
+
+                if (x == 0 && y == 0 && z == 0) continue;
+
+                Block block = world.getBlockAt(centerX + x, centerY + y, centerZ + z);
+                if (isMatureCrop(block)) {
+                    Location loc = block.getLocation();
+                    // Éviter les doublons
+                    if (!crops.contains(loc)) {
+                        crops.add(loc);
                     }
                 }
             }
-        }
-        Collections.shuffle(offsets, random);
-        
-        for (int[] offset : offsets) {
-            if (crops.size() >= maxCount) break;
-            
-            Block block = world.getBlockAt(centerX + offset[0], centerY + offset[1], centerZ + offset[2]);
-            
-            if (isMatureCrop(block)) {
-                crops.add(block.getLocation());
+        } else {
+            // Parcours direct si on veut beaucoup de cultures
+            for (int x = -effectiveRadius; x <= effectiveRadius && crops.size() < maxCount; x++) {
+                for (int y = -2; y <= 2 && crops.size() < maxCount; y++) {
+                    for (int z = -effectiveRadius; z <= effectiveRadius && crops.size() < maxCount; z++) {
+                        if (x == 0 && y == 0 && z == 0) continue;
+
+                        Block block = world.getBlockAt(centerX + x, centerY + y, centerZ + z);
+                        if (isMatureCrop(block)) {
+                            crops.add(block.getLocation());
+                        }
+                    }
+                }
             }
+            // Mélanger le résultat pour une distribution aléatoire
+            Collections.shuffle(crops, random);
         }
 
         return crops;
