@@ -152,11 +152,16 @@ public class BeeCollectorEnchant implements HoeEnchant, Listener {
         int beeCount = baseBeeCount + (int)(enchantLevel / 2);
         int maxCropsToHarvest = maxCrops + (int)(enchantLevel * 3);
 
+        if (debug) {
+            plugin.getLogger().info("§a[BeeCollector] Config: radius=" + baseRadius + "+" + (int)(enchantLevel / 2) +
+                "=" + radius + ", maxCrops=" + maxCrops + "+" + (int)(enchantLevel * 3) + "=" + maxCropsToHarvest);
+        }
+
         // Trouver les cultures matures à proximité
         List<Location> matureCrops = findMatureCrops(cropLocation, radius, maxCropsToHarvest);
 
         if (debug) {
-            plugin.getLogger().info("§a[BeeCollector] Cultures trouvées: " + matureCrops.size() + " (rayon: " + radius + ")");
+            plugin.getLogger().info("§a[BeeCollector] Cultures trouvées: " + matureCrops.size() + "/" + maxCropsToHarvest + " (rayon: " + radius + ")");
         }
 
         if (matureCrops.isEmpty()) {
