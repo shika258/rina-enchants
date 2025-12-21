@@ -56,7 +56,8 @@ public class BlizzardAnimation {
     private int giftTicksElapsed = 0;
     private boolean giftRewardGiven = false;
 
-    // OPTIMISATION: Liste des snowballs actives (évite de créer une task par snowball)
+    // OPTIMISATION: Liste des snowballs actives (évite de créer une task par
+    // snowball)
     private final List<SnowballTracker> activeSnowballs = new ArrayList<>();
 
     private Consumer<Integer> onFinish;
@@ -76,12 +77,12 @@ public class BlizzardAnimation {
     }
 
     public BlizzardAnimation(RinaEnchantsPlugin plugin, Player owner, Location centerLocation,
-                              int durationTicks, int snowballsPerSecond, int blizzardRadius,
-                              int spawnHeight, double explosionChance, int explosionRadius,
-                              boolean giftEnabled, double giftChance, String giftTexture,
-                              List<String> giftCommands, String giftPickupMessage,
-                              boolean showParticles, boolean clientSideOnly,
-                              Set<Material> crops, Set<Material> noAgeCrops) {
+            int durationTicks, int snowballsPerSecond, int blizzardRadius,
+            int spawnHeight, double explosionChance, int explosionRadius,
+            boolean giftEnabled, double giftChance, String giftTexture,
+            List<String> giftCommands, String giftPickupMessage,
+            boolean showParticles, boolean clientSideOnly,
+            Set<Material> crops, Set<Material> noAgeCrops) {
         this.plugin = plugin;
         this.owner = owner;
         this.centerLocation = centerLocation;
@@ -112,7 +113,8 @@ public class BlizzardAnimation {
 
     public void start() {
         World world = centerLocation.getWorld();
-        if (world == null) return;
+        if (world == null)
+            return;
 
         // Particules de spawn initiales
         if (showParticles) {
@@ -159,10 +161,10 @@ public class BlizzardAnimation {
                 updateAllSnowballs();
 
                 // ═══════════════════════════════════════════════════════════
-                // PARTICULES AMBIANTES
+                // PARTICULES AMBIANTES - OPTIMISATION: Réduit
                 // ═══════════════════════════════════════════════════════════
-                if (showParticles && ticksElapsed % 8 == 0) {
-                    for (int i = 0; i < 5; i++) {
+                if (showParticles && ticksElapsed % 16 == 0) { // OPTIMISATION: tous les 16 ticks au lieu de 8
+                    for (int i = 0; i < 2; i++) { // OPTIMISATION: 2 au lieu de 5
                         double offsetX = (random.nextDouble() - 0.5) * blizzardRadius * 2;
                         double offsetY = random.nextDouble() * spawnHeight;
                         double offsetZ = (random.nextDouble() - 0.5) * blizzardRadius * 2;
@@ -246,13 +248,13 @@ public class BlizzardAnimation {
         Block hitBlock = impactLoc.getBlock();
         // Vérifier aussi les blocs adjacents (la boule peut atterrir à côté)
         Block[] blocksToCheck = {
-            hitBlock,
-            hitBlock.getRelative(0, -1, 0),
-            hitBlock.getRelative(0, 1, 0),
-            hitBlock.getRelative(1, 0, 0),
-            hitBlock.getRelative(-1, 0, 0),
-            hitBlock.getRelative(0, 0, 1),
-            hitBlock.getRelative(0, 0, -1)
+                hitBlock,
+                hitBlock.getRelative(0, -1, 0),
+                hitBlock.getRelative(0, 1, 0),
+                hitBlock.getRelative(1, 0, 0),
+                hitBlock.getRelative(-1, 0, 0),
+                hitBlock.getRelative(0, 0, 1),
+                hitBlock.getRelative(0, 0, -1)
         };
 
         for (Block block : blocksToCheck) {
@@ -283,7 +285,8 @@ public class BlizzardAnimation {
 
     private void spawnSnowball(Location center) {
         World world = center.getWorld();
-        if (world == null) return;
+        if (world == null)
+            return;
 
         // Position aléatoire au-dessus du joueur
         double offsetX = (random.nextDouble() - 0.5) * blizzardRadius * 2;
@@ -314,7 +317,8 @@ public class BlizzardAnimation {
 
     private void triggerExplosion(Location center) {
         World world = center.getWorld();
-        if (world == null) return;
+        if (world == null)
+            return;
 
         // Effets visuels
         if (showParticles) {
@@ -347,7 +351,8 @@ public class BlizzardAnimation {
 
                         // Particules de récolte
                         if (showParticles) {
-                            owner.spawnParticle(Particle.HAPPY_VILLAGER, cropLoc.clone().add(0.5, 0.5, 0.5), 2, 0.3, 0.3, 0.3, 0);
+                            owner.spawnParticle(Particle.HAPPY_VILLAGER, cropLoc.clone().add(0.5, 0.5, 0.5), 2, 0.3,
+                                    0.3, 0.3, 0);
                         }
                     }
                 }
@@ -357,7 +362,8 @@ public class BlizzardAnimation {
 
     private void spawnGift(Location center) {
         World world = center.getWorld();
-        if (world == null) return;
+        if (world == null)
+            return;
 
         // Position aléatoire au-dessus du joueur
         double offsetX = (random.nextDouble() - 0.5) * blizzardRadius;
@@ -401,7 +407,8 @@ public class BlizzardAnimation {
      * au lieu d'avoir une task séparée
      */
     private void updateGift() {
-        if (activeGiftItem == null) return;
+        if (activeGiftItem == null)
+            return;
 
         giftTicksElapsed++;
 
@@ -414,7 +421,8 @@ public class BlizzardAnimation {
             return;
         }
 
-        // Vérifier si le joueur est proche (ramassage) - SEUL moyen d'obtenir la récompense
+        // Vérifier si le joueur est proche (ramassage) - SEUL moyen d'obtenir la
+        // récompense
         if (!activeGiftItem.isDead() && activeGiftItem.isValid() && owner.isOnline()) {
             try {
                 if (owner.getLocation().distance(activeGiftItem.getLocation()) < 1.5) {
@@ -431,7 +439,8 @@ public class BlizzardAnimation {
             }
         }
 
-        // Si le cadeau a disparu sans être ramassé par le joueur (hopper, despawn, etc.) - pas de récompense
+        // Si le cadeau a disparu sans être ramassé par le joueur (hopper, despawn,
+        // etc.) - pas de récompense
         if (activeGiftItem.isDead() || !activeGiftItem.isValid()) {
             activeGiftItem = null;
             return;
@@ -466,9 +475,8 @@ public class BlizzardAnimation {
                 meta.setOwnerProfile(profile);
                 meta.setDisplayName(ChatColor.GOLD + "" + ChatColor.BOLD + "Cadeau de Noël");
                 meta.setLore(Arrays.asList(
-                    ChatColor.GRAY + "Un cadeau magique du Blizzard!",
-                    ChatColor.AQUA + "Ramassez-le pour une récompense!"
-                ));
+                        ChatColor.GRAY + "Un cadeau magique du Blizzard!",
+                        ChatColor.AQUA + "Ramassez-le pour une récompense!"));
             } catch (Exception e) {
                 plugin.getLogger().warning("§e[Blizzard] Erreur lors de la création de la tête: " + e.getMessage());
             }
@@ -502,8 +510,10 @@ public class BlizzardAnimation {
 
     private boolean isMatureCrop(Block block) {
         Material type = block.getType();
-        if (!CROPS.contains(type)) return false;
-        if (NO_AGE_CROPS.contains(type)) return true;
+        if (!CROPS.contains(type))
+            return false;
+        if (NO_AGE_CROPS.contains(type))
+            return true;
 
         if (block.getBlockData() instanceof Ageable ageable) {
             return ageable.getAge() >= ageable.getMaximumAge();

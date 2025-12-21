@@ -64,38 +64,36 @@ public class FrogTongueAnimation {
 
     static {
         CROPS.addAll(Arrays.asList(
-            Material.WHEAT, Material.CARROTS, Material.POTATOES, Material.BEETROOTS,
-            Material.NETHER_WART, Material.COCOA, Material.SWEET_BERRY_BUSH,
-            Material.MELON, Material.PUMPKIN, Material.SUGAR_CANE, Material.CACTUS,
-            Material.BAMBOO, Material.KELP, Material.KELP_PLANT,
-            Material.TUBE_CORAL, Material.BUBBLE_CORAL, Material.BRAIN_CORAL,
-            Material.FIRE_CORAL, Material.HORN_CORAL,
-            Material.TUBE_CORAL_BLOCK, Material.BUBBLE_CORAL_BLOCK, Material.BRAIN_CORAL_BLOCK,
-            Material.FIRE_CORAL_BLOCK, Material.HORN_CORAL_BLOCK,
-            Material.WARPED_ROOTS, Material.CRIMSON_ROOTS, Material.NETHER_SPROUTS,
-            Material.TWISTING_VINES, Material.WEEPING_VINES,
-            Material.LILAC, Material.ROSE_BUSH, Material.PEONY, Material.SUNFLOWER,
-            Material.TALL_GRASS, Material.LARGE_FERN,
-            Material.OAK_SAPLING, Material.BIRCH_SAPLING, Material.JUNGLE_SAPLING,
-            Material.SPRUCE_SAPLING, Material.CHERRY_SAPLING, Material.ACACIA_SAPLING,
-            Material.DARK_OAK_SAPLING, Material.MANGROVE_PROPAGULE,
-            Material.SEA_PICKLE, Material.CHORUS_FLOWER, Material.CHORUS_PLANT
-        ));
+                Material.WHEAT, Material.CARROTS, Material.POTATOES, Material.BEETROOTS,
+                Material.NETHER_WART, Material.COCOA, Material.SWEET_BERRY_BUSH,
+                Material.MELON, Material.PUMPKIN, Material.SUGAR_CANE, Material.CACTUS,
+                Material.BAMBOO, Material.KELP, Material.KELP_PLANT,
+                Material.TUBE_CORAL, Material.BUBBLE_CORAL, Material.BRAIN_CORAL,
+                Material.FIRE_CORAL, Material.HORN_CORAL,
+                Material.TUBE_CORAL_BLOCK, Material.BUBBLE_CORAL_BLOCK, Material.BRAIN_CORAL_BLOCK,
+                Material.FIRE_CORAL_BLOCK, Material.HORN_CORAL_BLOCK,
+                Material.WARPED_ROOTS, Material.CRIMSON_ROOTS, Material.NETHER_SPROUTS,
+                Material.TWISTING_VINES, Material.WEEPING_VINES,
+                Material.LILAC, Material.ROSE_BUSH, Material.PEONY, Material.SUNFLOWER,
+                Material.TALL_GRASS, Material.LARGE_FERN,
+                Material.OAK_SAPLING, Material.BIRCH_SAPLING, Material.JUNGLE_SAPLING,
+                Material.SPRUCE_SAPLING, Material.CHERRY_SAPLING, Material.ACACIA_SAPLING,
+                Material.DARK_OAK_SAPLING, Material.MANGROVE_PROPAGULE,
+                Material.SEA_PICKLE, Material.CHORUS_FLOWER, Material.CHORUS_PLANT));
 
         NO_AGE_CROPS.addAll(Arrays.asList(
-            Material.MELON, Material.PUMPKIN, Material.SUGAR_CANE, Material.CACTUS,
-            Material.BAMBOO, Material.KELP, Material.KELP_PLANT,
-            Material.TUBE_CORAL, Material.BUBBLE_CORAL, Material.BRAIN_CORAL,
-            Material.FIRE_CORAL, Material.HORN_CORAL,
-            Material.TUBE_CORAL_BLOCK, Material.BUBBLE_CORAL_BLOCK, Material.BRAIN_CORAL_BLOCK,
-            Material.FIRE_CORAL_BLOCK, Material.HORN_CORAL_BLOCK,
-            Material.WARPED_ROOTS, Material.CRIMSON_ROOTS, Material.NETHER_SPROUTS,
-            Material.LILAC, Material.ROSE_BUSH, Material.PEONY, Material.SUNFLOWER,
-            Material.OAK_SAPLING, Material.BIRCH_SAPLING, Material.JUNGLE_SAPLING,
-            Material.SPRUCE_SAPLING, Material.CHERRY_SAPLING, Material.ACACIA_SAPLING,
-            Material.DARK_OAK_SAPLING, Material.MANGROVE_PROPAGULE,
-            Material.CHORUS_FLOWER, Material.CHORUS_PLANT, Material.SEA_PICKLE
-        ));
+                Material.MELON, Material.PUMPKIN, Material.SUGAR_CANE, Material.CACTUS,
+                Material.BAMBOO, Material.KELP, Material.KELP_PLANT,
+                Material.TUBE_CORAL, Material.BUBBLE_CORAL, Material.BRAIN_CORAL,
+                Material.FIRE_CORAL, Material.HORN_CORAL,
+                Material.TUBE_CORAL_BLOCK, Material.BUBBLE_CORAL_BLOCK, Material.BRAIN_CORAL_BLOCK,
+                Material.FIRE_CORAL_BLOCK, Material.HORN_CORAL_BLOCK,
+                Material.WARPED_ROOTS, Material.CRIMSON_ROOTS, Material.NETHER_SPROUTS,
+                Material.LILAC, Material.ROSE_BUSH, Material.PEONY, Material.SUNFLOWER,
+                Material.OAK_SAPLING, Material.BIRCH_SAPLING, Material.JUNGLE_SAPLING,
+                Material.SPRUCE_SAPLING, Material.CHERRY_SAPLING, Material.ACACIA_SAPLING,
+                Material.DARK_OAK_SAPLING, Material.MANGROVE_PROPAGULE,
+                Material.CHORUS_FLOWER, Material.CHORUS_PLANT, Material.SEA_PICKLE));
     }
 
     /**
@@ -104,25 +102,25 @@ public class FrogTongueAnimation {
     public enum FrogType {
         // Orange: Langue courte mais rapide
         WARM(Frog.Variant.WARM, 0.5, 0.6, false,
-             Color.fromRGB(255, 140, 0), "Orange"),
+                Color.fromRGB(255, 140, 0), "Orange"),
 
         // Blanc: Langue longue mais lente
         COLD(Frog.Variant.COLD, 1.4, 1.8, false,
-             Color.fromRGB(220, 220, 255), "Blanc"),
+                Color.fromRGB(220, 220, 255), "Blanc"),
 
         // Vert: Langue moyenne + rebond (2 cultures)
         TEMPERATE(Frog.Variant.TEMPERATE, 1.0, 1.2, true,
-                  Color.fromRGB(80, 200, 80), "Vert");
+                Color.fromRGB(80, 200, 80), "Vert");
 
         public final Frog.Variant variant;
-        public final double rangeMultiplier;    // Multiplicateur de portée
+        public final double rangeMultiplier; // Multiplicateur de portée
         public final double fireRateMultiplier; // Multiplicateur de cadence (plus haut = plus lent)
-        public final boolean hasBounce;         // Peut attraper 2 cultures
-        public final Color tongueColor;         // Couleur de la langue
+        public final boolean hasBounce; // Peut attraper 2 cultures
+        public final Color tongueColor; // Couleur de la langue
         public final String displayName;
 
         FrogType(Frog.Variant variant, double rangeMultiplier, double fireRateMultiplier,
-                 boolean hasBounce, Color tongueColor, String displayName) {
+                boolean hasBounce, Color tongueColor, String displayName) {
             this.variant = variant;
             this.rangeMultiplier = rangeMultiplier;
             this.fireRateMultiplier = fireRateMultiplier;
@@ -152,8 +150,8 @@ public class FrogTongueAnimation {
     }
 
     public FrogTongueAnimation(RinaEnchantsPlugin plugin, Location centerLocation, Player owner,
-                               int baseTongueRange, int baseFireRate, int duration, int frogCount,
-                               boolean showParticles, boolean clientSideOnly) {
+            int baseTongueRange, int baseFireRate, int duration, int frogCount,
+            boolean showParticles, boolean clientSideOnly) {
         this.plugin = plugin;
         this.centerLocation = centerLocation.clone();
         this.owner = owner;
@@ -180,7 +178,8 @@ public class FrogTongueAnimation {
 
     public void start() {
         World world = centerLocation.getWorld();
-        if (world == null) return;
+        if (world == null)
+            return;
 
         // Spawner les grenouilles avec différents types
         FrogType[] types = FrogType.values();
@@ -194,10 +193,9 @@ public class FrogTongueAnimation {
                 // Position fixe autour de la culture initiale
                 Location spawnLoc = centerLocation.clone();
                 spawnLoc.add(
-                    Math.cos(startAngle) * 2,
-                    0,
-                    Math.sin(startAngle) * 2
-                );
+                        Math.cos(startAngle) * 2,
+                        0,
+                        Math.sin(startAngle) * 2);
                 // S'assurer que la grenouille est sur un bloc solide
                 spawnLoc = findSafeSpawnLocation(spawnLoc, world);
 
@@ -267,6 +265,7 @@ public class FrogTongueAnimation {
 
         private int ticksAlive = 0;
         private final Set<String> harvestedBlocks = new HashSet<>();
+        private static final int MAX_CROP_SEARCH_ATTEMPTS = 30; // OPTIMISATION: Limite de recherche
 
         @Override
         public void run() {
@@ -302,15 +301,18 @@ public class FrogTongueAnimation {
                 return;
             }
 
-            // Mettre à jour chaque grenouille
-            for (FrogInstance frog : frogs) {
-                updateFrog(frog, world);
+            // OPTIMISATION: Mettre à jour les grenouilles seulement tous les 2 ticks
+            if (ticksAlive % 2 == 0) {
+                for (FrogInstance frog : frogs) {
+                    updateFrog(frog, world);
+                }
             }
 
             // Son ambient occasionnel
             if (ticksAlive % 60 == 0 && !frogs.isEmpty()) {
                 FrogInstance randomFrog = frogs.get(random.nextInt(frogs.size()));
-                owner.playSound(randomFrog.entity.getLocation(), Sound.ENTITY_FROG_AMBIENT, 0.4f, 0.9f + random.nextFloat() * 0.2f);
+                owner.playSound(randomFrog.entity.getLocation(), Sound.ENTITY_FROG_AMBIENT, 0.4f,
+                        0.9f + random.nextFloat() * 0.2f);
             }
         }
 
@@ -351,31 +353,29 @@ public class FrogTongueAnimation {
             int cy = center.getBlockY();
             int cz = center.getBlockZ();
 
-            List<Location> potentialTargets = new ArrayList<>();
+            // OPTIMISATION: Échantillonnage aléatoire au lieu de scan complet O(n³)
+            for (int attempt = 0; attempt < MAX_CROP_SEARCH_ATTEMPTS; attempt++) {
+                int x = random.nextInt(range * 2 + 1) - range;
+                int y = random.nextInt(5) - 2; // -2 à +2
+                int z = random.nextInt(range * 2 + 1) - range;
 
-            for (int x = -range; x <= range; x++) {
-                for (int y = -2; y <= 2; y++) {
-                    for (int z = -range; z <= range; z++) {
-                        // Vérifier la distance (cercle, pas carré)
-                        if (x * x + z * z > range * range) continue;
+                // Vérifier cercle
+                if (x * x + z * z > range * range)
+                    continue;
 
-                        Location blockLoc = new Location(world, cx + x, cy + y, cz + z);
-                        String key = blockLoc.getBlockX() + ":" + blockLoc.getBlockY() + ":" + blockLoc.getBlockZ();
+                int bx = cx + x, by = cy + y, bz = cz + z;
+                String key = bx + ":" + by + ":" + bz;
 
-                        if (alreadyHarvested.contains(key)) continue;
+                if (alreadyHarvested.contains(key))
+                    continue;
 
-                        Block block = blockLoc.getBlock();
-                        if (isMatureCrop(block)) {
-                            potentialTargets.add(blockLoc);
-                        }
-                    }
+                Block block = world.getBlockAt(bx, by, bz);
+                if (isMatureCrop(block)) {
+                    return block.getLocation();
                 }
             }
 
-            if (potentialTargets.isEmpty()) return null;
-
-            // Retourner une cible aléatoire
-            return potentialTargets.get(random.nextInt(potentialTargets.size()));
+            return null;
         }
 
         /**
@@ -413,7 +413,8 @@ public class FrogTongueAnimation {
                 Bukkit.getScheduler().runTaskLater(plugin, () -> {
                     Location bounceTarget = findTargetCrop(to, world, 3, harvestedBlocks);
                     if (bounceTarget != null) {
-                        String bounceKey = bounceTarget.getBlockX() + ":" + bounceTarget.getBlockY() + ":" + bounceTarget.getBlockZ();
+                        String bounceKey = bounceTarget.getBlockX() + ":" + bounceTarget.getBlockY() + ":"
+                                + bounceTarget.getBlockZ();
                         harvestedBlocks.add(bounceKey);
                         totalCropsHarvested++;
 
@@ -460,10 +461,10 @@ public class FrogTongueAnimation {
                     onComboTongue.accept(totalCombos);
                 }
 
-                // Effet de combo spectaculaire
+                // Effet de combo spectaculaire - OPTIMISATION: Réduit
                 if (showParticles) {
                     Location comboLoc = target.clone().add(0.5, 0.5, 0.5);
-                    owner.spawnParticle(Particle.TOTEM_OF_UNDYING, comboLoc, 15, 0.5, 0.5, 0.5, 0.3);
+                    owner.spawnParticle(Particle.TOTEM_OF_UNDYING, comboLoc, 8, 0.3, 0.3, 0.3, 0.2);
                 }
 
                 owner.playSound(target, Sound.ENTITY_FROG_EAT, 1.0f, 0.8f);
@@ -495,8 +496,10 @@ public class FrogTongueAnimation {
     private boolean isMatureCrop(Block block) {
         Material type = block.getType();
 
-        if (!CROPS.contains(type)) return false;
-        if (NO_AGE_CROPS.contains(type)) return true;
+        if (!CROPS.contains(type))
+            return false;
+        if (NO_AGE_CROPS.contains(type))
+            return true;
 
         if (block.getBlockData() instanceof Ageable ageable) {
             return ageable.getAge() >= ageable.getMaximumAge();

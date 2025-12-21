@@ -13,31 +13,49 @@ debug: false
 
 
 # ═══════════════════════════════════════════════════════════════════
+#                     💎 CYBERLEVELS HOOK
+# ═══════════════════════════════════════════════════════════════════
+# Intégration avec CyberLevel pour l'XP
+# Quand un enchantement proc, l'XP CyberLevel est multipliée
+
+cyberlevels-hook:
+  # Activer l'intégration CyberLevel
+  enabled: true
+
+
+
+# ═══════════════════════════════════════════════════════════════════
 #                     🐝 BEE COLLECTOR / APICULTEUR
 # ═══════════════════════════════════════════════════════════════════
 # Des abeilles apparaissent et récoltent les cultures automatiquement.
 # Chaque abeille a un comportement unique et aléatoire.
 
 bee-collector:
-  
+
   enabled: true
   enchant-id: "bee_collector"
-  
+
+  # XP CyberLevel par culture récoltée
+  cyber-level-xp-per-block: 200
+
   # Visible uniquement par le joueur (recommandé pour 500+ joueurs)
   client-side-only: true
-  
+
   # ─────────────────────────────────────────────────────────────────
   #                         PARAMÈTRES DE BASE
   # ─────────────────────────────────────────────────────────────────
-  
-  # Rayon de base (blocs). Rayon réel = radius + (niveau / 3)
-  radius: 3
-  
+
+  # Rayon de base (blocs). Rayon réel = radius + (niveau / 2)
+  radius: 5
+
   # Nombre d'abeilles de base. Réel = bee-count + (niveau / 2)
-  bee-count: 3
-  
-  # Max cultures par activation. Réel = max-crops + (niveau * 2)
-  max-crops: 10
+  bee-count: 5
+
+  # Max cultures par activation. Réel = max-crops + (niveau * 3)
+  max-crops: 20
+
+  # Vitesse des abeilles (multiplicateur). 1.0 = normal, 2.0 = 2x plus rapide, etc.
+  bee-speed: 2.0
   
   # ─────────────────────────────────────────────────────────────────
   #                         EFFETS
@@ -66,17 +84,20 @@ bee-collector:
 #   - Niveau 400: 100% de combo (capped)
 
 panda-roll:
-  
+
   enabled: true
   enchant-id: "panda_roll"
-  
+
+  # XP CyberLevel par culture récoltée
+  cyber-level-xp-per-block: 150
+
   # Visible uniquement par le joueur (recommandé pour 500+ joueurs)
   client-side-only: true
-  
+
   # ─────────────────────────────────────────────────────────────────
   #                         PARAMÈTRES DE BASE
   # ─────────────────────────────────────────────────────────────────
-  
+
   # Distance de roulade (en blocs)
   roll-distance: 5
   
@@ -123,17 +144,20 @@ panda-roll:
 # - Durée: base-duration → max-duration (interpolé)
 
 allay-laser:
-  
+
   enabled: true
   enchant-id: "allay_laser"
-  
+
+  # XP CyberLevel par culture récoltée
+  cyber-level-xp-per-block: 250
+
   # Visible uniquement par le joueur (recommandé pour 500+ joueurs)
   client-side-only: true
-  
+
   # ─────────────────────────────────────────────────────────────────
   #                         PARAMÈTRES DE BASE
   # ─────────────────────────────────────────────────────────────────
-  
+
   # Niveau maximum (1000 recommandé pour ce système)
   max-level: 1000
   
@@ -269,9 +293,9 @@ allay-laser:
 # ═══════════════════════════════════════════════════════════════════
 #
 # BEE COLLECTOR (max level 10):
-#   Niveau 1:  Rayon 3, 3 abeilles, max 12 cultures
-#   Niveau 5:  Rayon 4, 5 abeilles, max 20 cultures
-#   Niveau 10: Rayon 6, 8 abeilles, max 30 cultures
+#   Niveau 1:  Rayon 5, 5 abeilles, max 23 cultures
+#   Niveau 5:  Rayon 7, 7 abeilles, max 35 cultures
+#   Niveau 10: Rayon 10, 10 abeilles, max 50 cultures
 #
 # PANDA ROLL (combo-chance-per-level: 0.25):
 #   Niveau 1:   0.25% chance de combo
@@ -307,17 +331,20 @@ allay-laser:
 # Tous les paramètres augmentent avec le niveau de l'enchantement.
 
 ravager-stampede:
-  
+
   enabled: true
   enchant-id: "ravager_stampede"
-  
+
+  # XP CyberLevel par culture récoltée
+  cyber-level-xp-per-block: 300
+
   # Visible uniquement par le joueur (recommandé pour 500+ joueurs)
   client-side-only: true
-  
+
   # ─────────────────────────────────────────────────────────────────
   #                         PARAMÈTRES DE BASE
   # ─────────────────────────────────────────────────────────────────
-  
+
   # Niveau maximum (100 recommandé pour ce système)
   max-level: 100
   
@@ -370,3 +397,715 @@ ravager-stampede:
   # Message de fin (statistiques de récolte)
   message: true
   message-text: "&c&l⚔ &4Le Ravageur a dévasté &c{count} &4cultures avec &c{stomps} &4piétinements!"
+
+
+# ═══════════════════════════════════════════════════════════════════
+#                  ❄ BLIZZARD ÉTERNEL / ETERNAL BLIZZARD
+# ═══════════════════════════════════════════════════════════════════
+# Un blizzard magique envahit la zone!
+#
+# FONCTIONNALITÉS:
+# 1. BLIZZARD - Des boules de neige tombent du ciel de façon chaotique
+# 2. EXPLOSION - Micro-chance que les boules explosent et récoltent (3x3)
+# 3. CADEAUX - Chance rare qu'un cadeau de Noël tombe du ciel!
+#
+# SCALING (10 000 niveaux max):
+# - Durée: 5s + (niveau / 1000)s → max 15s au niveau 10000
+# - Snowballs/seconde: (niveau / 100) + 1 → max 101 au niveau 10000
+# - Chance d'explosion: 0.1% par boule de neige
+# - Chance de cadeau: configurable
+
+blizzard-eternal:
+
+  enabled: true
+  enchant-id: "blizzard_eternal"
+
+  # XP CyberLevel par culture récoltée
+  cyber-level-xp-per-block: 200
+
+  # Visible uniquement par le joueur (recommandé pour 500+ joueurs)
+  client-side-only: true
+
+  # ─────────────────────────────────────────────────────────────────
+  #                         PARAMÈTRES DE BASE
+  # ─────────────────────────────────────────────────────────────────
+
+  # Niveau maximum
+  max-level: 10000
+
+  # ─────────────────────────────────────────────────────────────────
+  #                      DURÉE DU BLIZZARD
+  # ─────────────────────────────────────────────────────────────────
+  # Durée = base-duration + (niveau / 1000) secondes
+  # Exemple: niveau 5000 = 5 + 5 = 10 secondes
+
+  base-duration: 5
+  max-duration: 15
+
+  # ─────────────────────────────────────────────────────────────────
+  #                      INTENSITÉ (SNOWBALLS)
+  # ─────────────────────────────────────────────────────────────────
+  # Nombre de boules de neige par seconde = (niveau / snowballs-divisor) + base
+  # Exemple avec divisor=100, base=1: niveau 5000 = 50+1 = 51 snowballs/s
+  # Cap maximum pour éviter le lag à haut niveau
+
+  snowballs-divisor: 100
+  base-snowballs-per-second: 1
+  max-snowballs-per-second: 50
+
+  # Rayon du blizzard autour du joueur (en blocs)
+  blizzard-radius: 8
+
+  # Hauteur de spawn des snowballs au-dessus du joueur
+  spawn-height: 10
+
+  # ─────────────────────────────────────────────────────────────────
+  #                      EXPLOSIONS DE RÉCOLTE
+  # ─────────────────────────────────────────────────────────────────
+  # Chance qu'une boule de neige déclenche une explosion de récolte
+  # En pourcentage (0.1 = 0.1%)
+
+  explosion-chance: 0.1
+  explosion-radius: 3
+
+  # ─────────────────────────────────────────────────────────────────
+  #                      SYSTÈME DE CADEAUX
+  # ─────────────────────────────────────────────────────────────────
+  # Chance qu'un cadeau tombe du ciel pendant le blizzard
+  # En pourcentage (0.5 = 0.5% par tick)
+
+  gift:
+    enabled: true
+    chance: 0.5
+
+    # Texture de la tête du cadeau (base64)
+    texture: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTI5MTljNjczMTdjNzY3ODQzOGZmNTIwYzk4ZGRlMGUzYjRkNjg3NjljODkzOGE1YTNkZTI5NjhlZGZjNzMxNCJ9fX0="
+
+    # Commandes exécutées quand le joueur ramasse le cadeau
+    # %player% sera remplacé par le nom du joueur
+    commands:
+      - "cyberlevel giveExp 200 %player%"
+      - "tellraw %player% {\"text\":\"§b❄ §fVous avez reçu un §6Cadeau de Noël §f! §a+200 XP CyberLevel\"}"
+
+    # Message affiché au ramassage
+    pickup-message: "&b❄ &fVous avez trouvé un &6Cadeau de Noël&f!"
+
+  # ─────────────────────────────────────────────────────────────────
+  #                         EFFETS
+  # ─────────────────────────────────────────────────────────────────
+
+  particles: true
+  sound: true
+
+  # Message de début (quand le blizzard commence)
+  start-message: true
+  start-message-text: "&b❄ &fUn &bBlizzard Éternel &fenvahit la zone!"
+
+  # Message de fin
+  message: true
+  message-text: "&b❄ &fLe blizzard a récolté &b{count} &fcultures!"
+
+
+# ═══════════════════════════════════════════════════════════════════
+#                  🐸 FROG TONGUE LASH / COUP DE LANGUE
+# ═══════════════════════════════════════════════════════════════════
+# Des grenouilles apparaissent et attrapent les cultures avec leur
+# langue élastique ultra satisfaisante!
+#
+# 3 TYPES DE GRENOUILLES:
+# - 🟠 Orange (WARM) = Langue courte mais RAPIDE
+# - ⚪ Blanc (COLD) = Langue LONGUE mais lente
+# - 🟢 Vert (TEMPERATE) = Langue moyenne + REBOND (2 cultures!)
+#
+# SYSTÈME DE COMBO:
+# Quand 3 grenouilles lèchent la même zone → COMBO TONGUE!
+# Effet visuel spectaculaire + son satisfaisant
+#
+# SCALING (100 niveaux max):
+# - Portée de langue: base → max (modifié par type de grenouille)
+# - Cadence de tir: diminue avec le niveau (plus rapide)
+# - Durée: augmente avec le niveau
+# - Nombre de grenouilles: 3 → 6
+
+frog-tongue-lash:
+
+  enabled: true
+  enchant-id: "frog_tongue_lash"
+
+  # XP CyberLevel par culture récoltée
+  cyber-level-xp-per-block: 175
+
+  # Visible uniquement par le joueur (recommandé pour 500+ joueurs)
+  client-side-only: true
+
+  # ─────────────────────────────────────────────────────────────────
+  #                         PARAMÈTRES DE BASE
+  # ─────────────────────────────────────────────────────────────────
+
+  # Niveau maximum
+  max-level: 100
+
+  # ─────────────────────────────────────────────────────────────────
+  #                      PORTÉE DE LA LANGUE
+  # ─────────────────────────────────────────────────────────────────
+  # Portée de base (en blocs). Modifiée par le type de grenouille:
+  # - Orange: x0.5 (courte)
+  # - Blanc: x1.4 (longue)
+  # - Vert: x1.0 (normale)
+
+  base-tongue-range: 4
+  max-tongue-range: 8
+
+  # ─────────────────────────────────────────────────────────────────
+  #                      CADENCE DE TIR (en ticks)
+  # ─────────────────────────────────────────────────────────────────
+  # Intervalle de base entre chaque coup de langue
+  # Modifié par le type de grenouille:
+  # - Orange: x0.6 (très rapide)
+  # - Blanc: x1.8 (lente)
+  # - Vert: x1.2 (normale)
+
+  base-fire-rate: 15
+  min-fire-rate: 5
+
+  # ─────────────────────────────────────────────────────────────────
+  #                      DURÉE (en ticks)
+  # ─────────────────────────────────────────────────────────────────
+  # Combien de temps les grenouilles restent actives
+
+  base-duration: 100
+  max-duration: 300
+
+  # ─────────────────────────────────────────────────────────────────
+  #                      NOMBRE DE GRENOUILLES
+  # ─────────────────────────────────────────────────────────────────
+  # Nombre de grenouilles qui apparaissent
+  # Au niveau max, vous aurez les 3 types x2 = 6 grenouilles
+
+  base-frog-count: 3
+  max-frog-count: 6
+
+  # ─────────────────────────────────────────────────────────────────
+  #                         EFFETS
+  # ─────────────────────────────────────────────────────────────────
+
+  particles: true
+  sound: true
+
+  # Message de début (quand les grenouilles apparaissent)
+  start-message: true
+  start-message-text: "&a&l🐸 &2Des grenouilles affamées apparaissent!"
+
+  # Message de fin (statistiques de récolte)
+  message: true
+  message-text: "&a&l🐸 &2Les grenouilles ont attrapé &a{count} &2cultures!"
+  combo-suffix: " &7(&a{combos} combos&7)"
+
+  # Message de combo (quand 3 grenouilles lèchent la même zone)
+  combo-message: true
+  combo-message-text: "&a&l🐸 &2&lCOMBO TONGUE! &ax{combo}"
+
+
+# ═══════════════════════════════════════════════════════════════════
+#                  🔊 WARDEN PULSE / ONDE DU WARDEN
+# ═══════════════════════════════════════════════════════════════════
+# Le Warden émerge du sol et émet des ondes soniques concentriques
+# qui récoltent les cultures en vagues successives!
+#
+# MÉCANIQUE:
+# 1. ÉMERGENCE - Le Warden sort du sol avec animation sculk
+# 2. PULSES - Ondes soniques concentriques qui s'étendent
+# 3. RÉSONANCE - Zone touchée 2+ fois = bonus!
+#
+# L'effet est purement visuel: les cercles de particules sculk
+# s'étendent et récoltent tout sur leur passage.
+#
+# SCALING (2000 niveaux max):
+# - Nombre de pulses: 3 → 10
+# - Rayon max: 8 → 25 blocs
+# - Intervalle: 1.5s → 0.5s (plus rapide)
+# - Vitesse d'expansion: 8 → 20 blocs/s
+
+warden-pulse:
+
+  enabled: true
+  enchant-id: "warden_pulse"
+
+  # XP CyberLevel par culture récoltée
+  cyber-level-xp-per-block: 225
+
+  # Visible uniquement par le joueur (recommandé pour 500+ joueurs)
+  client-side-only: true
+
+  # ─────────────────────────────────────────────────────────────────
+  #                         PARAMÈTRES DE BASE
+  # ─────────────────────────────────────────────────────────────────
+
+  # Niveau maximum (2000 recommandé pour cet enchantement)
+  max-level: 2000
+
+  # ─────────────────────────────────────────────────────────────────
+  #                      NOMBRE DE PULSES
+  # ─────────────────────────────────────────────────────────────────
+  # Nombre d'ondes soniques émises par le Warden
+
+  base-pulse-count: 3
+  max-pulse-count: 10
+
+  # ─────────────────────────────────────────────────────────────────
+  #                      INTERVALLE ENTRE PULSES (ticks)
+  # ─────────────────────────────────────────────────────────────────
+  # Temps entre chaque émission de pulse
+  # Plus le niveau est haut, plus les pulses sont rapprochés
+
+  base-pulse-interval: 30
+  min-pulse-interval: 10
+
+  # ─────────────────────────────────────────────────────────────────
+  #                      RAYON MAXIMUM DES PULSES
+  # ─────────────────────────────────────────────────────────────────
+  # Distance maximale atteinte par chaque onde sonique (en blocs)
+
+  base-max-radius: 8
+  max-max-radius: 25
+
+  # ─────────────────────────────────────────────────────────────────
+  #                      VITESSE D'EXPANSION (blocs/seconde)
+  # ─────────────────────────────────────────────────────────────────
+  # Vitesse à laquelle les ondes se propagent
+
+  base-expand-speed: 8
+  max-expand-speed: 20
+
+  # ─────────────────────────────────────────────────────────────────
+  #                         EFFETS
+  # ─────────────────────────────────────────────────────────────────
+
+  particles: true
+  sound: true
+
+  # Message de début (quand le Warden émerge)
+  start-message: true
+  start-message-text: "&8&l🔊 &7Le &8Warden &7émerge des profondeurs..."
+
+  # Message de fin (statistiques de récolte)
+  message: true
+  message-text: "&8&l🔊 &7Les ondes du Warden ont récolté &8{count} &7cultures!"
+  resonance-suffix: " &7(&5{resonances} résonances&7)"
+
+  # Message de résonance (affiché toutes les 5 résonances)
+  resonance-message: true
+  resonance-message-text: "&8&l🔊 &5RÉSONANCE! &7x{count}"
+
+
+# ═══════════════════════════════════════════════════════════════════
+#                   CONFIGURATION RIVALHARVESTERHOES
+# ═══════════════════════════════════════════════════════════════════
+#
+# Pour RivalHarvesterHoes enchants.yml, ajoutez:
+#
+# frog_tongue_lash:
+#   enabled: true
+#   name: "&a🐸 Coup de Langue"
+#   description:
+#     - "&7Des grenouilles attrapent les cultures"
+#     - "&7avec leur langue élastique!"
+#     - "&6Système de combo inclus!"
+#   max-level: 100
+#   chance-per-level: 0.5
+#   base-chance: 2.0
+#   cost-per-level: 2000
+#   base-cost: 4000
+#
+# warden_pulse:
+#   enabled: true
+#   name: "&8🔊 Onde du Warden"
+#   description:
+#     - "&7Le Warden émet des ondes soniques"
+#     - "&7qui récoltent tout sur leur passage!"
+#     - "&5Système de résonance inclus!"
+#   max-level: 2000
+#   chance-per-level: 0.05
+#   base-chance: 1.0
+#   cost-per-level: 500
+#   base-cost: 5000
+#
+# golem_factory:
+#   enabled: true
+#   name: "&7🤖 Usine à Golems"
+#   description:
+#     - "&7Des mini-golems patrouillent"
+#     - "&7et récoltent les cultures!"
+#     - "&6Système de fusion inclus!"
+#   max-level: 500
+#   chance-per-level: 0.2
+#   base-chance: 1.5
+#   cost-per-level: 1000
+#   base-cost: 3000
+#
+# ═══════════════════════════════════════════════════════════════════
+
+
+# ═══════════════════════════════════════════════════════════════════
+#                  🤖 GOLEM FACTORY / USINE À GOLEMS
+# ═══════════════════════════════════════════════════════════════════
+# Des Iron Golems miniatures apparaissent et patrouillent la zone!
+# Quand 2 golems se rencontrent, ils peuvent fusionner en un
+# golem GÉANT qui fait un ground slam dévastateur!
+#
+# MÉCANIQUE:
+# 1. SPAWN - Mini-golems apparaissent (taille réduite via SCALE)
+# 2. PATROUILLE - Les golems se déplacent et récoltent
+# 3. FUSION - 2 golems proches peuvent fusionner!
+# 4. GROUND SLAM - Le golem géant frappe le sol (récolte massive)
+#
+# SCALING (500 niveaux max):
+# - Nombre de golems: 2 → 6
+# - Taille (scale): 0.4 → 0.7
+# - Chance de fusion: 5% → 25%
+# - Rayon du slam: 4 → 10 blocs
+
+golem-factory:
+
+  enabled: true
+  enchant-id: "golem_factory"
+
+  # XP CyberLevel par culture récoltée
+  cyber-level-xp-per-block: 200
+
+  # Visible uniquement par le joueur (recommandé pour 500+ joueurs)
+  client-side-only: true
+
+  # ─────────────────────────────────────────────────────────────────
+  #                         PARAMÈTRES DE BASE
+  # ─────────────────────────────────────────────────────────────────
+
+  # Niveau maximum
+  max-level: 500
+
+  # ─────────────────────────────────────────────────────────────────
+  #                      NOMBRE DE GOLEMS
+  # ─────────────────────────────────────────────────────────────────
+
+  base-golem-count: 2
+  max-golem-count: 6
+
+  # ─────────────────────────────────────────────────────────────────
+  #                      TAILLE DES GOLEMS (SCALE)
+  # ─────────────────────────────────────────────────────────────────
+  # Échelle des mini-golems (1.0 = taille normale)
+  # Les golems géants font scale x2.5
+
+  base-scale: 0.4
+  max-scale: 0.7
+
+  # ─────────────────────────────────────────────────────────────────
+  #                      RAYON DE PATROUILLE
+  # ─────────────────────────────────────────────────────────────────
+  # Zone dans laquelle les golems se déplacent (en blocs)
+
+  base-patrol-radius: 5
+  max-patrol-radius: 12
+
+  # ─────────────────────────────────────────────────────────────────
+  #                      DURÉE (en ticks)
+  # ─────────────────────────────────────────────────────────────────
+
+  base-duration: 100
+  max-duration: 300
+
+  # ─────────────────────────────────────────────────────────────────
+  #                      SYSTÈME DE FUSION
+  # ─────────────────────────────────────────────────────────────────
+  # Chance que 2 golems proches fusionnent (en %)
+  # La fusion crée un golem géant qui fait un ground slam!
+
+  base-merge-chance: 5.0
+  max-merge-chance: 25.0
+
+  # ─────────────────────────────────────────────────────────────────
+  #                      GROUND SLAM
+  # ─────────────────────────────────────────────────────────────────
+  # Rayon de l'onde de choc du slam du golem géant
+
+  base-slam-radius: 4
+  max-slam-radius: 10
+
+  # ─────────────────────────────────────────────────────────────────
+  #                         EFFETS
+  # ─────────────────────────────────────────────────────────────────
+
+  particles: true
+  sound: true
+
+  # Message de début
+  start-message: true
+  start-message-text: "&7&l🤖 &f{count} mini-golems sortent de l'usine!"
+
+  # Message de fusion
+  merge-message: true
+  merge-message-text: "&7&l🤖 &6&lFUSION! &fGolem géant créé!"
+
+  # Message de fin
+  message: true
+  message-text: "&7&l🤖 &fLes golems ont récolté &7{count} &fcultures!"
+  merge-suffix: " &7(&6{merges} fusion(s)&7)"
+
+
+# ═══════════════════════════════════════════════════════════════════
+#                  🌊 AXOLOTL TSUNAMI / TSUNAMI D'AXOLOTLS
+# ═══════════════════════════════════════════════════════════════════
+# Une vague d'axolotls colorés déferle sur le champ et récolte
+# tout sur son passage! Direction aléatoire à chaque proc.
+#
+# MÉCANIQUE:
+# 1. VAGUE - Direction aléatoire (pas basée sur le regard)
+# 2. AXOLOTLS - Ligne d'axolotls surfant sur la vague
+# 3. BLEU RARE - L'axolotl bleu = récolte x2 dans sa zone!
+# 4. PLAY DEAD - Effet bonus mignon quand un axolotl joue le mort
+# 5. RETOUR - À haut niveau, la vague revient dans l'autre sens!
+#
+# SCALING (3000 niveaux max):
+# - Largeur de la vague: 5 → 15 blocs
+# - Distance parcourue: 10 → 30 blocs
+# - Nombre d'axolotls: 3 → 10
+# - Chance d'axolotl bleu: 2% → 15%
+# - Retour de vague: activé à 50%+ du niveau max
+
+axolotl-tsunami:
+
+  enabled: true
+  enchant-id: "axolotl_tsunami"
+
+  # XP CyberLevel par culture récoltée
+  cyber-level-xp-per-block: 275
+
+  # Visible uniquement par le joueur (recommandé pour 500+ joueurs)
+  client-side-only: true
+
+  # ─────────────────────────────────────────────────────────────────
+  #                         PARAMÈTRES DE BASE
+  # ─────────────────────────────────────────────────────────────────
+
+  # Niveau maximum (3000 recommandé pour cet enchantement)
+  max-level: 3000
+
+  # ─────────────────────────────────────────────────────────────────
+  #                      LARGEUR DE LA VAGUE
+  # ─────────────────────────────────────────────────────────────────
+  # Nombre de blocs de large de la vague
+
+  base-wave-width: 5
+  max-wave-width: 15
+
+  # ─────────────────────────────────────────────────────────────────
+  #                      DISTANCE PARCOURUE
+  # ─────────────────────────────────────────────────────────────────
+  # Distance totale que la vague parcourt (en blocs)
+
+  base-distance: 10
+  max-distance: 30
+
+  # ─────────────────────────────────────────────────────────────────
+  #                      NOMBRE D'AXOLOTLS
+  # ─────────────────────────────────────────────────────────────────
+  # Combien d'axolotls surfent sur la vague
+
+  base-axolotl-count: 3
+  max-axolotl-count: 10
+
+  # ─────────────────────────────────────────────────────────────────
+  #                      AXOLOTL BLEU (RARE)
+  # ─────────────────────────────────────────────────────────────────
+  # Chance qu'un axolotl soit bleu (récolte x2 dans sa zone!)
+  # En pourcentage
+
+  base-blue-chance: 2.0
+  max-blue-chance: 15.0
+
+  # ─────────────────────────────────────────────────────────────────
+  #                      PLAY DEAD
+  # ─────────────────────────────────────────────────────────────────
+  # Chance qu'un axolotl joue le mort (effet visuel mignon)
+
+  play-dead-chance: 5.0
+
+  # ─────────────────────────────────────────────────────────────────
+  #                      RETOUR DE VAGUE
+  # ─────────────────────────────────────────────────────────────────
+  # À partir de quel ratio de niveau (0.0 à 1.0) la vague revient
+  # Exemple: 0.5 = la vague retourne à partir du niveau 1500 (50% de 3000)
+
+  return-wave-threshold: 0.5
+
+  # ─────────────────────────────────────────────────────────────────
+  #                         EFFETS
+  # ─────────────────────────────────────────────────────────────────
+
+  particles: true
+  sound: true
+
+  # Message de début (quand la vague démarre)
+  start-message: true
+  start-message-text: "&b&l🌊 &3Une vague d'axolotls déferle!"
+
+  # Message de bonus bleu
+  blue-bonus-message: true
+  blue-bonus-message-text: "&b&l🌊 &9Axolotl bleu: &b+{count} bonus!"
+
+  # Message de fin (statistiques de récolte)
+  message: true
+  message-text: "&b&l🌊 &3Le tsunami a emporté &b{count} &3cultures!"
+  blue-suffix: " &7(&9+{blue} bonus bleu&7)"
+
+
+# ═══════════════════════════════════════════════════════════════════
+#                   CONFIGURATION RIVALHARVESTERHOES
+# ═══════════════════════════════════════════════════════════════════
+#
+# Pour RivalHarvesterHoes enchants.yml, ajoutez:
+#
+# axolotl_tsunami:
+#   enabled: true
+#   name: "&b🌊 Tsunami d'Axolotls"
+#   description:
+#     - "&7Une vague d'axolotls déferle"
+#     - "&7et récolte tout sur son passage!"
+#     - "&9Axolotl bleu = bonus x2!"
+#   max-level: 3000
+#   chance-per-level: 0.03
+#   base-chance: 0.5
+#   cost-per-level: 300
+#   base-cost: 5000
+#
+# ═══════════════════════════════════════════════════════════════════
+
+
+# ═══════════════════════════════════════════════════════════════════
+#                  👻 PHANTOM STRIKE / FRAPPE DU PHANTOM
+# ═══════════════════════════════════════════════════════════════════
+# Un Phantom GÉANT (scale x2) surgit des ombres et effectue des
+# piqués dévastateurs sur les cultures!
+#
+# MÉCANIQUE:
+# 1. APPARITION - Le Phantom émerge avec effet sombre
+# 2. VOL EN 8 - Vol en figure-8 dynamique au-dessus du champ
+# 3. PIQUÉS - Plonge sur les cultures pour les récolter
+# 4. IMPACT - Onde de choc de particules d'âme à l'impact
+# 5. FINAL - Balayage massif avant disparition
+#
+# SCALING (5000 niveaux max):
+# - Durée du vol: 5s → 20s
+# - Rayon de vol: 5 → 15 blocs
+# - Intervalle piqués: 2s → 0.75s (plus fréquent)
+# - Rayon d'impact: 3 → 8 blocs
+
+ender-dragon-breath:
+
+  enabled: true
+  enchant-id: "ender_dragon_breath"
+
+  # XP CyberLevel par culture récoltée
+  cyber-level-xp-per-block: 300
+
+  # Visible uniquement par le joueur (recommandé pour 500+ joueurs)
+  client-side-only: true
+
+  # ─────────────────────────────────────────────────────────────────
+  #                         PARAMÈTRES DE BASE
+  # ─────────────────────────────────────────────────────────────────
+
+  # Niveau maximum (5000 recommandé pour cet enchantement)
+  max-level: 5000
+
+  # ─────────────────────────────────────────────────────────────────
+  #                      TAILLE DU PHANTOM (SCALE)
+  # ─────────────────────────────────────────────────────────────────
+  # Échelle du phantom (multipliée par 5 en interne)
+  # 0.4 = phantom géant impressionnant!
+
+  dragon-scale: 0.4
+
+  # ─────────────────────────────────────────────────────────────────
+  #                      DURÉE DU VOL (en ticks)
+  # ─────────────────────────────────────────────────────────────────
+  # Combien de temps le phantom reste actif
+  # 20 ticks = 1 seconde
+
+  base-flight-duration: 100
+  max-flight-duration: 400
+
+  # ─────────────────────────────────────────────────────────────────
+  #                      FIGURE-8 DE VOL
+  # ─────────────────────────────────────────────────────────────────
+  # Rayon de la figure-8 (en blocs)
+
+  base-spiral-radius: 5.0
+  max-spiral-radius: 15.0
+
+  # Vitesse de vol (radians par tick)
+  # Plus élevé = vol plus rapide
+  spiral-speed: 0.1
+
+  # ─────────────────────────────────────────────────────────────────
+  #                      INTERVALLE DE PIQUÉ (ticks)
+  # ─────────────────────────────────────────────────────────────────
+  # Temps entre chaque piqué d'attaque
+  # Diminue avec le niveau (plus fréquent)
+
+  base-breath-interval: 40
+  min-breath-interval: 15
+
+  # ─────────────────────────────────────────────────────────────────
+  #                      RAYON D'IMPACT
+  # ─────────────────────────────────────────────────────────────────
+  # Taille de la zone de récolte à l'impact (en blocs)
+
+  base-breath-radius: 3.0
+  max-breath-radius: 8.0
+
+  # ─────────────────────────────────────────────────────────────────
+  #                      DURÉE DES ZONES (ticks)
+  # ─────────────────────────────────────────────────────────────────
+  # Non utilisé pour le Phantom (récolte instantanée à l'impact)
+
+  base-breath-zone-duration: 40
+  max-breath-zone-duration: 100
+
+  # ─────────────────────────────────────────────────────────────────
+  #                         EFFETS
+  # ─────────────────────────────────────────────────────────────────
+
+  particles: true
+  sound: true
+
+  # Message de début (quand le phantom apparaît)
+  start-message: true
+  start-message-text: "&8&l👻 &7Un Phantom géant surgit des ombres!"
+
+  # Message de fin (statistiques de récolte)
+  message: true
+  message-text: "&8&l👻 &7Le Phantom a fauché &8{count} &7cultures!"
+  cloud-suffix: " &7(&8{clouds} piqués&7)"
+
+
+# ═══════════════════════════════════════════════════════════════════
+#                   CONFIGURATION RIVALHARVESTERHOES
+# ═══════════════════════════════════════════════════════════════════
+#
+# Pour RivalHarvesterHoes enchants.yml, ajoutez:
+#
+# ender_dragon_breath:
+#   enabled: true
+#   name: "&8👻 Frappe du Phantom"
+#   description:
+#     - "&7Un Phantom géant plonge"
+#     - "&7et fauche les cultures!"
+#     - "&8Piqués dévastateurs!"
+#   max-level: 5000
+#   chance-per-level: 0.02
+#   base-chance: 0.3
+#   cost-per-level: 200
+#   base-cost: 8000
+#
+# ═══════════════════════════════════════════════════════════════════

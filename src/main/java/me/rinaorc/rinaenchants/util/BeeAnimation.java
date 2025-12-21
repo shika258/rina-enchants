@@ -49,12 +49,12 @@ public class BeeAnimation {
     private final double phaseX;
     private final double phaseY;
     private final double phaseZ;
-    
+
     private static final double ARRIVAL_DISTANCE = 1.0;
 
     public BeeAnimation(RinaEnchantsPlugin plugin, Location startLocation, List<Location> targetCrops,
-                        boolean showParticles, int beeId, Player owner, boolean clientSideOnly,
-                        double speedMultiplier) {
+            boolean showParticles, int beeId, Player owner, boolean clientSideOnly,
+            double speedMultiplier) {
         this.plugin = plugin;
         this.startLocation = startLocation.clone();
         this.targetCrops = targetCrops;
@@ -70,19 +70,20 @@ public class BeeAnimation {
         // ═══════════════════════════════════════════════════════════
         // PARAMÈTRES UNIQUES pour chaque abeille (vraiment aléatoires)
         // Vitesse de base multipliée par le config speedMultiplier
+        // OPTIMISATION: Vitesse doublée car update tous les 2 ticks
         // ═══════════════════════════════════════════════════════════
-        this.baseSpeed = (0.2 + random.nextDouble() * 0.25) * configSpeedMultiplier; // Base 0.2-0.45 × multiplier
-        
+        this.baseSpeed = (0.4 + random.nextDouble() * 0.5) * configSpeedMultiplier; // OPTIMISATION: Doublée
+
         // Amplitudes différentes pour chaque axe
-        this.waveAmplitudeX = 0.02 + random.nextDouble() * 0.1;  // 0.02 à 0.12
+        this.waveAmplitudeX = 0.02 + random.nextDouble() * 0.1; // 0.02 à 0.12
         this.waveAmplitudeY = 0.03 + random.nextDouble() * 0.12; // 0.03 à 0.15
-        this.waveAmplitudeZ = 0.02 + random.nextDouble() * 0.1;  // 0.02 à 0.12
-        
+        this.waveAmplitudeZ = 0.02 + random.nextDouble() * 0.1; // 0.02 à 0.12
+
         // Fréquences différentes pour chaque axe (crée des mouvements complexes)
         this.waveFrequencyX = 0.2 + random.nextDouble() * 0.4; // 0.2 à 0.6
         this.waveFrequencyY = 0.15 + random.nextDouble() * 0.35; // 0.15 à 0.5
         this.waveFrequencyZ = 0.25 + random.nextDouble() * 0.4; // 0.25 à 0.65
-        
+
         // Phases de départ différentes (décale les mouvements)
         this.phaseX = random.nextDouble() * Math.PI * 2;
         this.phaseY = random.nextDouble() * Math.PI * 2;
@@ -94,10 +95,12 @@ public class BeeAnimation {
     }
 
     public void start() {
-        if (targetCrops.isEmpty()) return;
+        if (targetCrops.isEmpty())
+            return;
 
         World world = startLocation.getWorld();
-        if (world == null) return;
+        if (world == null)
+            return;
 
         // Essayer de créer l'entité abeille
         try {
@@ -140,15 +143,15 @@ public class BeeAnimation {
     }
 
     private class BeeMovementTask extends BukkitRunnable {
-        
+
         private int ticksAlive = 0;
         private static final int MAX_TICKS = 300;
-        
+
         // Variation de vitesse dynamique
         private double speedMultiplier = 1.0;
         private int speedChangeCounter = 0;
         private int nextSpeedChange = 15 + random.nextInt(25);
-        
+
         // Déviation temporaire aléatoire
         private double deviationX = 0;
         private double deviationZ = 0;
@@ -163,14 +166,19 @@ public class BeeAnimation {
                 cancel();
                 return;
             }
-            
+
+            // OPTIMISATION: Skip les ticks impairs (update tous les 2 ticks)
+            if (ticksAlive % 2 != 0) {
+                return;
+            }
+
             // Vérifier si le propriétaire est toujours en ligne
             if (!owner.isOnline()) {
                 cleanup();
                 cancel();
                 return;
             }
-            
+
             // Changement de vitesse aléatoire
             speedChangeCounter++;
             if (speedChangeCounter >= nextSpeedChange) {
@@ -178,7 +186,7 @@ public class BeeAnimation {
                 speedChangeCounter = 0;
                 nextSpeedChange = 15 + random.nextInt(25);
             }
-            
+
             // Déviation aléatoire occasionnelle (simule l'abeille qui "explore")
             deviationCounter++;
             if (deviationCounter >= 30 + random.nextInt(40)) {
@@ -206,10 +214,9 @@ public class BeeAnimation {
 
             // Cible avec légère variation
             Location target = targetCrops.get(currentTargetIndex).clone().add(
-                0.5 + (random.nextDouble() - 0.5) * 0.4,
-                0.5,
-                0.5 + (random.nextDouble() - 0.5) * 0.4
-            );
+                    0.5 + (random.nextDouble() - 0.5) * 0.4,
+                    0.5,
+                    0.5 + (random.nextDouble() - 0.5) * 0.4);
             Location current = beeEntity.getLocation();
 
             Vector direction = target.toVector().subtract(current.toVector());
@@ -225,7 +232,7 @@ public class BeeAnimation {
                 }
 
                 currentTargetIndex++;
-                
+
                 // Pause aléatoire à chaque récolte
                 if (random.nextDouble() < 0.4) {
                     speedMultiplier = 0.3;
@@ -235,50 +242,47 @@ public class BeeAnimation {
 
             double currentSpeed = baseSpeed * speedMultiplier;
             direction.normalize().multiply(currentSpeed);
-            
+
             // ═══════════════════════════════════════════════════════════
             // MOUVEMENT COMPLEXE ET UNIQUE
             // Combinaison de sinusoïdes avec fréquences et phases différentes
             // ═══════════════════════════════════════════════════════════
             double t = ticksAlive;
-            
+
             double waveX = Math.sin(t * waveFrequencyX + phaseX) * waveAmplitudeX
-                         + Math.sin(t * waveFrequencyX * 1.7 + phaseX * 0.5) * waveAmplitudeX * 0.3;
-            
+                    + Math.sin(t * waveFrequencyX * 1.7 + phaseX * 0.5) * waveAmplitudeX * 0.3;
+
             double waveY = Math.sin(t * waveFrequencyY + phaseY) * waveAmplitudeY
-                         + Math.cos(t * waveFrequencyY * 0.8 + phaseY * 1.3) * waveAmplitudeY * 0.4;
-            
+                    + Math.cos(t * waveFrequencyY * 0.8 + phaseY * 1.3) * waveAmplitudeY * 0.4;
+
             double waveZ = Math.cos(t * waveFrequencyZ + phaseZ) * waveAmplitudeZ
-                         + Math.sin(t * waveFrequencyZ * 1.4 + phaseZ * 0.7) * waveAmplitudeZ * 0.35;
-            
+                    + Math.sin(t * waveFrequencyZ * 1.4 + phaseZ * 0.7) * waveAmplitudeZ * 0.35;
+
             // Ajouter la déviation temporaire
             waveX += deviationX;
             waveZ += deviationZ;
-            
+
             // Micro-perturbations aléatoires
             if (random.nextDouble() < 0.15) {
                 waveX += (random.nextDouble() - 0.5) * 0.08;
                 waveY += (random.nextDouble() - 0.5) * 0.05;
                 waveZ += (random.nextDouble() - 0.5) * 0.08;
             }
-            
+
             direction.add(new Vector(waveX, waveY, waveZ));
 
             Location newLocation = current.add(direction);
-            
+
             Vector lookDir = target.toVector().subtract(newLocation.toVector());
             if (lookDir.lengthSquared() > 0) {
                 newLocation.setDirection(lookDir);
             }
-            
+
             beeEntity.teleport(newLocation);
 
-            // Particules de traînée (uniquement pour le propriétaire)
-            if (showParticles && ticksAlive % (2 + random.nextInt(2)) == 0) {
+            // Particules de traînée - OPTIMISATION: Réduit de moitié
+            if (showParticles && ticksAlive % 8 == 0) { // OPTIMISATION: tous les 8 ticks au lieu de 2-4
                 owner.spawnParticle(Particle.END_ROD, current, 1, 0, 0, 0, 0);
-                if (random.nextDouble() < 0.6) {
-                    owner.spawnParticle(Particle.WAX_OFF, current, 1 + random.nextInt(2), 0.1, 0.1, 0.1, 0);
-                }
             }
         }
 
@@ -308,14 +312,13 @@ public class BeeAnimation {
 
             double currentSpeed = baseSpeed * speedMultiplier;
             direction.normalize().multiply(currentSpeed);
-            
+
             double t = ticksAlive;
             direction.add(new Vector(
-                Math.sin(t * waveFrequencyX + phaseX) * waveAmplitudeX,
-                Math.sin(t * waveFrequencyY + phaseY) * waveAmplitudeY,
-                Math.cos(t * waveFrequencyZ + phaseZ) * waveAmplitudeZ
-            ));
-            
+                    Math.sin(t * waveFrequencyX + phaseX) * waveAmplitudeX,
+                    Math.sin(t * waveFrequencyY + phaseY) * waveAmplitudeY,
+                    Math.cos(t * waveFrequencyZ + phaseZ) * waveAmplitudeZ));
+
             currentParticleLocation.add(direction);
 
             if (ticksAlive % 2 == 0) {

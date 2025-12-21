@@ -20,7 +20,8 @@ import java.util.function.Consumer;
  * AXOLOTL TSUNAMI / TSUNAMI D'AXOLOTLS
  *
  * Une vague d'axolotls déferle sur le champ dans une direction aléatoire!
- * Les axolotls surfent sur des particules d'eau et récoltent tout sur leur passage.
+ * Les axolotls surfent sur des particules d'eau et récoltent tout sur leur
+ * passage.
  *
  * Caractéristiques:
  * - Direction aléatoire à chaque proc
@@ -66,44 +67,40 @@ public class AxolotlTsunamiAnimation {
 
     static {
         CROPS.addAll(Arrays.asList(
-            Material.WHEAT, Material.CARROTS, Material.POTATOES, Material.BEETROOTS,
-            Material.NETHER_WART, Material.COCOA, Material.SWEET_BERRY_BUSH,
-            Material.MELON, Material.PUMPKIN, Material.SUGAR_CANE, Material.CACTUS,
-            Material.BAMBOO, Material.KELP, Material.KELP_PLANT,
-            Material.TUBE_CORAL, Material.BUBBLE_CORAL, Material.BRAIN_CORAL,
-            Material.FIRE_CORAL, Material.HORN_CORAL,
-            Material.TUBE_CORAL_BLOCK, Material.BUBBLE_CORAL_BLOCK, Material.BRAIN_CORAL_BLOCK,
-            Material.FIRE_CORAL_BLOCK, Material.HORN_CORAL_BLOCK,
-            Material.WARPED_ROOTS, Material.CRIMSON_ROOTS, Material.NETHER_SPROUTS,
-            Material.TWISTING_VINES, Material.WEEPING_VINES,
-            Material.LILAC, Material.ROSE_BUSH, Material.PEONY, Material.SUNFLOWER,
-            Material.TALL_GRASS, Material.LARGE_FERN,
-            Material.OAK_SAPLING, Material.BIRCH_SAPLING, Material.JUNGLE_SAPLING,
-            Material.SPRUCE_SAPLING, Material.CHERRY_SAPLING, Material.ACACIA_SAPLING,
-            Material.DARK_OAK_SAPLING, Material.MANGROVE_PROPAGULE,
-            Material.SEA_PICKLE, Material.CHORUS_FLOWER, Material.CHORUS_PLANT
-        ));
+                Material.WHEAT, Material.CARROTS, Material.POTATOES, Material.BEETROOTS,
+                Material.NETHER_WART, Material.COCOA, Material.SWEET_BERRY_BUSH,
+                Material.MELON, Material.PUMPKIN, Material.SUGAR_CANE, Material.CACTUS,
+                Material.BAMBOO, Material.KELP, Material.KELP_PLANT,
+                Material.TUBE_CORAL, Material.BUBBLE_CORAL, Material.BRAIN_CORAL,
+                Material.FIRE_CORAL, Material.HORN_CORAL,
+                Material.TUBE_CORAL_BLOCK, Material.BUBBLE_CORAL_BLOCK, Material.BRAIN_CORAL_BLOCK,
+                Material.FIRE_CORAL_BLOCK, Material.HORN_CORAL_BLOCK,
+                Material.WARPED_ROOTS, Material.CRIMSON_ROOTS, Material.NETHER_SPROUTS,
+                Material.TWISTING_VINES, Material.WEEPING_VINES,
+                Material.LILAC, Material.ROSE_BUSH, Material.PEONY, Material.SUNFLOWER,
+                Material.TALL_GRASS, Material.LARGE_FERN,
+                Material.OAK_SAPLING, Material.BIRCH_SAPLING, Material.JUNGLE_SAPLING,
+                Material.SPRUCE_SAPLING, Material.CHERRY_SAPLING, Material.ACACIA_SAPLING,
+                Material.DARK_OAK_SAPLING, Material.MANGROVE_PROPAGULE,
+                Material.SEA_PICKLE, Material.CHORUS_FLOWER, Material.CHORUS_PLANT));
 
         NO_AGE_CROPS.addAll(Arrays.asList(
-            Material.MELON, Material.PUMPKIN, Material.SUGAR_CANE, Material.CACTUS,
-            Material.BAMBOO, Material.KELP, Material.KELP_PLANT,
-            Material.TUBE_CORAL, Material.BUBBLE_CORAL, Material.BRAIN_CORAL,
-            Material.FIRE_CORAL, Material.HORN_CORAL,
-            Material.TUBE_CORAL_BLOCK, Material.BUBBLE_CORAL_BLOCK, Material.BRAIN_CORAL_BLOCK,
-            Material.FIRE_CORAL_BLOCK, Material.HORN_CORAL_BLOCK,
-            Material.WARPED_ROOTS, Material.CRIMSON_ROOTS, Material.NETHER_SPROUTS,
-            Material.LILAC, Material.ROSE_BUSH, Material.PEONY, Material.SUNFLOWER,
-            Material.OAK_SAPLING, Material.BIRCH_SAPLING, Material.JUNGLE_SAPLING,
-            Material.SPRUCE_SAPLING, Material.CHERRY_SAPLING, Material.ACACIA_SAPLING,
-            Material.DARK_OAK_SAPLING, Material.MANGROVE_PROPAGULE,
-            Material.CHORUS_FLOWER, Material.CHORUS_PLANT, Material.SEA_PICKLE
-        ));
+                Material.MELON, Material.PUMPKIN, Material.SUGAR_CANE, Material.CACTUS,
+                Material.BAMBOO, Material.KELP, Material.KELP_PLANT,
+                Material.TUBE_CORAL, Material.BUBBLE_CORAL, Material.BRAIN_CORAL,
+                Material.FIRE_CORAL, Material.HORN_CORAL,
+                Material.TUBE_CORAL_BLOCK, Material.BUBBLE_CORAL_BLOCK, Material.BRAIN_CORAL_BLOCK,
+                Material.FIRE_CORAL_BLOCK, Material.HORN_CORAL_BLOCK,
+                Material.WARPED_ROOTS, Material.CRIMSON_ROOTS, Material.NETHER_SPROUTS,
+                Material.LILAC, Material.ROSE_BUSH, Material.PEONY, Material.SUNFLOWER,
+                Material.OAK_SAPLING, Material.BIRCH_SAPLING, Material.JUNGLE_SAPLING,
+                Material.SPRUCE_SAPLING, Material.CHERRY_SAPLING, Material.ACACIA_SAPLING,
+                Material.DARK_OAK_SAPLING, Material.MANGROVE_PROPAGULE,
+                Material.CHORUS_FLOWER, Material.CHORUS_PLANT, Material.SEA_PICKLE));
     }
 
     // Couleurs pour les particules
     private static final Color WAVE_BLUE = Color.fromRGB(30, 144, 255);
-    private static final Color WAVE_CYAN = Color.fromRGB(0, 255, 255);
-    private static final Color FOAM_WHITE = Color.fromRGB(240, 248, 255);
 
     /**
      * Instance d'un axolotl individuel
@@ -111,7 +108,7 @@ public class AxolotlTsunamiAnimation {
     private class AxolotlInstance {
         Axolotl entity;
         Axolotl.Variant variant;
-        double offsetFromCenter; // Position sur la ligne de la vague
+        double offsetFromCenter;
         boolean isBlue;
         boolean isPlayingDead;
         int playDeadTicks = 0;
@@ -124,9 +121,9 @@ public class AxolotlTsunamiAnimation {
     }
 
     public AxolotlTsunamiAnimation(RinaEnchantsPlugin plugin, Location centerLocation, Player owner,
-                                    int waveWidth, int waveDistance, int axolotlCount,
-                                    double blueChance, double playDeadChance, boolean hasReturnWave,
-                                    boolean showParticles, boolean clientSideOnly) {
+            int waveWidth, int waveDistance, int axolotlCount,
+            double blueChance, double playDeadChance, boolean hasReturnWave,
+            boolean showParticles, boolean clientSideOnly) {
         this.plugin = plugin;
         this.centerLocation = centerLocation.clone();
         this.owner = owner;
@@ -171,7 +168,8 @@ public class AxolotlTsunamiAnimation {
         this.isReturnWave = isReturn;
 
         World world = centerLocation.getWorld();
-        if (world == null) return;
+        if (world == null)
+            return;
 
         // Si c'est le retour, inverser la direction
         Vector currentDirection = isReturn ? waveDirection.clone().multiply(-1) : waveDirection.clone();
@@ -180,9 +178,8 @@ public class AxolotlTsunamiAnimation {
         Vector perpendicular = new Vector(-currentDirection.getZ(), 0, currentDirection.getX()).normalize();
 
         // Position de départ de la vague
-        Location waveStart = isReturn ?
-            centerLocation.clone().add(waveDirection.clone().multiply(waveDistance)) :
-            centerLocation.clone();
+        Location waveStart = isReturn ? centerLocation.clone().add(waveDirection.clone().multiply(waveDistance))
+                : centerLocation.clone();
 
         // Spawner les axolotls en ligne
         double spacing = (double) waveWidth / (axolotlCount - 1);
@@ -196,17 +193,18 @@ public class AxolotlTsunamiAnimation {
                 variant = Axolotl.Variant.BLUE;
             } else {
                 Axolotl.Variant[] commonVariants = {
-                    Axolotl.Variant.LUCY,
-                    Axolotl.Variant.WILD,
-                    Axolotl.Variant.GOLD,
-                    Axolotl.Variant.CYAN
+                        Axolotl.Variant.LUCY,
+                        Axolotl.Variant.WILD,
+                        Axolotl.Variant.GOLD,
+                        Axolotl.Variant.CYAN
                 };
                 variant = commonVariants[random.nextInt(commonVariants.length)];
             }
 
             Location spawnLoc = waveStart.clone().add(perpendicular.clone().multiply(offset));
             spawnLoc = findGroundLevel(spawnLoc, world);
-            if (spawnLoc == null) continue;
+            if (spawnLoc == null)
+                continue;
 
             try {
                 Axolotl axolotl = (Axolotl) world.spawnEntity(spawnLoc, EntityType.AXOLOTL);
@@ -257,8 +255,7 @@ public class AxolotlTsunamiAnimation {
         if (showParticles) {
             for (int i = 0; i < 10; i++) {
                 Location waveLoc = waveStart.clone().add(
-                    perpendicular.clone().multiply((random.nextDouble() - 0.5) * waveWidth)
-                );
+                        perpendicular.clone().multiply((random.nextDouble() - 0.5) * waveWidth));
                 owner.spawnParticle(Particle.SPLASH, waveLoc.clone().add(0, 0.5, 0), 3, 0.3, 0.2, 0.3, 0.1);
             }
         }
@@ -277,8 +274,9 @@ public class AxolotlTsunamiAnimation {
         private int ticksAlive = 0;
         private double distanceTraveled = 0;
         private final Set<String> harvestedBlocks = new HashSet<>();
-        private static final double WAVE_SPEED = 0.4;
+        private static final double WAVE_SPEED = 0.8; // OPTIMISATION: Doublée car update tous les 2 ticks
         private double wavePhase = 0;
+        private static final int HARVEST_MAX_PER_AXOLOTL = 3; // OPTIMISATION: Limite par axolotl
 
         WaveTask(Vector direction, Vector perpendicular) {
             this.direction = direction.clone();
@@ -336,44 +334,35 @@ public class AxolotlTsunamiAnimation {
                 return;
             }
 
-            // ═══════════════════════════════════════════════════════════
-            // MOUVEMENT DE LA VAGUE
-            // ═══════════════════════════════════════════════════════════
+            // OPTIMISATION: Mise à jour accum ulée, vitesse doublée
             distanceTraveled += WAVE_SPEED;
 
-            Location waveCenter = isReturnWave ?
-                centerLocation.clone().add(waveDirection.clone().multiply(waveDistance - distanceTraveled)) :
-                centerLocation.clone().add(waveDirection.clone().multiply(distanceTraveled));
+            Location waveCenter = isReturnWave
+                    ? centerLocation.clone().add(waveDirection.clone().multiply(waveDistance - distanceTraveled))
+                    : centerLocation.clone().add(waveDirection.clone().multiply(distanceTraveled));
 
             // ═══════════════════════════════════════════════════════════
-            // PARTICULES DE VAGUE
+            // PARTICULES DE VAGUE - OPTIMISATION: Réduit de moitié
             // ═══════════════════════════════════════════════════════════
-            if (showParticles && ticksAlive % 3 == 0) {
-                // Ligne de vague avec mouvement ondulé (un point sur 2)
-                for (int i = 0; i < waveWidth; i += 2) {
+            if (showParticles && ticksAlive % 6 == 0) { // OPTIMISATION: tous les 6 ticks au lieu de 3
+                // Ligne de vague avec mouvement ondulé (un point sur 4)
+                for (int i = 0; i < waveWidth; i += 4) { // OPTIMISATION: i += 4 au lieu de 2
                     double offset = -waveWidth / 2.0 + i;
                     double waveHeight = Math.sin(wavePhase + i * 0.5) * 0.3 + 0.5;
 
                     Location waveLoc = waveCenter.clone()
-                        .add(perpendicular.clone().multiply(offset))
-                        .add(0, waveHeight, 0);
+                            .add(perpendicular.clone().multiply(offset))
+                            .add(0, waveHeight, 0);
 
-                    // Particules d'eau
                     owner.spawnParticle(Particle.SPLASH, waveLoc, 1, 0.1, 0.1, 0.1, 0.05);
-
-                    // Écume (moins fréquent)
-                    if (i % 4 == 0) {
-                        Particle.DustOptions foam = new Particle.DustOptions(FOAM_WHITE, 1.0f);
-                        owner.spawnParticle(Particle.DUST, waveLoc.clone().add(0, 0.2, 0), 1, 0.1, 0.1, 0.1, 0, foam);
-                    }
                 }
 
-                // Bulles derrière la vague
-                if (ticksAlive % 6 == 0) {
+                // Bulles moins fréquentes
+                if (ticksAlive % 12 == 0) {
                     Location bubbleLoc = waveCenter.clone()
-                        .add(direction.clone().multiply(-1))
-                        .add(perpendicular.clone().multiply((random.nextDouble() - 0.5) * waveWidth));
-                    owner.spawnParticle(Particle.BUBBLE_POP, bubbleLoc, 2, 0.3, 0.2, 0.3, 0.02);
+                            .add(direction.clone().multiply(-1))
+                            .add(perpendicular.clone().multiply((random.nextDouble() - 0.5) * waveWidth));
+                    owner.spawnParticle(Particle.BUBBLE_POP, bubbleLoc, 1, 0.3, 0.2, 0.3, 0.02);
                 }
             }
 
@@ -398,13 +387,8 @@ public class AxolotlTsunamiAnimation {
             double waveHeight = Math.sin(wavePhase + axolotl.offsetFromCenter * 0.3) * 0.2 + 0.3;
 
             Location targetLoc = waveCenter.clone()
-                .add(perpendicular.clone().multiply(axolotl.offsetFromCenter))
-                .add(0, waveHeight, 0);
-
-            // Trouver le sol
-            targetLoc = findGroundLevel(targetLoc, world);
-            if (targetLoc == null) return;
-            targetLoc.add(0, waveHeight, 0);
+                    .add(perpendicular.clone().multiply(axolotl.offsetFromCenter))
+                    .add(0, waveHeight, 0);
 
             // Orienter l'axolotl dans la direction de la vague
             targetLoc.setDirection(direction);
@@ -440,28 +424,31 @@ public class AxolotlTsunamiAnimation {
             }
 
             // ═══════════════════════════════════════════════════════════
-            // RÉCOLTER LES CULTURES
+            // RÉCOLTER LES CULTURES - OPTIMISATION: Limite par axolotl
             // ═══════════════════════════════════════════════════════════
-            int harvestRadius = axolotl.isBlue ? 2 : 1; // Bleu = rayon double!
+            int harvestRadius = axolotl.isBlue ? 2 : 1;
             int cx = targetLoc.getBlockX();
             int cy = targetLoc.getBlockY();
             int cz = targetLoc.getBlockZ();
+            int harvestCount = 0;
 
-            for (int x = -harvestRadius; x <= harvestRadius; x++) {
-                for (int y = -1; y <= 1; y++) {
-                    for (int z = -harvestRadius; z <= harvestRadius; z++) {
-                        Location blockLoc = new Location(world, cx + x, cy + y, cz + z);
-                        String key = blockLoc.getBlockX() + ":" + blockLoc.getBlockY() + ":" + blockLoc.getBlockZ();
+            for (int x = -harvestRadius; x <= harvestRadius && harvestCount < HARVEST_MAX_PER_AXOLOTL; x++) {
+                for (int y = -1; y <= 1 && harvestCount < HARVEST_MAX_PER_AXOLOTL; y++) {
+                    for (int z = -harvestRadius; z <= harvestRadius && harvestCount < HARVEST_MAX_PER_AXOLOTL; z++) {
+                        int bx = cx + x, by = cy + y, bz = cz + z;
+                        String key = bx + ":" + by + ":" + bz;
 
-                        if (harvestedBlocks.contains(key)) continue;
+                        if (harvestedBlocks.contains(key))
+                            continue;
 
-                        Block block = blockLoc.getBlock();
+                        Block block = world.getBlockAt(bx, by, bz);
                         if (isMatureCrop(block)) {
                             harvestedBlocks.add(key);
                             totalCropsHarvested++;
+                            harvestCount++;
 
                             if (onCropHit != null) {
-                                onCropHit.accept(blockLoc);
+                                onCropHit.accept(block.getLocation());
                             }
 
                             // Bonus pour axolotl bleu
@@ -470,33 +457,15 @@ public class AxolotlTsunamiAnimation {
                                 if (onBlueBonus != null && totalBlueBonuses % 5 == 0) {
                                     onBlueBonus.accept(totalBlueBonuses);
                                 }
-
-                                // Effet spécial bleu
-                                if (showParticles) {
-                                    owner.spawnParticle(Particle.END_ROD,
-                                        blockLoc.clone().add(0.5, 0.5, 0.5), 2, 0.1, 0.1, 0.1, 0.02);
-                                }
-                            }
-
-                            // Effet de récolte
-                            if (showParticles) {
-                                owner.spawnParticle(Particle.SPLASH,
-                                    blockLoc.clone().add(0.5, 0.5, 0.5), 2, 0.2, 0.2, 0.2, 0.05);
                             }
                         }
                     }
                 }
             }
 
-            // Particules autour de l'axolotl
-            if (showParticles && ticksAlive % 5 == 0) {
+            // OPTIMISATION: Particules uniquement si récolte et moins fréquent
+            if (showParticles && ticksAlive % 10 == 0) {
                 owner.spawnParticle(Particle.SPLASH, targetLoc, 1, 0.2, 0.1, 0.2, 0.02);
-
-                // Particules spéciales pour le bleu
-                if (axolotl.isBlue && ticksAlive % 10 == 0) {
-                    Particle.DustOptions blueDust = new Particle.DustOptions(WAVE_CYAN, 1.2f);
-                    owner.spawnParticle(Particle.DUST, targetLoc.clone().add(0, 0.3, 0), 2, 0.2, 0.2, 0.2, 0, blueDust);
-                }
             }
         }
 
@@ -539,8 +508,10 @@ public class AxolotlTsunamiAnimation {
     private boolean isMatureCrop(Block block) {
         Material type = block.getType();
 
-        if (!CROPS.contains(type)) return false;
-        if (NO_AGE_CROPS.contains(type)) return true;
+        if (!CROPS.contains(type))
+            return false;
+        if (NO_AGE_CROPS.contains(type))
+            return true;
 
         if (block.getBlockData() instanceof Ageable ageable) {
             return ageable.getAge() >= ageable.getMaximumAge();

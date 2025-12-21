@@ -65,38 +65,36 @@ public class GolemFactoryAnimation {
 
     static {
         CROPS.addAll(Arrays.asList(
-            Material.WHEAT, Material.CARROTS, Material.POTATOES, Material.BEETROOTS,
-            Material.NETHER_WART, Material.COCOA, Material.SWEET_BERRY_BUSH,
-            Material.MELON, Material.PUMPKIN, Material.SUGAR_CANE, Material.CACTUS,
-            Material.BAMBOO, Material.KELP, Material.KELP_PLANT,
-            Material.TUBE_CORAL, Material.BUBBLE_CORAL, Material.BRAIN_CORAL,
-            Material.FIRE_CORAL, Material.HORN_CORAL,
-            Material.TUBE_CORAL_BLOCK, Material.BUBBLE_CORAL_BLOCK, Material.BRAIN_CORAL_BLOCK,
-            Material.FIRE_CORAL_BLOCK, Material.HORN_CORAL_BLOCK,
-            Material.WARPED_ROOTS, Material.CRIMSON_ROOTS, Material.NETHER_SPROUTS,
-            Material.TWISTING_VINES, Material.WEEPING_VINES,
-            Material.LILAC, Material.ROSE_BUSH, Material.PEONY, Material.SUNFLOWER,
-            Material.TALL_GRASS, Material.LARGE_FERN,
-            Material.OAK_SAPLING, Material.BIRCH_SAPLING, Material.JUNGLE_SAPLING,
-            Material.SPRUCE_SAPLING, Material.CHERRY_SAPLING, Material.ACACIA_SAPLING,
-            Material.DARK_OAK_SAPLING, Material.MANGROVE_PROPAGULE,
-            Material.SEA_PICKLE, Material.CHORUS_FLOWER, Material.CHORUS_PLANT
-        ));
+                Material.WHEAT, Material.CARROTS, Material.POTATOES, Material.BEETROOTS,
+                Material.NETHER_WART, Material.COCOA, Material.SWEET_BERRY_BUSH,
+                Material.MELON, Material.PUMPKIN, Material.SUGAR_CANE, Material.CACTUS,
+                Material.BAMBOO, Material.KELP, Material.KELP_PLANT,
+                Material.TUBE_CORAL, Material.BUBBLE_CORAL, Material.BRAIN_CORAL,
+                Material.FIRE_CORAL, Material.HORN_CORAL,
+                Material.TUBE_CORAL_BLOCK, Material.BUBBLE_CORAL_BLOCK, Material.BRAIN_CORAL_BLOCK,
+                Material.FIRE_CORAL_BLOCK, Material.HORN_CORAL_BLOCK,
+                Material.WARPED_ROOTS, Material.CRIMSON_ROOTS, Material.NETHER_SPROUTS,
+                Material.TWISTING_VINES, Material.WEEPING_VINES,
+                Material.LILAC, Material.ROSE_BUSH, Material.PEONY, Material.SUNFLOWER,
+                Material.TALL_GRASS, Material.LARGE_FERN,
+                Material.OAK_SAPLING, Material.BIRCH_SAPLING, Material.JUNGLE_SAPLING,
+                Material.SPRUCE_SAPLING, Material.CHERRY_SAPLING, Material.ACACIA_SAPLING,
+                Material.DARK_OAK_SAPLING, Material.MANGROVE_PROPAGULE,
+                Material.SEA_PICKLE, Material.CHORUS_FLOWER, Material.CHORUS_PLANT));
 
         NO_AGE_CROPS.addAll(Arrays.asList(
-            Material.MELON, Material.PUMPKIN, Material.SUGAR_CANE, Material.CACTUS,
-            Material.BAMBOO, Material.KELP, Material.KELP_PLANT,
-            Material.TUBE_CORAL, Material.BUBBLE_CORAL, Material.BRAIN_CORAL,
-            Material.FIRE_CORAL, Material.HORN_CORAL,
-            Material.TUBE_CORAL_BLOCK, Material.BUBBLE_CORAL_BLOCK, Material.BRAIN_CORAL_BLOCK,
-            Material.FIRE_CORAL_BLOCK, Material.HORN_CORAL_BLOCK,
-            Material.WARPED_ROOTS, Material.CRIMSON_ROOTS, Material.NETHER_SPROUTS,
-            Material.LILAC, Material.ROSE_BUSH, Material.PEONY, Material.SUNFLOWER,
-            Material.OAK_SAPLING, Material.BIRCH_SAPLING, Material.JUNGLE_SAPLING,
-            Material.SPRUCE_SAPLING, Material.CHERRY_SAPLING, Material.ACACIA_SAPLING,
-            Material.DARK_OAK_SAPLING, Material.MANGROVE_PROPAGULE,
-            Material.CHORUS_FLOWER, Material.CHORUS_PLANT, Material.SEA_PICKLE
-        ));
+                Material.MELON, Material.PUMPKIN, Material.SUGAR_CANE, Material.CACTUS,
+                Material.BAMBOO, Material.KELP, Material.KELP_PLANT,
+                Material.TUBE_CORAL, Material.BUBBLE_CORAL, Material.BRAIN_CORAL,
+                Material.FIRE_CORAL, Material.HORN_CORAL,
+                Material.TUBE_CORAL_BLOCK, Material.BUBBLE_CORAL_BLOCK, Material.BRAIN_CORAL_BLOCK,
+                Material.FIRE_CORAL_BLOCK, Material.HORN_CORAL_BLOCK,
+                Material.WARPED_ROOTS, Material.CRIMSON_ROOTS, Material.NETHER_SPROUTS,
+                Material.LILAC, Material.ROSE_BUSH, Material.PEONY, Material.SUNFLOWER,
+                Material.OAK_SAPLING, Material.BIRCH_SAPLING, Material.JUNGLE_SAPLING,
+                Material.SPRUCE_SAPLING, Material.CHERRY_SAPLING, Material.ACACIA_SAPLING,
+                Material.DARK_OAK_SAPLING, Material.MANGROVE_PROPAGULE,
+                Material.CHORUS_FLOWER, Material.CHORUS_PLANT, Material.SEA_PICKLE));
     }
 
     // Couleurs pour les particules
@@ -115,6 +113,7 @@ public class GolemFactoryAnimation {
         boolean isMerging = false;
         boolean isGiant = false;
         double personalScale;
+        double cachedGroundY; // OPTIMISATION: Y du sol caché au spawn
 
         GolemInstance(double scale) {
             this.personalScale = scale;
@@ -122,9 +121,9 @@ public class GolemFactoryAnimation {
     }
 
     public GolemFactoryAnimation(RinaEnchantsPlugin plugin, Location centerLocation, Player owner,
-                                  int golemCount, double golemScale, int patrolRadius, int duration,
-                                  double mergeChance, int slamRadius,
-                                  boolean showParticles, boolean clientSideOnly) {
+            int golemCount, double golemScale, int patrolRadius, int duration,
+            double mergeChance, int slamRadius,
+            boolean showParticles, boolean clientSideOnly) {
         this.plugin = plugin;
         this.centerLocation = centerLocation.clone();
         this.owner = owner;
@@ -153,7 +152,8 @@ public class GolemFactoryAnimation {
 
     public void start() {
         World world = centerLocation.getWorld();
-        if (world == null) return;
+        if (world == null)
+            return;
 
         // Spawner les mini-golems à des positions aléatoires dans un rayon de 20 blocs
         int spawnRadius = 20;
@@ -164,14 +164,14 @@ public class GolemFactoryAnimation {
             double dist = 3 + random.nextDouble() * (spawnRadius - 3); // Entre 3 et 20 blocs
 
             Location spawnLoc = centerLocation.clone().add(
-                Math.cos(angle) * dist,
-                0,
-                Math.sin(angle) * dist
-            );
+                    Math.cos(angle) * dist,
+                    0,
+                    Math.sin(angle) * dist);
 
             // Trouver le sol
             spawnLoc = findGroundLevel(spawnLoc, world);
-            if (spawnLoc == null) continue;
+            if (spawnLoc == null)
+                continue;
 
             try {
                 IronGolem golem = (IronGolem) world.spawnEntity(spawnLoc, EntityType.IRON_GOLEM);
@@ -207,6 +207,7 @@ public class GolemFactoryAnimation {
                 GolemInstance instance = new GolemInstance(golemScale);
                 instance.entity = golem;
                 instance.targetLocation = getRandomPatrolTarget();
+                instance.cachedGroundY = spawnLoc.getY(); // OPTIMISATION: cache la hauteur
                 golems.add(instance);
 
                 // Effet de spawn
@@ -214,7 +215,7 @@ public class GolemFactoryAnimation {
                     Particle.DustOptions dust = new Particle.DustOptions(IRON_GRAY, 2.0f);
                     owner.spawnParticle(Particle.DUST, spawnLoc.clone().add(0, 0.5, 0), 8, 0.3, 0.3, 0.3, 0, dust);
                     owner.spawnParticle(Particle.BLOCK, spawnLoc, 5, 0.3, 0.1, 0.3, 0.1,
-                        Material.IRON_BLOCK.createBlockData());
+                            Material.IRON_BLOCK.createBlockData());
                 }
 
             } catch (Exception e) {
@@ -241,8 +242,9 @@ public class GolemFactoryAnimation {
 
         private int ticksAlive = 0;
         private final Set<String> harvestedBlocks = new HashSet<>();
-        private static final double MOVE_SPEED = 0.15; // Vitesse augmentée pour mouvement visible
-        private static final double MERGE_DISTANCE = 2.5; // Distance augmentée pour éviter fusions trop faciles
+        private static final double MOVE_SPEED = 0.30; // OPTIMISATION: Vitesse doublée car update tous les 2 ticks
+        private static final double MERGE_DISTANCE = 2.5;
+        private static final int HARVEST_MAX_PER_TICK = 5; // OPTIMISATION: Limite de récolte par tick
 
         @Override
         public void run() {
@@ -278,22 +280,26 @@ public class GolemFactoryAnimation {
                 return;
             }
 
-            // Mettre à jour chaque golem
-            List<GolemInstance> golemsToRemove = new ArrayList<>();
-            for (GolemInstance golem : golems) {
-                if (golem.isMerging) continue;
-                updateGolem(golem, world);
+            // OPTIMISATION: Mettre à jour les golems seulement tous les 2 ticks
+            if (ticksAlive % 2 == 0) {
+                for (GolemInstance golem : golems) {
+                    if (golem.isMerging)
+                        continue;
+                    updateGolem(golem, world);
+                }
             }
 
-            // Vérifier les fusions (seulement si au moins 2 golems non-géants)
-            checkForMerges(world);
+            // OPTIMISATION: Vérifier les fusions seulement tous les 5 ticks
+            if (ticksAlive % 5 == 0) {
+                checkForMerges(world);
+            }
 
             // Sons ambient
             if (ticksAlive % 80 == 0 && !golems.isEmpty()) {
                 GolemInstance randomGolem = golems.get(random.nextInt(golems.size()));
                 if (randomGolem.entity != null && !randomGolem.entity.isDead()) {
                     owner.playSound(randomGolem.entity.getLocation(),
-                        Sound.ENTITY_IRON_GOLEM_STEP, 0.4f, 1.2f + random.nextFloat() * 0.3f);
+                            Sound.ENTITY_IRON_GOLEM_STEP, 0.4f, 1.2f + random.nextFloat() * 0.3f);
                 }
             }
         }
@@ -309,7 +315,7 @@ public class GolemFactoryAnimation {
             // ═══════════════════════════════════════════════════════════
 
             if (golem.targetLocation == null || golem.ticksSinceDirectionChange > 40 ||
-                currentLoc.distanceSquared(golem.targetLocation) < 2) {
+                    currentLoc.distanceSquared(golem.targetLocation) < 2) {
                 golem.targetLocation = getRandomPatrolTarget();
                 golem.ticksSinceDirectionChange = 0;
             }
@@ -331,18 +337,10 @@ public class GolemFactoryAnimation {
                 double newX = currentLoc.getX() + dx * speed;
                 double newZ = currentLoc.getZ() + dz * speed;
 
-                // Trouver le sol à la nouvelle position
-                Location newLoc = new Location(world, newX, currentLoc.getY(), newZ);
-                Location groundLoc = findGroundLevel(newLoc, world);
-
-                if (groundLoc != null) {
-                    // Calculer le yaw pour faire face à la direction de mouvement
-                    float yaw = (float) Math.toDegrees(Math.atan2(-dx, dz));
-                    groundLoc.setYaw(yaw);
-                    groundLoc.setPitch(0);
-
-                    golem.entity.teleport(groundLoc);
-                }
+                // OPTIMISATION: Utiliser la hauteur Y cachée au lieu de recalculer
+                float yaw = (float) Math.toDegrees(Math.atan2(-dx, dz));
+                Location newLoc = new Location(world, newX, golem.cachedGroundY, newZ, yaw, 0);
+                golem.entity.teleport(newLoc);
             }
 
             // ═══════════════════════════════════════════════════════════
@@ -363,7 +361,7 @@ public class GolemFactoryAnimation {
                     }
 
                     owner.playSound(currentLoc, Sound.ENTITY_IRON_GOLEM_ATTACK, 0.5f,
-                        golem.isGiant ? 0.7f : 1.3f);
+                            golem.isGiant ? 0.7f : 1.3f);
                 }
             }
 
@@ -373,7 +371,7 @@ public class GolemFactoryAnimation {
 
             if (showParticles && ticksAlive % 8 == 0) {
                 owner.spawnParticle(Particle.BLOCK, currentLoc, 1, 0.2, 0, 0.2, 0,
-                    Material.IRON_BLOCK.createBlockData());
+                        Material.IRON_BLOCK.createBlockData());
             }
         }
 
@@ -382,47 +380,51 @@ public class GolemFactoryAnimation {
             int cx = loc.getBlockX();
             int cy = loc.getBlockY();
             int cz = loc.getBlockZ();
-            boolean harvested = false;
+            int harvestCount = 0; // OPTIMISATION: Compteur pour limiter
 
-            for (int x = -radius; x <= radius; x++) {
-                for (int y = -1; y <= 2; y++) {
-                    for (int z = -radius; z <= radius; z++) {
-                        Location blockLoc = new Location(world, cx + x, cy + y, cz + z);
-                        String key = blockLoc.getBlockX() + ":" + blockLoc.getBlockY() + ":" + blockLoc.getBlockZ();
+            for (int x = -radius; x <= radius && harvestCount < HARVEST_MAX_PER_TICK; x++) {
+                for (int y = -1; y <= 2 && harvestCount < HARVEST_MAX_PER_TICK; y++) {
+                    for (int z = -radius; z <= radius && harvestCount < HARVEST_MAX_PER_TICK; z++) {
+                        // OPTIMISATION: Clé générée sans créer de Location
+                        int bx = cx + x, by = cy + y, bz = cz + z;
+                        String key = bx + ":" + by + ":" + bz;
 
-                        if (harvestedBlocks.contains(key)) continue;
+                        if (harvestedBlocks.contains(key))
+                            continue;
 
-                        Block block = blockLoc.getBlock();
+                        Block block = world.getBlockAt(bx, by, bz);
                         if (isMatureCrop(block)) {
                             harvestedBlocks.add(key);
                             totalCropsHarvested++;
-                            harvested = true;
+                            harvestCount++;
 
                             if (onCropHit != null) {
-                                onCropHit.accept(blockLoc);
+                                onCropHit.accept(block.getLocation());
                             }
 
                             if (showParticles) {
                                 owner.spawnParticle(Particle.HAPPY_VILLAGER,
-                                    blockLoc.clone().add(0.5, 0.5, 0.5), 2, 0.2, 0.2, 0.2, 0);
+                                        block.getLocation().add(0.5, 0.5, 0.5), 2, 0.2, 0.2, 0.2, 0);
                             }
                         }
                     }
                 }
             }
 
-            return harvested;
+            return harvestCount > 0;
         }
 
         private void checkForMerges(World world) {
             // Chercher des paires de golems non-géants proches
             for (int i = 0; i < golems.size(); i++) {
                 GolemInstance g1 = golems.get(i);
-                if (g1.isGiant || g1.isMerging || g1.entity == null) continue;
+                if (g1.isGiant || g1.isMerging || g1.entity == null)
+                    continue;
 
                 for (int j = i + 1; j < golems.size(); j++) {
                     GolemInstance g2 = golems.get(j);
-                    if (g2.isGiant || g2.isMerging || g2.entity == null) continue;
+                    if (g2.isGiant || g2.isMerging || g2.entity == null)
+                        continue;
 
                     double dist = g1.entity.getLocation().distance(g2.entity.getLocation());
                     if (dist < MERGE_DISTANCE) {
@@ -442,8 +444,8 @@ public class GolemFactoryAnimation {
             totalMerges++;
 
             Location mergeLoc = g1.entity.getLocation().clone()
-                .add(g2.entity.getLocation())
-                .multiply(0.5);
+                    .add(g2.entity.getLocation())
+                    .multiply(0.5);
 
             // Effet de fusion
             if (showParticles) {
@@ -466,7 +468,8 @@ public class GolemFactoryAnimation {
 
             // Créer le golem géant après un délai
             Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                if (!owner.isOnline() || isFinished) return;
+                if (!owner.isOnline() || isFinished)
+                    return;
 
                 spawnGiantGolem(mergeLoc, world);
             }, 10L);
@@ -529,7 +532,8 @@ public class GolemFactoryAnimation {
         }
 
         private void performGroundSlam(GolemInstance giant, World world) {
-            if (!owner.isOnline() || isFinished) return;
+            if (!owner.isOnline() || isFinished)
+                return;
 
             Location slamLoc = giant.entity.getLocation();
 
@@ -543,18 +547,18 @@ public class GolemFactoryAnimation {
                 for (int r = 1; r <= slamRadius; r++) {
                     final int radius = r;
                     Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                        if (!owner.isOnline()) return;
+                        if (!owner.isOnline())
+                            return;
 
                         int points = radius * 4;
                         for (int i = 0; i < points; i++) {
                             double angle = (Math.PI * 2 / points) * i;
                             Location ringLoc = slamLoc.clone().add(
-                                Math.cos(angle) * radius, 0.1, Math.sin(angle) * radius
-                            );
+                                    Math.cos(angle) * radius, 0.1, Math.sin(angle) * radius);
                             owner.spawnParticle(Particle.BLOCK, ringLoc, 2, 0.1, 0.1, 0.1, 0.1,
-                                Material.DIRT.createBlockData());
+                                    Material.DIRT.createBlockData());
                             owner.spawnParticle(Particle.DUST, ringLoc, 1, 0.1, 0.1, 0.1, 0,
-                                new Particle.DustOptions(IRON_DARK, 1.5f));
+                                    new Particle.DustOptions(IRON_DARK, 1.5f));
                         }
                     }, (r - 1) * 2L);
                 }
@@ -562,7 +566,7 @@ public class GolemFactoryAnimation {
                 // Impact central
                 owner.spawnParticle(Particle.EXPLOSION, slamLoc, 1, 0, 0, 0, 0);
                 owner.spawnParticle(Particle.BLOCK, slamLoc, 15, 0.5, 0.2, 0.5, 0.2,
-                    Material.IRON_BLOCK.createBlockData());
+                        Material.IRON_BLOCK.createBlockData());
             }
 
             // Sons
@@ -577,13 +581,15 @@ public class GolemFactoryAnimation {
 
             for (int x = -slamRadius; x <= slamRadius; x++) {
                 for (int z = -slamRadius; z <= slamRadius; z++) {
-                    if (x * x + z * z > slamRadius * slamRadius) continue;
+                    if (x * x + z * z > slamRadius * slamRadius)
+                        continue;
 
                     for (int y = -2; y <= 2; y++) {
                         Location blockLoc = new Location(world, cx + x, cy + y, cz + z);
                         String key = blockLoc.getBlockX() + ":" + blockLoc.getBlockY() + ":" + blockLoc.getBlockZ();
 
-                        if (harvestedBlocks.contains(key)) continue;
+                        if (harvestedBlocks.contains(key))
+                            continue;
 
                         Block block = blockLoc.getBlock();
                         if (isMatureCrop(block)) {
@@ -605,7 +611,7 @@ public class GolemFactoryAnimation {
                         Location loc = giant.entity.getLocation();
                         owner.spawnParticle(Particle.POOF, loc.clone().add(0, 1, 0), 15, 0.5, 1, 0.5, 0.1);
                         owner.spawnParticle(Particle.BLOCK, loc, 10, 0.5, 0.5, 0.5, 0.1,
-                            Material.IRON_BLOCK.createBlockData());
+                                Material.IRON_BLOCK.createBlockData());
                     }
                     giant.entity.remove();
                     golems.remove(giant);
@@ -621,7 +627,7 @@ public class GolemFactoryAnimation {
                     if (showParticles && owner.isOnline()) {
                         owner.spawnParticle(Particle.POOF, loc.clone().add(0, 0.5, 0), 8, 0.3, 0.3, 0.3, 0.1);
                         owner.spawnParticle(Particle.BLOCK, loc, 5, 0.3, 0.3, 0.3, 0.1,
-                            Material.IRON_BLOCK.createBlockData());
+                                Material.IRON_BLOCK.createBlockData());
                     }
 
                     golem.entity.remove();
@@ -637,10 +643,9 @@ public class GolemFactoryAnimation {
         double angle = random.nextDouble() * Math.PI * 2;
         double dist = 3 + random.nextDouble() * 17; // Entre 3 et 20 blocs
         return centerLocation.clone().add(
-            Math.cos(angle) * dist,
-            0,
-            Math.sin(angle) * dist
-        );
+                Math.cos(angle) * dist,
+                0,
+                Math.sin(angle) * dist);
     }
 
     private Location findGroundLevel(Location loc, World world) {
@@ -673,8 +678,10 @@ public class GolemFactoryAnimation {
     private boolean isMatureCrop(Block block) {
         Material type = block.getType();
 
-        if (!CROPS.contains(type)) return false;
-        if (NO_AGE_CROPS.contains(type)) return true;
+        if (!CROPS.contains(type))
+            return false;
+        if (NO_AGE_CROPS.contains(type))
+            return true;
 
         if (block.getBlockData() instanceof Ageable ageable) {
             return ageable.getAge() >= ageable.getMaximumAge();
