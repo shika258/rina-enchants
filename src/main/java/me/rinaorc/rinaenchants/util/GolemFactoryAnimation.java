@@ -155,18 +155,18 @@ public class GolemFactoryAnimation {
         World world = centerLocation.getWorld();
         if (world == null) return;
 
-        // Spawner les mini-golems en cercle pour éviter les fusions immédiates
-        double angleStep = (2 * Math.PI) / golemCount;
-        double spawnRadius = Math.max(3.0, patrolRadius * 0.4); // Minimum 3 blocs du centre
+        // Spawner les mini-golems à des positions aléatoires dans un rayon de 20 blocs
+        int spawnRadius = 20;
 
         for (int i = 0; i < golemCount; i++) {
-            // Position espacée uniformément en cercle
-            double angle = i * angleStep;
+            // Position aléatoire chaotique dans le rayon
+            double angle = random.nextDouble() * Math.PI * 2;
+            double dist = 3 + random.nextDouble() * (spawnRadius - 3); // Entre 3 et 20 blocs
 
             Location spawnLoc = centerLocation.clone().add(
-                Math.cos(angle) * spawnRadius,
+                Math.cos(angle) * dist,
                 0,
-                Math.sin(angle) * spawnRadius
+                Math.sin(angle) * dist
             );
 
             // Trouver le sol
@@ -635,7 +635,7 @@ public class GolemFactoryAnimation {
 
     private Location getRandomPatrolTarget() {
         double angle = random.nextDouble() * Math.PI * 2;
-        double dist = random.nextDouble() * patrolRadius;
+        double dist = 3 + random.nextDouble() * 17; // Entre 3 et 20 blocs
         return centerLocation.clone().add(
             Math.cos(angle) * dist,
             0,
