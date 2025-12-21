@@ -102,8 +102,8 @@ public class AllayAnimation {
 
         // Particules de spawn
         if (showParticles) {
-            owner.spawnParticle(Particle.END_ROD, startLocation, 30, 0.5, 0.5, 0.5, 0.1);
-            owner.spawnParticle(Particle.ENCHANT, startLocation, 50, 0.5, 0.5, 0.5, 0.5);
+            owner.spawnParticle(Particle.END_ROD, startLocation, 15, 0.5, 0.5, 0.5, 0.1);
+            owner.spawnParticle(Particle.ENCHANT, startLocation, 25, 0.5, 0.5, 0.5, 0.5);
         }
 
         // Démarrer l'animation principale
@@ -218,12 +218,12 @@ public class AllayAnimation {
             // EFFETS VISUELS de l'Allay (aura magique)
             // ═══════════════════════════════════════════════════════════
             
-            if (showParticles && ticksAlive % 3 == 0) {
+            if (showParticles && ticksAlive % 5 == 0) {
                 // Aura magique autour de l'allay
-                owner.spawnParticle(Particle.ENCHANT, currentPos, 3, 0.3, 0.3, 0.3, 0.2);
-                
+                owner.spawnParticle(Particle.ENCHANT, currentPos, 2, 0.3, 0.3, 0.3, 0.2);
+
                 // Particules de notes de musique occasionnelles
-                if (ticksAlive % 15 == 0) {
+                if (ticksAlive % 20 == 0) {
                     owner.spawnParticle(Particle.NOTE, currentPos.clone().add(0, 0.5, 0), 1, 0.3, 0.3, 0.3, 0);
                 }
             }
@@ -314,11 +314,11 @@ public class AllayAnimation {
             }
             
             // Effet d'impact à la cible
-            owner.spawnParticle(Particle.END_ROD, laserEnd, 8, 0.2, 0.2, 0.2, 0.05);
-            owner.spawnParticle(Particle.HAPPY_VILLAGER, laserEnd, 5, 0.3, 0.3, 0.3, 0);
-            
+            owner.spawnParticle(Particle.END_ROD, laserEnd, 4, 0.2, 0.2, 0.2, 0.05);
+            owner.spawnParticle(Particle.HAPPY_VILLAGER, laserEnd, 2, 0.3, 0.3, 0.3, 0);
+
             // Effet de charge à l'origine
-            owner.spawnParticle(Particle.ELECTRIC_SPARK, laserStart, 3, 0.1, 0.1, 0.1, 0.02);
+            owner.spawnParticle(Particle.ELECTRIC_SPARK, laserStart, 2, 0.1, 0.1, 0.1, 0.02);
             
             // Sons
             owner.playSound(laserStart, Sound.ENTITY_ALLAY_ITEM_THROWN, 0.4f, 1.5f);
@@ -347,9 +347,9 @@ public class AllayAnimation {
                 
                 if (showParticles && owner.isOnline()) {
                     // Effet de disparition magique
-                    owner.spawnParticle(Particle.END_ROD, loc, 30, 0.5, 0.5, 0.5, 0.1);
-                    owner.spawnParticle(Particle.ENCHANT, loc, 50, 0.5, 0.5, 0.5, 0.3);
-                    owner.spawnParticle(Particle.TOTEM_OF_UNDYING, loc, 20, 0.3, 0.3, 0.3, 0.2);
+                    owner.spawnParticle(Particle.END_ROD, loc, 15, 0.5, 0.5, 0.5, 0.1);
+                    owner.spawnParticle(Particle.ENCHANT, loc, 25, 0.5, 0.5, 0.5, 0.3);
+                    owner.spawnParticle(Particle.TOTEM_OF_UNDYING, loc, 10, 0.3, 0.3, 0.3, 0.2);
                 }
                 
                 if (owner.isOnline()) {

@@ -159,8 +159,8 @@ public class PandaAnimation {
         }
 
         if (showParticles) {
-            owner.spawnParticle(Particle.CLOUD, startPos, 20, 0.5, 0.3, 0.5, 0.1);
-            owner.spawnParticle(Particle.HAPPY_VILLAGER, startPos, 10, 0.3, 0.3, 0.3, 0);
+            owner.spawnParticle(Particle.CLOUD, startPos, 10, 0.5, 0.3, 0.5, 0.1);
+            owner.spawnParticle(Particle.HAPPY_VILLAGER, startPos, 5, 0.3, 0.3, 0.3, 0);
         }
         
         owner.playSound(startPos, Sound.ENTITY_PANDA_SNEEZE, 1.0f, 0.8f);
@@ -253,8 +253,8 @@ public class PandaAnimation {
                             }
                             
                             if (showParticles) {
-                                owner.spawnParticle(Particle.BLOCK, blockLoc.clone().add(0.5, 0.5, 0.5), 
-                                    10, 0.3, 0.3, 0.3, 0, block.getBlockData());
+                                owner.spawnParticle(Particle.BLOCK, blockLoc.clone().add(0.5, 0.5, 0.5),
+                                    5, 0.3, 0.3, 0.3, 0, block.getBlockData());
                             }
                         }
                     }
@@ -266,16 +266,16 @@ public class PandaAnimation {
             // ═══════════════════════════════════════════════════════════
             
             if (showParticles) {
-                if (ticksElapsed % 2 == 0) {
-                    owner.spawnParticle(Particle.BLOCK, currentLocation.clone().add(0, 0.2, 0), 
-                        3, 0.3, 0.1, 0.3, 0.1, Material.DIRT.createBlockData());
+                if (ticksElapsed % 3 == 0) {
+                    owner.spawnParticle(Particle.BLOCK, currentLocation.clone().add(0, 0.2, 0),
+                        2, 0.3, 0.1, 0.3, 0.1, Material.DIRT.createBlockData());
                 }
-                
-                owner.spawnParticle(Particle.CLOUD, currentLocation, 2, 0.2, 0.1, 0.2, 0.02);
-                
-                if (ticksElapsed % 5 == 0) {
-                    owner.spawnParticle(Particle.HAPPY_VILLAGER, currentLocation.clone().add(0, 0.5, 0), 
-                        3, 0.2, 0.2, 0.2, 0);
+
+                owner.spawnParticle(Particle.CLOUD, currentLocation, 1, 0.2, 0.1, 0.2, 0.02);
+
+                if (ticksElapsed % 8 == 0) {
+                    owner.spawnParticle(Particle.HAPPY_VILLAGER, currentLocation.clone().add(0, 0.5, 0),
+                        2, 0.2, 0.2, 0.2, 0);
                 }
             }
             
@@ -299,7 +299,7 @@ public class PandaAnimation {
             }
             
             if (showParticles) {
-                owner.spawnParticle(Particle.CLOUD, currentLocation, 15, 0.5, 0.3, 0.5, 0.1);
+                owner.spawnParticle(Particle.CLOUD, currentLocation, 8, 0.5, 0.3, 0.5, 0.1);
             }
             
             // ═══════════════════════════════════════════════════════════
@@ -316,8 +316,8 @@ public class PandaAnimation {
                 }
                 
                 if (showParticles) {
-                    owner.spawnParticle(Particle.TOTEM_OF_UNDYING, currentLocation.clone().add(0, 1, 0), 
-                        30, 0.5, 0.5, 0.5, 0.3);
+                    owner.spawnParticle(Particle.TOTEM_OF_UNDYING, currentLocation.clone().add(0, 1, 0),
+                        15, 0.5, 0.5, 0.5, 0.3);
                 }
                 
                 owner.playSound(currentLocation, Sound.ENTITY_PANDA_EAT, 1.0f, 1.5f);
@@ -381,8 +381,8 @@ public class PandaAnimation {
             Location loc = pandaEntity.getLocation();
             
             if (showParticles && owner.isOnline()) {
-                owner.spawnParticle(Particle.POOF, loc, 20, 0.5, 0.5, 0.5, 0.1);
-                owner.spawnParticle(Particle.HEART, loc.clone().add(0, 1, 0), 5, 0.3, 0.3, 0.3, 0);
+                owner.spawnParticle(Particle.POOF, loc, 10, 0.5, 0.5, 0.5, 0.1);
+                owner.spawnParticle(Particle.HEART, loc.clone().add(0, 1, 0), 3, 0.3, 0.3, 0.3, 0);
             }
             
             if (owner.isOnline()) {
