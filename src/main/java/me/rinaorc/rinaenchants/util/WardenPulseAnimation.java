@@ -8,24 +8,25 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Warden;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.Vector;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.Team;
 
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
- * Animation du Warden avec Pulses Soniques
+ * Animation du Warden avec Onde Sonique Unique
  *
  * WARDEN PULSE / ONDE DU WARDEN
  *
- * Le Warden émerge du sol et émet des ondes soniques concentriques
- * qui récoltent les cultures en vagues successives.
+ * Le Warden émerge du sol avec un effet glowing cyan
+ * et émet une seule onde sonique concentrique
+ * qui récolte les cultures en une vague unique.
  *
  * Caractéristiques:
- * - Animation d'émergence du Warden
- * - Pulses soniques concentriques (cercles qui s'étendent)
- * - Système de résonance: zones touchées 2+ fois = bonus
+ * - Animation d'émergence du Warden avec glowing cyan
+ * - Une seule onde sonique qui s'étend
  * - Effets visuels sculk et sonic boom
  * - Client-side pour optimisation serveur 500+ joueurs
  */
@@ -34,27 +35,21 @@ public class WardenPulseAnimation {
     private final RinaEnchantsPlugin plugin;
     private final Location centerLocation;
     private final Player owner;
-    private final int pulseCount;
-    private final int pulseInterval;
     private final int maxPulseRadius;
     private final int pulseExpandSpeed;
     private final boolean showParticles;
     private final boolean clientSideOnly;
     private final Random random;
+    private Team glowTeam;
 
     // Callbacks
     private Consumer<Location> onCropHit;
-    private Consumer<Integer> onResonance;
+    private Consumer<Integer> onResonance; // Gardé pour compatibilité
     private BiConsumer<Integer, Integer> onFinish;
 
     // État
     private Warden wardenEntity;
     private int totalCropsHarvested = 0;
-    private int totalResonances = 0;
-
-    // Tracking des zones pour la résonance
-    private final Map<String, Integer> zoneHitCount = new HashMap<>();
-    private static final int RESONANCE_THRESHOLD = 2;
 
     // Set des cultures
     private static final Set<Material> CROPS = new HashSet<>();
@@ -102,13 +97,11 @@ public class WardenPulseAnimation {
     private static final Color RESONANCE_CYAN = Color.fromRGB(0, 255, 255);
 
     public WardenPulseAnimation(RinaEnchantsPlugin plugin, Location centerLocation, Player owner,
-                                int pulseCount, int pulseInterval, int maxPulseRadius,
-                                int pulseExpandSpeed, boolean showParticles, boolean clientSideOnly) {
+                                int maxPulseRadius, int pulseExpandSpeed,
+                                boolean showParticles, boolean clientSideOnly) {
         this.plugin = plugin;
         this.centerLocation = centerLocation.clone();
         this.owner = owner;
-        this.pulseCount = pulseCount;
-        this.pulseInterval = pulseInterval;
         this.maxPulseRadius = maxPulseRadius;
         this.pulseExpandSpeed = pulseExpandSpeed;
         this.showParticles = showParticles;
@@ -133,7 +126,7 @@ public class WardenPulseAnimation {
         if (world == null) return;
 
         // ═══════════════════════════════════════════════════════════
-        // PHASE 1: ANIMATION D'ÉMERGENCE DU WARDEN
+        // PHASE 1: ANIMATION D'ÉMERGENCE DU WARDEN AVEC GLOWING CYAN
         // ═══════════════════════════════════════════════════════════
 
         Location spawnLoc = centerLocation.clone();
@@ -165,6 +158,20 @@ public class WardenPulseAnimation {
             wardenEntity.setCollidable(false);
             wardenEntity.setRemoveWhenFarAway(false);
 
+            // ═══════════════════════════════════════════════════════════
+            // GLOWING CYAN - Créer une équipe avec couleur AQUA
+            // ═══════════════════════════════════════════════════════════
+            wardenEntity.setGlowing(true);
+
+            Scoreboard scoreboard = owner.getScoreboard();
+            String teamName = "warden_glow_" + wardenEntity.getEntityId();
+            glowTeam = scoreboard.getTeam(teamName);
+            if (glowTeam == null) {
+                glowTeam = scoreboard.registerNewTeam(teamName);
+            }
+            glowTeam.setColor(ChatColor.AQUA);
+            glowTeam.addEntry(wardenEntity.getUniqueId().toString());
+
             // Marquer l'entité pour cleanup
             plugin.markAsEnchantEntity(wardenEntity);
 
@@ -179,35 +186,47 @@ public class WardenPulseAnimation {
         }
 
         // ═══════════════════════════════════════════════════════════
-        // PHASE 2: DÉMARRER LES PULSES APRÈS L'ÉMERGENCE
+        // PHASE 2: DÉMARRER L'ONDE UNIQUE APRÈS L'ÉMERGENCE
         // ═══════════════════════════════════════════════════════════
 
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             if (wardenEntity == null || wardenEntity.isDead()) {
+                cleanupGlowTeam();
                 finishAnimation();
                 return;
             }
 
-            // Démarrer la séquence de pulses
-            new PulseSequenceTask().runTaskTimer(plugin, 0L, 1L);
+            // Démarrer l'onde unique
+            new SinglePulseTask().runTaskTimer(plugin, 0L, 1L);
 
         }, 20L); // 1 seconde d'émergence
     }
 
     /**
-     * Task qui gère la séquence de pulses
+     * Nettoie l'équipe de glowing
      */
-    private class PulseSequenceTask extends BukkitRunnable {
+    private void cleanupGlowTeam() {
+        if (glowTeam != null) {
+            try {
+                glowTeam.unregister();
+            } catch (Exception ignored) {}
+            glowTeam = null;
+        }
+    }
+
+    /**
+     * Task qui gère l'onde unique
+     */
+    private class SinglePulseTask extends BukkitRunnable {
 
         private int ticksAlive = 0;
-        private int pulsesEmitted = 0;
-        private int ticksSinceLastPulse = 0;
-        private final List<ActivePulse> activePulses = new ArrayList<>();
+        private double currentRadius = 0;
+        private boolean pulseStarted = false;
+        private final Set<String> harvestedBlocks = new HashSet<>();
 
         @Override
         public void run() {
             ticksAlive++;
-            ticksSinceLastPulse++;
 
             // Vérifier si le propriétaire est toujours en ligne
             if (!owner.isOnline()) {
@@ -223,7 +242,7 @@ public class WardenPulseAnimation {
                 return;
             }
 
-            World world = owner.getWorld();
+            World world = centerLocation.getWorld();
             if (world == null) {
                 cleanup();
                 cancel();
@@ -231,18 +250,13 @@ public class WardenPulseAnimation {
             }
 
             // ═══════════════════════════════════════════════════════════
-            // ÉMETTRE UN NOUVEAU PULSE
+            // DÉMARRER L'ONDE UNIQUE
             // ═══════════════════════════════════════════════════════════
 
-            if (pulsesEmitted < pulseCount && ticksSinceLastPulse >= pulseInterval) {
-                ticksSinceLastPulse = 0;
-                pulsesEmitted++;
+            if (!pulseStarted) {
+                pulseStarted = true;
 
-                // Créer un nouveau pulse
-                ActivePulse newPulse = new ActivePulse(wardenEntity.getLocation().clone());
-                activePulses.add(newPulse);
-
-                // Effet de shriek du Warden
+                // Effet de sonic boom du Warden
                 if (showParticles) {
                     Location wardenLoc = wardenEntity.getLocation();
                     owner.spawnParticle(Particle.SONIC_BOOM, wardenLoc.clone().add(0, 1.5, 0), 1, 0, 0, 0, 0);
@@ -250,48 +264,92 @@ public class WardenPulseAnimation {
                 }
 
                 owner.playSound(wardenEntity.getLocation(), Sound.ENTITY_WARDEN_SONIC_BOOM, 0.6f, 1.2f);
+            }
 
-                // Animation de "roar" visuel (particules autour du Warden)
-                if (showParticles) {
-                    for (int i = 0; i < 6; i++) {
-                        double angle = (Math.PI * 2 / 6) * i;
-                        Location ringLoc = wardenEntity.getLocation().clone().add(
-                            Math.cos(angle) * 0.8, 1.5, Math.sin(angle) * 0.8
-                        );
-                        Particle.DustOptions dust = new Particle.DustOptions(SCULK_BLUE, 1.5f);
-                        owner.spawnParticle(Particle.DUST, ringLoc, 2, 0.1, 0.1, 0.1, 0, dust);
+            // ═══════════════════════════════════════════════════════════
+            // EXPANSION DE L'ONDE
+            // ═══════════════════════════════════════════════════════════
+
+            double previousRadius = currentRadius;
+            currentRadius += (double) pulseExpandSpeed / 20.0; // blocks per tick
+
+            // Fin de l'onde
+            if (currentRadius > maxPulseRadius) {
+                cleanup();
+                cancel();
+                return;
+            }
+
+            // ═══════════════════════════════════════════════════════════
+            // DESSINER LE CERCLE DE L'ONDE
+            // ═══════════════════════════════════════════════════════════
+
+            if (showParticles) {
+                int points = (int) (currentRadius * 4);
+                points = Math.max(6, Math.min(points, 32));
+
+                Particle.DustOptions pulseDust = new Particle.DustOptions(SCULK_BLUE, 1.0f);
+                Particle.DustOptions pulseGlow = new Particle.DustOptions(SCULK_DARK, 1.5f);
+
+                for (int i = 0; i < points; i++) {
+                    double angle = (Math.PI * 2 / points) * i;
+                    double x = Math.cos(angle) * currentRadius;
+                    double z = Math.sin(angle) * currentRadius;
+
+                    Location circleLoc = centerLocation.clone().add(x, 0, z);
+                    circleLoc = findGroundLevel(circleLoc, world);
+
+                    if (circleLoc != null) {
+                        circleLoc.add(0, 0.1, 0);
+                        owner.spawnParticle(Particle.DUST, circleLoc, 1, 0, 0, 0, 0, pulseDust);
+
+                        if (i % 4 == 0) {
+                            owner.spawnParticle(Particle.DUST, circleLoc, 1, 0.1, 0.1, 0.1, 0, pulseGlow);
+                            owner.spawnParticle(Particle.SCULK_SOUL, circleLoc, 1, 0.1, 0.2, 0.1, 0.01);
+                        }
                     }
                 }
             }
 
             // ═══════════════════════════════════════════════════════════
-            // METTRE À JOUR TOUS LES PULSES ACTIFS
+            // RÉCOLTER LES CULTURES DANS L'ANNEAU DE L'ONDE
             // ═══════════════════════════════════════════════════════════
 
-            Iterator<ActivePulse> iterator = activePulses.iterator();
-            while (iterator.hasNext()) {
-                ActivePulse pulse = iterator.next();
-                pulse.update(world);
+            int maxR = (int) Math.ceil(currentRadius);
+            int cx = centerLocation.getBlockX();
+            int cy = centerLocation.getBlockY();
+            int cz = centerLocation.getBlockZ();
 
-                if (pulse.isFinished()) {
-                    iterator.remove();
-                }
-            }
+            for (int x = -maxR; x <= maxR; x++) {
+                for (int z = -maxR; z <= maxR; z++) {
+                    double dist = Math.sqrt(x * x + z * z);
 
-            // ═══════════════════════════════════════════════════════════
-            // AMBIANCE DU WARDEN
-            // ═══════════════════════════════════════════════════════════
+                    // Seulement les blocs dans l'anneau de l'onde
+                    if (dist < previousRadius || dist > currentRadius) continue;
 
-            if (ticksAlive % 40 == 0 && showParticles) {
-                // Particules d'aura sculk autour du Warden
-                Location wardenLoc = wardenEntity.getLocation();
-                for (int i = 0; i < 3; i++) {
-                    Location auraLoc = wardenLoc.clone().add(
-                        (random.nextDouble() - 0.5) * 1.5,
-                        random.nextDouble() * 2.5,
-                        (random.nextDouble() - 0.5) * 1.5
-                    );
-                    owner.spawnParticle(Particle.SCULK_SOUL, auraLoc, 1, 0, 0, 0, 0.02);
+                    for (int y = -2; y <= 2; y++) {
+                        Location blockLoc = new Location(world, cx + x, cy + y, cz + z);
+                        String key = blockLoc.getBlockX() + ":" + blockLoc.getBlockY() + ":" + blockLoc.getBlockZ();
+
+                        if (harvestedBlocks.contains(key)) continue;
+
+                        Block block = blockLoc.getBlock();
+                        if (isMatureCrop(block)) {
+                            harvestedBlocks.add(key);
+                            totalCropsHarvested++;
+
+                            // Callback
+                            if (onCropHit != null) {
+                                onCropHit.accept(blockLoc);
+                            }
+
+                            // Effet de récolte
+                            if (showParticles) {
+                                owner.spawnParticle(Particle.SCULK_CHARGE_POP, blockLoc.clone().add(0.5, 0.5, 0.5),
+                                    2, 0.2, 0.2, 0.2, 0.05);
+                            }
+                        }
+                    }
                 }
             }
 
@@ -299,196 +357,29 @@ public class WardenPulseAnimation {
             if (ticksAlive % 40 == 0) {
                 owner.playSound(wardenEntity.getLocation(), Sound.ENTITY_WARDEN_HEARTBEAT, 0.4f, 1.0f);
             }
-
-            // ═══════════════════════════════════════════════════════════
-            // FIN DE L'ANIMATION
-            // ═══════════════════════════════════════════════════════════
-
-            if (pulsesEmitted >= pulseCount && activePulses.isEmpty()) {
-                cleanup();
-                cancel();
-            }
         }
 
         /**
-         * Représente un pulse sonique en expansion
+         * Trouve le niveau du sol à une position donnée
          */
-        private class ActivePulse {
-
-            private final Location origin;
-            private double currentRadius = 0;
-            private int tick = 0;
-            private final Set<String> harvestedInThisPulse = new HashSet<>();
-
-            ActivePulse(Location origin) {
-                this.origin = origin.clone();
-            }
-
-            void update(World world) {
-                tick++;
-
-                // Expansion du pulse
-                double previousRadius = currentRadius;
-                currentRadius += (double) pulseExpandSpeed / 20.0; // blocks per tick
-
-                if (currentRadius > maxPulseRadius) {
-                    return; // Pulse terminé
-                }
-
-                // ═══════════════════════════════════════════════════════════
-                // DESSINER LE CERCLE DU PULSE
-                // ═══════════════════════════════════════════════════════════
-
-                if (showParticles) {
-                    // Nombre de points sur le cercle (plus grand rayon = plus de points)
-                    int points = (int) (currentRadius * 4);
-                    points = Math.max(6, Math.min(points, 32));
-
-                    Particle.DustOptions pulseDust = new Particle.DustOptions(SCULK_BLUE, 1.0f);
-                    Particle.DustOptions pulseGlow = new Particle.DustOptions(SCULK_DARK, 1.5f);
-
-                    for (int i = 0; i < points; i++) {
-                        double angle = (Math.PI * 2 / points) * i;
-                        double x = Math.cos(angle) * currentRadius;
-                        double z = Math.sin(angle) * currentRadius;
-
-                        // Trouver la hauteur du sol
-                        Location circleLoc = origin.clone().add(x, 0, z);
-                        circleLoc = findGroundLevel(circleLoc, world);
-
-                        if (circleLoc != null) {
-                            circleLoc.add(0, 0.1, 0); // Légèrement au-dessus du sol
-
-                            // Particule principale
-                            owner.spawnParticle(Particle.DUST, circleLoc, 1, 0, 0, 0, 0, pulseDust);
-
-                            // Effet de traînée (particules moins fréquentes)
-                            if (i % 4 == 0) {
-                                owner.spawnParticle(Particle.DUST, circleLoc, 1, 0.1, 0.1, 0.1, 0, pulseGlow);
-                                owner.spawnParticle(Particle.SCULK_SOUL, circleLoc, 1, 0.1, 0.2, 0.1, 0.01);
-                            }
-                        }
-                    }
-                }
-
-                // ═══════════════════════════════════════════════════════════
-                // RÉCOLTER LES CULTURES DANS L'ANNEAU DU PULSE
-                // ═══════════════════════════════════════════════════════════
-
-                // On récolte seulement les blocs dans l'anneau entre previousRadius et currentRadius
-                int minR = (int) Math.floor(previousRadius);
-                int maxR = (int) Math.ceil(currentRadius);
-
-                int cx = origin.getBlockX();
-                int cy = origin.getBlockY();
-                int cz = origin.getBlockZ();
-
-                for (int x = -maxR; x <= maxR; x++) {
-                    for (int z = -maxR; z <= maxR; z++) {
-                        double distSq = x * x + z * z;
-                        double dist = Math.sqrt(distSq);
-
-                        // Seulement les blocs dans l'anneau du pulse actuel
-                        if (dist < previousRadius || dist > currentRadius) continue;
-
-                        for (int y = -2; y <= 2; y++) {
-                            Location blockLoc = new Location(world, cx + x, cy + y, cz + z);
-                            String key = blockLoc.getBlockX() + ":" + blockLoc.getBlockY() + ":" + blockLoc.getBlockZ();
-
-                            if (harvestedInThisPulse.contains(key)) continue;
-
-                            Block block = blockLoc.getBlock();
-                            if (isMatureCrop(block)) {
-                                harvestedInThisPulse.add(key);
-                                totalCropsHarvested++;
-
-                                // Tracker pour la résonance
-                                int hitCount = zoneHitCount.getOrDefault(key, 0) + 1;
-                                zoneHitCount.put(key, hitCount);
-
-                                // Résonance!
-                                if (hitCount == RESONANCE_THRESHOLD) {
-                                    triggerResonance(blockLoc);
-                                }
-
-                                // Callback
-                                if (onCropHit != null) {
-                                    onCropHit.accept(blockLoc);
-                                }
-
-                                // Effet de récolte
-                                if (showParticles) {
-                                    owner.spawnParticle(Particle.SCULK_CHARGE_POP, blockLoc.clone().add(0.5, 0.5, 0.5),
-                                        2, 0.2, 0.2, 0.2, 0.05);
-                                }
-                            }
-                        }
-                    }
+        private Location findGroundLevel(Location loc, World world) {
+            int startY = loc.getBlockY();
+            for (int y = startY; y >= startY - 3; y--) {
+                Location checkLoc = new Location(world, loc.getBlockX(), y, loc.getBlockZ());
+                if (!checkLoc.getBlock().isPassable()) {
+                    return checkLoc.clone().add(0.5, 1, 0.5);
                 }
             }
-
-            boolean isFinished() {
-                return currentRadius > maxPulseRadius;
-            }
-
-            /**
-             * Trouve le niveau du sol à une position donnée
-             */
-            private Location findGroundLevel(Location loc, World world) {
-                int startY = loc.getBlockY();
-                for (int y = startY; y >= startY - 3; y--) {
-                    Location checkLoc = new Location(world, loc.getBlockX(), y, loc.getBlockZ());
-                    if (!checkLoc.getBlock().isPassable()) {
-                        return checkLoc.clone().add(0.5, 1, 0.5);
-                    }
+            for (int y = startY + 1; y <= startY + 3; y++) {
+                Location checkLoc = new Location(world, loc.getBlockX(), y, loc.getBlockZ());
+                if (!checkLoc.getBlock().isPassable()) {
+                    return checkLoc.clone().add(0.5, 1, 0.5);
                 }
-                for (int y = startY + 1; y <= startY + 3; y++) {
-                    Location checkLoc = new Location(world, loc.getBlockX(), y, loc.getBlockZ());
-                    if (!checkLoc.getBlock().isPassable()) {
-                        return checkLoc.clone().add(0.5, 1, 0.5);
-                    }
-                }
-                return loc;
             }
-        }
-
-        /**
-         * Déclenche un effet de résonance
-         */
-        private void triggerResonance(Location loc) {
-            totalResonances++;
-
-            if (onResonance != null) {
-                onResonance.accept(totalResonances);
-            }
-
-            // Effet visuel de résonance (plus spectaculaire)
-            if (showParticles) {
-                Location effectLoc = loc.clone().add(0.5, 0.5, 0.5);
-
-                // Explosion de particules cyan
-                Particle.DustOptions resonanceDust = new Particle.DustOptions(RESONANCE_CYAN, 2.0f);
-                owner.spawnParticle(Particle.DUST, effectLoc, 10, 0.3, 0.3, 0.3, 0, resonanceDust);
-
-                // Cercle de particules
-                for (int i = 0; i < 6; i++) {
-                    double angle = (Math.PI * 2 / 6) * i;
-                    Location ringLoc = effectLoc.clone().add(Math.cos(angle) * 0.5, 0, Math.sin(angle) * 0.5);
-                    owner.spawnParticle(Particle.END_ROD, ringLoc, 1, 0, 0.5, 0, 0.05);
-                }
-
-                // Particules sculk
-                owner.spawnParticle(Particle.SCULK_SOUL, effectLoc, 5, 0.3, 0.5, 0.3, 0.1);
-            }
-
-            // Son de résonance
-            owner.playSound(loc, Sound.BLOCK_SCULK_SENSOR_CLICKING, 1.0f, 0.5f);
-            owner.playSound(loc, Sound.BLOCK_AMETHYST_BLOCK_CHIME, 0.8f, 1.5f);
+            return loc;
         }
 
         private void cleanup() {
-            activePulses.clear();
-
             if (wardenEntity != null && !wardenEntity.isDead()) {
                 Location loc = wardenEntity.getLocation();
 
@@ -513,6 +404,7 @@ public class WardenPulseAnimation {
                 wardenEntity.remove();
             }
 
+            cleanupGlowTeam();
             finishAnimation();
         }
     }
@@ -536,7 +428,7 @@ public class WardenPulseAnimation {
         }
 
         if (onFinish != null) {
-            onFinish.accept(totalCropsHarvested, totalResonances);
+            onFinish.accept(totalCropsHarvested, 0); // Plus de résonances avec une seule onde
         }
     }
 }

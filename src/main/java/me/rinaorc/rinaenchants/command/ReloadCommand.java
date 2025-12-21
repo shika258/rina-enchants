@@ -50,7 +50,21 @@ public class ReloadCommand implements CommandExecutor, TabCompleter {
             case "info":
                 sendInfo(sender);
                 break;
-                
+
+            case "cleanup":
+                if (!sender.hasPermission("rinaenchants.cleanup")) {
+                    sender.sendMessage(ChatColor.RED + "Vous n'avez pas la permission d'exécuter cette commande!");
+                    return true;
+                }
+
+                int cleaned = plugin.forceCleanupAllEntities();
+                if (cleaned > 0) {
+                    sender.sendMessage(ChatColor.GREEN + "✓ " + cleaned + " entité(s) d'enchantement supprimée(s)!");
+                } else {
+                    sender.sendMessage(ChatColor.YELLOW + "Aucune entité d'enchantement à nettoyer.");
+                }
+                break;
+
             case "help":
             default:
                 sendHelp(sender);
@@ -67,6 +81,7 @@ public class ReloadCommand implements CommandExecutor, TabCompleter {
         sender.sendMessage("");
         sender.sendMessage(ChatColor.YELLOW + "/rinaenchants reload" + ChatColor.GRAY + " - Recharge la configuration");
         sender.sendMessage(ChatColor.YELLOW + "/rinaenchants info" + ChatColor.GRAY + " - Affiche les infos du plugin");
+        sender.sendMessage(ChatColor.YELLOW + "/rinaenchants cleanup" + ChatColor.GRAY + " - Supprime les entités orphelines");
         sender.sendMessage(ChatColor.YELLOW + "/rinaenchants help" + ChatColor.GRAY + " - Affiche cette aide");
         sender.sendMessage(ChatColor.GOLD + "══════════════════════════");
         sender.sendMessage("");
@@ -102,7 +117,7 @@ public class ReloadCommand implements CommandExecutor, TabCompleter {
         List<String> completions = new ArrayList<>();
         
         if (args.length == 1) {
-            List<String> subCommands = Arrays.asList("reload", "info", "help");
+            List<String> subCommands = Arrays.asList("reload", "info", "cleanup", "help");
             String input = args[0].toLowerCase();
             
             for (String sub : subCommands) {

@@ -239,7 +239,7 @@ public class GolemFactoryAnimation {
 
         private int ticksAlive = 0;
         private final Set<String> harvestedBlocks = new HashSet<>();
-        private static final double MOVE_SPEED = 0.08;
+        private static final double MOVE_SPEED = 0.15; // Vitesse augmentée pour mouvement visible
         private static final double MERGE_DISTANCE = 1.5;
 
         @Override
@@ -306,25 +306,40 @@ public class GolemFactoryAnimation {
             // MOUVEMENT VERS LA CIBLE
             // ═══════════════════════════════════════════════════════════
 
-            if (golem.targetLocation == null || golem.ticksSinceDirectionChange > 60 ||
-                currentLoc.distanceSquared(golem.targetLocation) < 1) {
+            if (golem.targetLocation == null || golem.ticksSinceDirectionChange > 40 ||
+                currentLoc.distanceSquared(golem.targetLocation) < 2) {
                 golem.targetLocation = getRandomPatrolTarget();
                 golem.ticksSinceDirectionChange = 0;
             }
 
-            Vector direction = golem.targetLocation.toVector().subtract(currentLoc.toVector());
-            if (direction.lengthSquared() > 0.01) {
-                direction.setY(0).normalize();
+            // Calculer la direction vers la cible
+            double dx = golem.targetLocation.getX() - currentLoc.getX();
+            double dz = golem.targetLocation.getZ() - currentLoc.getZ();
+            double distanceXZ = Math.sqrt(dx * dx + dz * dz);
+
+            if (distanceXZ > 0.5) {
+                // Normaliser la direction
+                dx /= distanceXZ;
+                dz /= distanceXZ;
 
                 // Vitesse ajustée selon la taille
                 double speed = golem.isGiant ? MOVE_SPEED * 0.7 : MOVE_SPEED;
-                Location newLoc = currentLoc.clone().add(direction.multiply(speed));
-                newLoc.setDirection(direction);
 
-                // Garder au sol
-                newLoc = findGroundLevel(newLoc, world);
-                if (newLoc != null) {
-                    golem.entity.teleport(newLoc);
+                // Nouvelle position
+                double newX = currentLoc.getX() + dx * speed;
+                double newZ = currentLoc.getZ() + dz * speed;
+
+                // Trouver le sol à la nouvelle position
+                Location newLoc = new Location(world, newX, currentLoc.getY(), newZ);
+                Location groundLoc = findGroundLevel(newLoc, world);
+
+                if (groundLoc != null) {
+                    // Calculer le yaw pour faire face à la direction de mouvement
+                    float yaw = (float) Math.toDegrees(Math.atan2(-dx, dz));
+                    groundLoc.setYaw(yaw);
+                    groundLoc.setPitch(0);
+
+                    golem.entity.teleport(groundLoc);
                 }
             }
 
@@ -628,22 +643,30 @@ public class GolemFactoryAnimation {
     }
 
     private Location findGroundLevel(Location loc, World world) {
+        double x = loc.getX();
+        double z = loc.getZ();
         int startY = loc.getBlockY();
+
+        // Chercher le sol en dessous
         for (int y = startY; y >= startY - 5; y--) {
-            Location checkLoc = new Location(world, loc.getBlockX(), y, loc.getBlockZ());
-            Block block = checkLoc.getBlock();
-            if (!block.isPassable() && block.getType().isSolid()) {
-                return checkLoc.clone().add(0.5, 1, 0.5);
+            Block block = world.getBlockAt((int) Math.floor(x), y, (int) Math.floor(z));
+            Block above = world.getBlockAt((int) Math.floor(x), y + 1, (int) Math.floor(z));
+            if (block.getType().isSolid() && above.isPassable()) {
+                return new Location(world, x, y + 1, z);
             }
         }
+
+        // Chercher le sol au-dessus
         for (int y = startY + 1; y <= startY + 5; y++) {
-            Location checkLoc = new Location(world, loc.getBlockX(), y, loc.getBlockZ());
-            Block block = checkLoc.getBlock();
-            if (!block.isPassable() && block.getType().isSolid()) {
-                return checkLoc.clone().add(0.5, 1, 0.5);
+            Block block = world.getBlockAt((int) Math.floor(x), y, (int) Math.floor(z));
+            Block above = world.getBlockAt((int) Math.floor(x), y + 1, (int) Math.floor(z));
+            if (block.getType().isSolid() && above.isPassable()) {
+                return new Location(world, x, y + 1, z);
             }
         }
-        return loc;
+
+        // Si rien trouvé, retourner la position actuelle
+        return new Location(world, x, loc.getY(), z);
     }
 
     private boolean isMatureCrop(Block block) {
