@@ -466,7 +466,6 @@ public class FrogTongueAnimation {
                     owner.spawnParticle(Particle.TOTEM_OF_UNDYING, comboLoc, 15, 0.5, 0.5, 0.5, 0.3);
                 }
 
-                owner.playSound(target, Sound.ENTITY_PLAYER_LEVELUP, 0.8f, 1.5f);
                 owner.playSound(target, Sound.ENTITY_FROG_EAT, 1.0f, 0.8f);
 
                 // Reset la zone pour permettre un nouveau combo
