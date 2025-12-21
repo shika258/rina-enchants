@@ -17,16 +17,17 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
- * Animation du Phantom Géant
+ * Animation du Phantom Strike
  *
- * Un Phantom géant (scale x2) apparaît et survole le champ
+ * Un Phantom géant surgit des ombres et survole le champ
  * en effectuant des passes rasantes et des piqués pour récolter.
  *
  * Mécaniques:
- * - Vol en figure-8 avec passes rasantes
- * - Piqués d'attaque sur les cultures
- * - Traînée d'ombre et de particules d'âme
- * - Cri strident lors des attaques
+ * - Vol fluide en figure-8 au-dessus des cultures
+ * - Piqués d'attaque avec récolte en zone
+ * - Traînée de particules d'âme et de portail
+ * - Balayage final dévastateur
+ * - Immunité au feu solaire
  */
 public class EnderDragonBreathAnimation {
 
@@ -158,7 +159,7 @@ public class EnderDragonBreathAnimation {
             phantom.setVisualFire(false); // Empêcher l'effet visuel de feu
 
             // ═══════════════════════════════════════════════════════════
-            // APPLIQUER L'ÉCHELLE x2 (Phantom géant)
+            // APPLIQUER L'ÉCHELLE (Phantom géant)
             // ═══════════════════════════════════════════════════════════
             try {
                 AttributeInstance scaleAttr = phantom.getAttribute(Attribute.SCALE);

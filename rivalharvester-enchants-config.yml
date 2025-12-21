@@ -191,30 +191,29 @@
     price-increase: 350000000
 
   # ─────────────────────────────────────────────────────────────────
-  # 🐉 ENDER DRAGON BREATH / SOUFFLE DU DRAGON
+  # 👻 PHANTOM STRIKE / FRAPPE DU PHANTOM
   # ─────────────────────────────────────────────────────────────────
   ender_dragon_breath:
     enabled: true
     disenchanter: false
     player-only: true
     slot: 47
-    material: DRAGON_BREATH
+    material: PHANTOM_MEMBRANE
     base64:
       enabled: false
       value: ''
-    name: "&5&lSouffle du Dragon &8(&7🐉&8)"
+    name: "&8&lFrappe du Phantom &8(&7👻&8)"
     lore:
     - '&8ᴄʜᴀɴᴄᴇ ᴅᴇ ᴘʀᴏᴄ : &7%chance-percent%%'
     - ''
-    - '&#FF00E0E&#D900C9n&#B3009Bc&#8C006Dh&#66003Fa&#400010n&#660040t&#8C0070e&#B3009Fm&#D900CFe&#FF00FFn&#D900CFt &#8C006DL&#66003Fé&#400010g&#660040e&#8C0070n&#B3009Fd&#D900CFa&#FF00FFi&#D900CFr&#B3009Fe'
+    - '&#404060E&#4A4A70n&#545480c&#5E5E90h&#6868A0a&#7272B0n&#7C7CC0t&#8686D0e&#9090E0m&#9A9AF0e&#A4A4FFn&#9A9AF0t &#8686D0L&#7C7CC0é&#7272B0g&#6868A0e&#5E5E90n&#545480d&#4A4A70a&#404060i&#4A4A70r&#545480e'
     - ''
-    - '&7&o(( Un &5mini Ender Dragon &7&o(scale 0.4)'
-    - '&7&osurvole le champ en spirale et crache'
-    - '&7&odes nuages de dragon breath!'
+    - '&7&o(( Un &8Phantom géant &7&osurgit des ombres'
+    - '&7&oet survole le champ en figure-8!'
     - ''
-    - '&7&o🐉 &dZONES PERSISTANTES&7&o: Les nuages'
-    - '&7&ocontinuent de récolter plusieurs secondes!'
-    - '&7&o🐉 &5SOUFFLE FINAL&7&o: Explosion massive! ))'
+    - '&7&o👻 &8PIQUÉS&7&o: Plonge sur les cultures'
+    - '&7&oavec une onde de choc spectrale!'
+    - '&7&o👻 &5BALAYAGE FINAL&7&o: Frappe ultime! ))'
     - ' '
     - ' &e&l| &fPrix : &d%cost% &5❋'
     - ' &e&l| &fNiveau Max : &e%max_level%'
@@ -225,8 +224,8 @@
     - '&8[%progress%&8] &f%percentage%%'
     - '&c&o(( Prestige &b&l%prestige%&r &c&osur votre houe ))'
     disenchant:
-    - '&7&o(( Un mini Dragon survole et crache des'
-    - '&7&onuages de dragon breath persistants! ))'
+    - '&7&o(( Un Phantom géant survole et plonge'
+    - '&7&osur les cultures avec des ondes spectrales! ))'
     - ''
     - ' &e&l| &fNiveau Actuel : &e%current_level%'
     - ''
@@ -250,7 +249,7 @@
 # | Warden Pulse          | 2000      | 150      | SCULK            |
 # | Golem Factory         | 500       | 100      | IRON_BLOCK       |
 # | Axolotl Tsunami       | 3000      | 200      | AXOLOTL_BUCKET   |
-# | Ender Dragon Breath   | 5000      | 250      | DRAGON_BREATH    |
+# | Phantom Strike        | 5000      | 250      | PHANTOM_MEMBRANE |
 #
 # ═══════════════════════════════════════════════════════════════════
 # SLOTS UTILISÉS: 43, 44, 45, 46, 47
