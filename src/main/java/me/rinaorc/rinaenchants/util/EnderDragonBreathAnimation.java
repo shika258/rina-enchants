@@ -5,6 +5,7 @@ import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Ageable;
+import org.bukkit.boss.DragonBattle;
 import org.bukkit.entity.EnderDragon;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -144,11 +145,11 @@ public class EnderDragonBreathAnimation {
         Location spawnLoc = startLocation.clone().add(0, currentHeight, 0);
 
         dragon = world.spawn(spawnLoc, EnderDragon.class, d -> {
-            d.setAI(false);
             d.setSilent(true);
             d.setInvulnerable(true);
             d.setGravity(false);
             d.setPersistent(false);
+            d.setCollidable(false);
 
             // Appliquer le scale réduit (0.4 par défaut)
             if (d.getAttribute(Attribute.SCALE) != null) {
@@ -159,8 +160,26 @@ public class EnderDragonBreathAnimation {
             plugin.markAsEnchantEntity(d);
         });
 
+        if (dragon == null) {
+            return;
+        }
+
+        // Supprimer/cacher la boss bar
+        try {
+            DragonBattle battle = dragon.getDragonBattle();
+            if (battle != null && battle.getBossBar() != null) {
+                battle.getBossBar().setVisible(false);
+                battle.getBossBar().removeAll();
+            }
+        } catch (Exception ignored) {
+            // Pas de DragonBattle disponible (normal hors de l'End)
+        }
+
+        // Désactiver l'IA après le spawn pour éviter les comportements par défaut
+        dragon.setAI(false);
+
         // Rendre client-side si configuré
-        if (clientSideOnly && dragon != null) {
+        if (clientSideOnly) {
             plugin.makeEntityClientSide(dragon, player);
         }
 
@@ -207,6 +226,8 @@ public class EnderDragonBreathAnimation {
     }
 
     private void updateDragonPosition() {
+        if (dragon == null || dragon.isDead()) return;
+
         // Mouvement en spirale
         spiralAngle += spiralSpeed;
 
@@ -221,13 +242,23 @@ public class EnderDragonBreathAnimation {
 
         Location newLoc = new Location(world, x, y, z);
 
-        // Orienter le dragon vers sa direction de vol
-        Vector direction = newLoc.toVector().subtract(dragon.getLocation().toVector());
-        if (direction.lengthSquared() > 0.01) {
-            newLoc.setDirection(direction);
-        }
+        // Calculer le yaw basé sur la direction de vol (tangente à la spirale)
+        double tangentX = -Math.sin(spiralAngle);
+        double tangentZ = Math.cos(spiralAngle);
+        float yaw = (float) Math.toDegrees(Math.atan2(-tangentX, tangentZ));
+        newLoc.setYaw(yaw);
+        newLoc.setPitch(-10); // Légère inclinaison vers le bas
 
-        dragon.teleport(newLoc);
+        // Utiliser velocity pour un mouvement plus fluide
+        Location currentLoc = dragon.getLocation();
+        Vector velocity = newLoc.toVector().subtract(currentLoc.toVector()).multiply(0.5);
+        dragon.setVelocity(velocity);
+
+        // Téléporter pour la rotation et position exacte
+        Location teleportLoc = currentLoc.clone().add(velocity);
+        teleportLoc.setYaw(yaw);
+        teleportLoc.setPitch(-10);
+        dragon.teleport(teleportLoc);
     }
 
     private void createBreathCloud() {
