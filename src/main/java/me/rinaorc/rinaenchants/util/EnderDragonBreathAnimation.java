@@ -151,8 +151,8 @@ public class EnderDragonBreathAnimation {
             d.setPersistent(false);
 
             // Appliquer le scale réduit (0.4 par défaut)
-            if (d.getAttribute(Attribute.GENERIC_SCALE) != null) {
-                d.getAttribute(Attribute.GENERIC_SCALE).setBaseValue(dragonScale);
+            if (d.getAttribute(Attribute.SCALE) != null) {
+                d.getAttribute(Attribute.SCALE).setBaseValue(dragonScale);
             }
 
             // Marquer l'entité pour cleanup
