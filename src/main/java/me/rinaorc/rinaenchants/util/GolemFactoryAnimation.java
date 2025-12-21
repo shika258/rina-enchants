@@ -185,7 +185,7 @@ public class GolemFactoryAnimation {
                 // APPLIQUER L'ÉCHELLE (mini-golem)
                 // ═══════════════════════════════════════════════════════════
                 try {
-                    AttributeInstance scaleAttr = golem.getAttribute(Attribute.GENERIC_SCALE);
+                    AttributeInstance scaleAttr = golem.getAttribute(Attribute.SCALE);
                     if (scaleAttr != null) {
                         scaleAttr.setBaseValue(golemScale);
                     }
@@ -472,7 +472,7 @@ public class GolemFactoryAnimation {
                 // ═══════════════════════════════════════════════════════════
                 double giantScale = golemScale * 2.5;
                 try {
-                    AttributeInstance scaleAttr = giant.getAttribute(Attribute.GENERIC_SCALE);
+                    AttributeInstance scaleAttr = giant.getAttribute(Attribute.SCALE);
                     if (scaleAttr != null) {
                         scaleAttr.setBaseValue(giantScale);
                     }
