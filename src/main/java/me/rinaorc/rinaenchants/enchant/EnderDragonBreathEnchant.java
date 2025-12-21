@@ -203,7 +203,7 @@ public class EnderDragonBreathEnchant implements HoeEnchant, Listener {
 
         if (plugin.getConfig().getBoolean("ender-dragon-breath.start-message", true)) {
             String message = plugin.getConfig().getString("ender-dragon-breath.start-message-text",
-                "&5&l🐉 &dUn Dragon de l'End apparaît!");
+                "&8&l👻 &7Un Phantom géant surgit des ombres!");
             message = ChatColor.translateAlternateColorCodes('&', message);
             player.sendMessage(message);
         }
@@ -235,12 +235,12 @@ public class EnderDragonBreathEnchant implements HoeEnchant, Listener {
         animation.setOnFinish((totalCrops, totalClouds) -> {
             if (plugin.getConfig().getBoolean("ender-dragon-breath.message", true) && totalCrops > 0) {
                 String message = plugin.getConfig().getString("ender-dragon-breath.message-text",
-                    "&5&l🐉 &dLe Dragon a incinéré &5{count} &dcultures!");
+                    "&8&l👻 &7Le Phantom a fauché &8{count} &7cultures!");
                 message = message.replace("{count}", String.valueOf(totalCrops));
 
                 if (totalClouds > 0) {
                     String cloudSuffix = plugin.getConfig().getString("ender-dragon-breath.cloud-suffix",
-                        " &7(&5{clouds} souffles&7)");
+                        " &7(&8{clouds} piqués&7)");
                     cloudSuffix = cloudSuffix.replace("{clouds}", String.valueOf(totalClouds));
                     message += cloudSuffix;
                 }
@@ -250,7 +250,7 @@ public class EnderDragonBreathEnchant implements HoeEnchant, Listener {
             }
 
             if (playSound) {
-                player.playSound(player.getLocation(), Sound.ENTITY_ENDER_DRAGON_FLAP, 0.6f, 1.0f);
+                player.playSound(player.getLocation(), Sound.ENTITY_PHANTOM_FLAP, 0.8f, 1.0f);
             }
         });
 
