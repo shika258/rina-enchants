@@ -205,8 +205,8 @@ public class FrogTongueAnimation {
                 Frog frog = (Frog) world.spawnEntity(spawnLoc, EntityType.FROG);
                 frog.setInvulnerable(true);
                 frog.setSilent(false);
-                frog.setAI(false);
-                frog.setGravity(true); // Gravité activée pour qu'elle reste au sol
+                frog.setAI(true); // AI activée pour permettre l'animation de la langue
+                frog.setGravity(true);
                 frog.setCollidable(false);
                 frog.setRemoveWhenFarAway(false);
                 frog.setVariant(type.variant);
@@ -319,10 +319,18 @@ public class FrogTongueAnimation {
             frog.ticksSinceLastLick++;
 
             // ═══════════════════════════════════════════════════════════
-            // Les grenouilles restent sur place - pas de mouvement
+            // Téléporter la grenouille à sa position de spawn pour éviter qu'elle se déplace
             // ═══════════════════════════════════════════════════════════
 
             Location frogPos = frog.spawnLocation;
+            Location currentLoc = frog.entity.getLocation();
+
+            // Si la grenouille s'est trop éloignée, la ramener
+            if (currentLoc.distanceSquared(frogPos) > 1.0) {
+                Location teleportLoc = frogPos.clone();
+                teleportLoc.setDirection(currentLoc.getDirection()); // Garder l'orientation
+                frog.entity.teleport(teleportLoc);
+            }
 
             // ═══════════════════════════════════════════════════════════
             // TIR DE LANGUE vers les cultures (animation native)
@@ -498,7 +506,6 @@ public class FrogTongueAnimation {
                 if (showParticles) {
                     Location comboLoc = target.clone().add(0.5, 0.5, 0.5);
                     owner.spawnParticle(Particle.TOTEM_OF_UNDYING, comboLoc, 15, 0.5, 0.5, 0.5, 0.3);
-                    owner.spawnParticle(Particle.FLASH, comboLoc, 1, 0, 0, 0, 0);
                 }
 
                 owner.playSound(target, Sound.ENTITY_PLAYER_LEVELUP, 0.8f, 1.5f);
