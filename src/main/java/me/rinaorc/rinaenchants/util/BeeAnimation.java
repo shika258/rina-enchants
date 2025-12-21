@@ -30,7 +30,8 @@ public class BeeAnimation {
     private final Player owner; // Le joueur qui voit l'abeille
     private final boolean clientSideOnly;
     private final Random random;
-    
+    private final double configSpeedMultiplier; // Multiplicateur de vitesse depuis la config
+
     private Consumer<Location> onCropReached;
     private Bee beeEntity;
     private int currentTargetIndex = 0;
@@ -51,8 +52,9 @@ public class BeeAnimation {
     
     private static final double ARRIVAL_DISTANCE = 1.0;
 
-    public BeeAnimation(RinaEnchantsPlugin plugin, Location startLocation, List<Location> targetCrops, 
-                        boolean showParticles, int beeId, Player owner, boolean clientSideOnly) {
+    public BeeAnimation(RinaEnchantsPlugin plugin, Location startLocation, List<Location> targetCrops,
+                        boolean showParticles, int beeId, Player owner, boolean clientSideOnly,
+                        double speedMultiplier) {
         this.plugin = plugin;
         this.startLocation = startLocation.clone();
         this.targetCrops = targetCrops;
@@ -60,14 +62,16 @@ public class BeeAnimation {
         this.beeId = beeId;
         this.owner = owner;
         this.clientSideOnly = clientSideOnly;
-        
+        this.configSpeedMultiplier = speedMultiplier;
+
         // Seed unique pour cette abeille
         this.random = new Random(System.nanoTime() + beeId * 12345L);
-        
+
         // ═══════════════════════════════════════════════════════════
         // PARAMÈTRES UNIQUES pour chaque abeille (vraiment aléatoires)
+        // Vitesse de base multipliée par le config speedMultiplier
         // ═══════════════════════════════════════════════════════════
-        this.baseSpeed = 0.2 + random.nextDouble() * 0.25; // 0.2 à 0.45
+        this.baseSpeed = (0.2 + random.nextDouble() * 0.25) * configSpeedMultiplier; // Base 0.2-0.45 × multiplier
         
         // Amplitudes différentes pour chaque axe
         this.waveAmplitudeX = 0.02 + random.nextDouble() * 0.1;  // 0.02 à 0.12

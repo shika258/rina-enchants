@@ -291,7 +291,7 @@ public class RavagerAnimation {
             for (int x = -stompRadius; x <= stompRadius && harvested < maxPerStomp; x++) {
                 for (int z = -stompRadius; z <= stompRadius && harvested < maxPerStomp; z++) {
                     if (x * x + z * z <= stompRadius * stompRadius) {
-                        for (int y = -1; y <= 0; y++) {
+                        for (int y = -1; y <= 2; y++) {
                             Location cropLoc = center.clone().add(x, y, z);
                             if (harvestAt(cropLoc)) {
                                 harvested++;
@@ -349,7 +349,7 @@ public class RavagerAnimation {
             for (int x = -roarRadius; x <= roarRadius && harvested < maxPerRoar; x++) {
                 for (int z = -roarRadius; z <= roarRadius && harvested < maxPerRoar; z++) {
                     if (x * x + z * z <= roarRadius * roarRadius) {
-                        for (int y = -1; y <= 0; y++) {
+                        for (int y = -1; y <= 2; y++) {
                             Location cropLoc = center.clone().add(x, y, z);
                             if (harvestAt(cropLoc)) {
                                 harvested++;
