@@ -50,6 +50,9 @@ public class RinaEnchantsPlugin extends JavaPlugin implements Listener {
     // Clé pour marquer les entités spawned par ce plugin (PersistentDataContainer)
     private NamespacedKey enchantEntityKey;
 
+    // Task de nettoyage périodique des entités
+    private int cleanupTaskId = -1;
+
     // ═══════════════════════════════════════════════════════════════════════
     // SYSTÈME DE TRACKING POUR EMPÊCHER LES PROC EN CASCADE
     // ═══════════════════════════════════════════════════════════════════════
@@ -110,6 +113,13 @@ public class RinaEnchantsPlugin extends JavaPlugin implements Listener {
 
         // Task de nettoyage des locations expirées (toutes les 5 secondes)
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, this::cleanupExpiredLocations, 100L, 100L);
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // TASK DE NETTOYAGE PÉRIODIQUE DES ENTITÉS ORPHELINES (toutes les 2 minutes)
+        // Sécurité supplémentaire pour nettoyer les entités qui auraient pu
+        // échapper au cleanup normal (crash d'animation, bug, etc.)
+        // ═══════════════════════════════════════════════════════════════════════
+        cleanupTaskId = Bukkit.getScheduler().runTaskTimer(this, this::periodicEntityCleanup, 2400L, 2400L).getTaskId();
 
         // Attendre que RivalHarvesterHoes soit chargé
         Bukkit.getScheduler().runTaskLater(this, this::initializeEnchants, 20L);
@@ -353,6 +363,12 @@ public class RinaEnchantsPlugin extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
+        // Annuler la task de nettoyage périodique
+        if (cleanupTaskId != -1) {
+            Bukkit.getScheduler().cancelTask(cleanupTaskId);
+            cleanupTaskId = -1;
+        }
+
         // Nettoyer toutes les entités spawned par les enchantements
         cleanupEnchantEntities();
 
@@ -385,6 +401,70 @@ public class RinaEnchantsPlugin extends JavaPlugin implements Listener {
         if (cleaned > 0) {
             getLogger().info("§a✓ Nettoyage de " + cleaned + " entité(s) d'enchantement orpheline(s)");
         }
+    }
+
+    /**
+     * Nettoyage périodique des entités orphelines.
+     * Cette méthode est appelée toutes les 2 minutes pour nettoyer
+     * les entités qui auraient pu échapper au cleanup normal.
+     */
+    private void periodicEntityCleanup() {
+        int cleaned = 0;
+        boolean debug = getConfig().getBoolean("debug", false);
+
+        for (World world : Bukkit.getWorlds()) {
+            for (Entity entity : world.getEntities()) {
+                if (isEnchantEntity(entity)) {
+                    // Vérifier si l'entité est valide et n'est pas déjà morte
+                    if (!entity.isValid() || entity.isDead()) {
+                        continue;
+                    }
+
+                    // L'entité est toujours là mais marquée comme enchantement
+                    // Elle devrait avoir été nettoyée par son animation
+                    // Si elle est là depuis plus de 5 minutes, c'est un orphelin
+                    // Note: on ne peut pas facilement tracker le temps de vie,
+                    // donc on nettoie les entités sans AI qui sont immobiles
+                    if (!entity.hasAI() && entity.getVelocity().lengthSquared() < 0.01) {
+                        entity.remove();
+                        cleaned++;
+
+                        if (debug) {
+                            getLogger().info("§e[Cleanup périodique] Entité orpheline supprimée: " +
+                                entity.getType() + " à " + entity.getLocation().toVector());
+                        }
+                    }
+                }
+            }
+        }
+
+        if (cleaned > 0 && debug) {
+            getLogger().info("§a✓ Nettoyage périodique: " + cleaned + " entité(s) orpheline(s) supprimée(s)");
+        }
+    }
+
+    /**
+     * Force le nettoyage de toutes les entités d'enchantement.
+     * Peut être appelé via commande admin.
+     * @return Le nombre d'entités nettoyées
+     */
+    public int forceCleanupAllEntities() {
+        int cleaned = 0;
+
+        for (World world : Bukkit.getWorlds()) {
+            for (Entity entity : world.getEntities()) {
+                if (isEnchantEntity(entity)) {
+                    entity.remove();
+                    cleaned++;
+                }
+            }
+        }
+
+        if (cleaned > 0) {
+            getLogger().info("§a✓ Nettoyage forcé: " + cleaned + " entité(s) d'enchantement supprimée(s)");
+        }
+
+        return cleaned;
     }
 
     /**
