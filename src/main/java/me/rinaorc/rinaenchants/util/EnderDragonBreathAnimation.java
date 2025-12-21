@@ -155,6 +155,7 @@ public class EnderDragonBreathAnimation {
             phantom.setCollidable(false);
             phantom.setAI(false);
             phantom.setSize(4); // Taille du phantom (affecte la hitbox et l'apparence)
+            phantom.setVisualFire(false); // Empêcher l'effet visuel de feu
 
             // ═══════════════════════════════════════════════════════════
             // APPLIQUER L'ÉCHELLE x2 (Phantom géant)
@@ -204,6 +205,9 @@ public class EnderDragonBreathAnimation {
                     cancel();
                     return;
                 }
+
+                // Empêcher le phantom de brûler au soleil
+                phantom.setFireTicks(0);
 
                 ticksElapsed++;
 
