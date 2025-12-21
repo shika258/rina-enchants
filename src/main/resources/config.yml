@@ -979,24 +979,23 @@ axolotl-tsunami:
 
 
 # ═══════════════════════════════════════════════════════════════════
-#                  🐉 ENDER DRAGON BREATH / SOUFFLE DU DRAGON
+#                  👻 PHANTOM STRIKE / FRAPPE DU PHANTOM
 # ═══════════════════════════════════════════════════════════════════
-# Un mini Ender Dragon (scale 0.4) survole le champ en spirale
-# et crache des nuages de dragon breath qui récoltent les cultures!
+# Un Phantom GÉANT (scale x2) surgit des ombres et effectue des
+# piqués dévastateurs sur les cultures!
 #
 # MÉCANIQUE:
-# 1. APPARITION - Le dragon émerge en version miniature
-# 2. SPIRALE - Vol en spirale autour du point de proc
-# 3. SOUFFLE - Crache des zones de dragon breath périodiquement
-# 4. PERSISTANCE - Les zones continuent de récolter un moment
-# 5. FINAL - Souffle massif avant de disparaître
+# 1. APPARITION - Le Phantom émerge avec effet sombre
+# 2. VOL EN 8 - Vol en figure-8 dynamique au-dessus du champ
+# 3. PIQUÉS - Plonge sur les cultures pour les récolter
+# 4. IMPACT - Onde de choc de particules d'âme à l'impact
+# 5. FINAL - Balayage massif avant disparition
 #
 # SCALING (5000 niveaux max):
 # - Durée du vol: 5s → 20s
-# - Rayon spirale: 5 → 15 blocs
-# - Intervalle souffle: 2s → 0.75s (plus fréquent)
-# - Rayon souffle: 3 → 8 blocs
-# - Durée zones: 2s → 5s
+# - Rayon de vol: 5 → 15 blocs
+# - Intervalle piqués: 2s → 0.75s (plus fréquent)
+# - Rayon d'impact: 3 → 8 blocs
 
 ender-dragon-breath:
 
@@ -1017,47 +1016,47 @@ ender-dragon-breath:
   max-level: 5000
 
   # ─────────────────────────────────────────────────────────────────
-  #                      TAILLE DU DRAGON (SCALE)
+  #                      TAILLE DU PHANTOM (SCALE)
   # ─────────────────────────────────────────────────────────────────
-  # Échelle du dragon (1.0 = taille normale)
-  # 0.4 = dragon miniature très mignon!
+  # Échelle du phantom (multipliée par 5 en interne)
+  # 0.4 = phantom géant impressionnant!
 
   dragon-scale: 0.4
 
   # ─────────────────────────────────────────────────────────────────
   #                      DURÉE DU VOL (en ticks)
   # ─────────────────────────────────────────────────────────────────
-  # Combien de temps le dragon reste actif
+  # Combien de temps le phantom reste actif
   # 20 ticks = 1 seconde
 
   base-flight-duration: 100
   max-flight-duration: 400
 
   # ─────────────────────────────────────────────────────────────────
-  #                      SPIRALE DE VOL
+  #                      FIGURE-8 DE VOL
   # ─────────────────────────────────────────────────────────────────
-  # Rayon de la spirale (en blocs)
+  # Rayon de la figure-8 (en blocs)
 
   base-spiral-radius: 5.0
   max-spiral-radius: 15.0
 
-  # Vitesse de rotation (radians par tick)
-  # Plus élevé = rotation plus rapide
+  # Vitesse de vol (radians par tick)
+  # Plus élevé = vol plus rapide
   spiral-speed: 0.1
 
   # ─────────────────────────────────────────────────────────────────
-  #                      INTERVALLE DE SOUFFLE (ticks)
+  #                      INTERVALLE DE PIQUÉ (ticks)
   # ─────────────────────────────────────────────────────────────────
-  # Temps entre chaque souffle de dragon breath
+  # Temps entre chaque piqué d'attaque
   # Diminue avec le niveau (plus fréquent)
 
   base-breath-interval: 40
   min-breath-interval: 15
 
   # ─────────────────────────────────────────────────────────────────
-  #                      RAYON DU SOUFFLE
+  #                      RAYON D'IMPACT
   # ─────────────────────────────────────────────────────────────────
-  # Taille des zones de dragon breath (en blocs)
+  # Taille de la zone de récolte à l'impact (en blocs)
 
   base-breath-radius: 3.0
   max-breath-radius: 8.0
@@ -1065,7 +1064,7 @@ ender-dragon-breath:
   # ─────────────────────────────────────────────────────────────────
   #                      DURÉE DES ZONES (ticks)
   # ─────────────────────────────────────────────────────────────────
-  # Combien de temps les zones de souffle restent actives
+  # Non utilisé pour le Phantom (récolte instantanée à l'impact)
 
   base-breath-zone-duration: 40
   max-breath-zone-duration: 100
@@ -1077,14 +1076,14 @@ ender-dragon-breath:
   particles: true
   sound: true
 
-  # Message de début (quand le dragon apparaît)
+  # Message de début (quand le phantom apparaît)
   start-message: true
-  start-message-text: "&5&l🐉 &dUn Dragon de l'End apparaît!"
+  start-message-text: "&8&l👻 &7Un Phantom géant surgit des ombres!"
 
   # Message de fin (statistiques de récolte)
   message: true
-  message-text: "&5&l🐉 &dLe Dragon a incinéré &5{count} &dcultures!"
-  cloud-suffix: " &7(&5{clouds} souffles&7)"
+  message-text: "&8&l👻 &7Le Phantom a fauché &8{count} &7cultures!"
+  cloud-suffix: " &7(&8{clouds} piqués&7)"
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -1095,11 +1094,11 @@ ender-dragon-breath:
 #
 # ender_dragon_breath:
 #   enabled: true
-#   name: "&5🐉 Souffle du Dragon"
+#   name: "&8👻 Frappe du Phantom"
 #   description:
-#     - "&7Un mini Ender Dragon survole"
-#     - "&7et crache des nuages mortels!"
-#     - "&dZones persistantes de récolte!"
+#     - "&7Un Phantom géant plonge"
+#     - "&7et fauche les cultures!"
+#     - "&8Piqués dévastateurs!"
 #   max-level: 5000
 #   chance-per-level: 0.02
 #   base-chance: 0.3
