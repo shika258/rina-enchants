@@ -5,6 +5,7 @@ import me.rinaorc.rinaenchants.enchant.AllayLaserEnchant;
 import me.rinaorc.rinaenchants.enchant.BeeCollectorEnchant;
 import me.rinaorc.rinaenchants.enchant.BlizzardEnchant;
 import me.rinaorc.rinaenchants.enchant.FrogTongueLashEnchant;
+import me.rinaorc.rinaenchants.enchant.GolemFactoryEnchant;
 import me.rinaorc.rinaenchants.enchant.PandaRollEnchant;
 import me.rinaorc.rinaenchants.enchant.RavagerStampedeEnchant;
 import me.rinaorc.rinaenchants.enchant.WardenPulseEnchant;
@@ -218,6 +219,17 @@ public class RinaEnchantsPlugin extends JavaPlugin implements Listener {
             registeredEnchants.add(wardenEnchant);
 
             getLogger().info("§8✓ Enchantement Warden Pulse enregistré!");
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // ENCHANTEMENT GOLEM FACTORY
+        // ═══════════════════════════════════════════════════════════
+        if (getConfig().getBoolean("golem-factory.enabled", true)) {
+            GolemFactoryEnchant golemEnchant = new GolemFactoryEnchant(this);
+            hoesAPI.registerEnchant(golemEnchant);
+            registeredEnchants.add(golemEnchant);
+
+            getLogger().info("§7✓ Enchantement Golem Factory enregistré!");
         }
 
         getLogger().info("§a✓ " + registeredEnchants.size() + " enchantement(s) chargé(s)!");
