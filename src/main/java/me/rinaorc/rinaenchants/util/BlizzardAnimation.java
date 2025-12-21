@@ -23,6 +23,9 @@ import java.util.function.Consumer;
  * - Boules de neige tombant du ciel de façon chaotique
  * - Micro-chance d'explosion de récolte (3x3)
  * - Système de cadeaux avec tête custom
+ *
+ * OPTIMISATION: Toutes les snowballs sont trackées dans une seule task
+ * au lieu de créer une task par snowball (réduction massive des tasks)
  */
 public class BlizzardAnimation {
 
@@ -50,9 +53,27 @@ public class BlizzardAnimation {
     private int ticksElapsed = 0;
     private boolean giftSpawned = false;
     private Item activeGiftItem = null;
+    private int giftTicksElapsed = 0;
+    private boolean giftRewardGiven = false;
+
+    // OPTIMISATION: Liste des snowballs actives (évite de créer une task par snowball)
+    private final List<SnowballTracker> activeSnowballs = new ArrayList<>();
 
     private Consumer<Integer> onFinish;
     private Consumer<Location> onCropHit;
+
+    /**
+     * Classe interne pour tracker les snowballs sans créer de task séparée
+     */
+    private static class SnowballTracker {
+        final Snowball snowball;
+        int ticksAlive = 0;
+        boolean processed = false;
+
+        SnowballTracker(Snowball snowball) {
+            this.snowball = snowball;
+        }
+    }
 
     public BlizzardAnimation(RinaEnchantsPlugin plugin, Player owner, Location centerLocation,
                               int durationTicks, int snowballsPerSecond, int blizzardRadius,
@@ -132,6 +153,12 @@ public class BlizzardAnimation {
                 }
 
                 // ═══════════════════════════════════════════════════════════
+                // MISE À JOUR DE TOUTES LES SNOWBALLS (OPTIMISATION)
+                // Au lieu d'avoir une task par snowball, on les update toutes ici
+                // ═══════════════════════════════════════════════════════════
+                updateAllSnowballs();
+
+                // ═══════════════════════════════════════════════════════════
                 // PARTICULES AMBIANTES
                 // ═══════════════════════════════════════════════════════════
                 if (showParticles && ticksElapsed % 8 == 0) {
@@ -152,12 +179,106 @@ public class BlizzardAnimation {
                     giftSpawned = true;
                 }
 
+                // ═══════════════════════════════════════════════════════════
+                // MISE À JOUR DU CADEAU (OPTIMISATION - plus de task séparée)
+                // ═══════════════════════════════════════════════════════════
+                if (activeGiftItem != null && !giftRewardGiven) {
+                    updateGift();
+                }
+
                 // Sons ambiants
                 if (ticksElapsed % 20 == 0) {
                     owner.playSound(currentCenter, Sound.BLOCK_POWDER_SNOW_STEP, 0.5f, 1.0f);
                 }
             }
         }.runTaskTimer(plugin, 0L, 1L);
+    }
+
+    /**
+     * OPTIMISATION: Met à jour toutes les snowballs dans une seule boucle
+     * au lieu de créer une task par snowball
+     */
+    private void updateAllSnowballs() {
+        Iterator<SnowballTracker> iterator = activeSnowballs.iterator();
+
+        while (iterator.hasNext()) {
+            SnowballTracker tracker = iterator.next();
+
+            // Skip si déjà traité
+            if (tracker.processed) {
+                iterator.remove();
+                continue;
+            }
+
+            tracker.ticksAlive++;
+
+            Snowball snowball = tracker.snowball;
+
+            // Vérifier si la snowball est morte ou a expiré
+            if (snowball.isDead() || !snowball.isValid() || tracker.ticksAlive > 100) {
+                // La boule a touché le sol ou expiré
+                processSnowballImpact(snowball);
+                tracker.processed = true;
+
+                if (!snowball.isDead()) {
+                    snowball.remove();
+                }
+                iterator.remove();
+                continue;
+            }
+
+            // Particules de traînée
+            if (showParticles && tracker.ticksAlive % 2 == 0) {
+                owner.spawnParticle(Particle.SNOWFLAKE, snowball.getLocation(), 1, 0, 0, 0, 0);
+            }
+        }
+    }
+
+    /**
+     * Traite l'impact d'une snowball (récolte + explosion potentielle)
+     */
+    private void processSnowballImpact(Snowball snowball) {
+        Location impactLoc = snowball.getLocation();
+
+        // ═══════════════════════════════════════════════════════════
+        // RÉCOLTE DE LA CULTURE TOUCHÉE PAR LA BOULE DE NEIGE
+        // ═══════════════════════════════════════════════════════════
+        Block hitBlock = impactLoc.getBlock();
+        // Vérifier aussi les blocs adjacents (la boule peut atterrir à côté)
+        Block[] blocksToCheck = {
+            hitBlock,
+            hitBlock.getRelative(0, -1, 0),
+            hitBlock.getRelative(0, 1, 0),
+            hitBlock.getRelative(1, 0, 0),
+            hitBlock.getRelative(-1, 0, 0),
+            hitBlock.getRelative(0, 0, 1),
+            hitBlock.getRelative(0, 0, -1)
+        };
+
+        for (Block block : blocksToCheck) {
+            if (isMatureCrop(block)) {
+                Location cropLoc = block.getLocation();
+                plugin.markEntityBreakingLocation(cropLoc);
+
+                if (onCropHit != null) {
+                    onCropHit.accept(cropLoc);
+                }
+                totalCropsHarvested++;
+
+                // Particules de récolte
+                if (showParticles) {
+                    owner.spawnParticle(Particle.SNOWFLAKE, cropLoc.clone().add(0.5, 0.5, 0.5), 5, 0.2, 0.2, 0.2, 0.02);
+                }
+                break; // Une seule culture par boule de neige
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // CHANCE D'EXPLOSION (récolte en zone 3x3)
+        // ═══════════════════════════════════════════════════════════
+        if (random.nextDouble() * 100 < explosionChance) {
+            triggerExplosion(impactLoc);
+        }
     }
 
     private void spawnSnowball(Location center) {
@@ -187,71 +308,8 @@ public class BlizzardAnimation {
             plugin.makeEntityClientSide(snowball, owner);
         }
 
-        // Tracker pour la récolte et l'explosion potentielle
-        new BukkitRunnable() {
-            int ticks = 0;
-
-            @Override
-            public void run() {
-                if (snowball.isDead() || !snowball.isValid() || ticks > 100) {
-                    // La boule a touché le sol ou expiré
-                    Location impactLoc = snowball.getLocation();
-
-                    // ═══════════════════════════════════════════════════════════
-                    // RÉCOLTE DE LA CULTURE TOUCHÉE PAR LA BOULE DE NEIGE
-                    // ═══════════════════════════════════════════════════════════
-                    Block hitBlock = impactLoc.getBlock();
-                    // Vérifier aussi les blocs adjacents (la boule peut atterrir à côté)
-                    Block[] blocksToCheck = {
-                        hitBlock,
-                        hitBlock.getRelative(0, -1, 0),
-                        hitBlock.getRelative(0, 1, 0),
-                        hitBlock.getRelative(1, 0, 0),
-                        hitBlock.getRelative(-1, 0, 0),
-                        hitBlock.getRelative(0, 0, 1),
-                        hitBlock.getRelative(0, 0, -1)
-                    };
-
-                    for (Block block : blocksToCheck) {
-                        if (isMatureCrop(block)) {
-                            Location cropLoc = block.getLocation();
-                            plugin.markEntityBreakingLocation(cropLoc);
-
-                            if (onCropHit != null) {
-                                onCropHit.accept(cropLoc);
-                            }
-                            totalCropsHarvested++;
-
-                            // Particules de récolte
-                            if (showParticles) {
-                                owner.spawnParticle(Particle.SNOWFLAKE, cropLoc.clone().add(0.5, 0.5, 0.5), 5, 0.2, 0.2, 0.2, 0.02);
-                            }
-                            break; // Une seule culture par boule de neige
-                        }
-                    }
-
-                    // ═══════════════════════════════════════════════════════════
-                    // CHANCE D'EXPLOSION (récolte en zone 3x3)
-                    // ═══════════════════════════════════════════════════════════
-                    if (random.nextDouble() * 100 < explosionChance) {
-                        triggerExplosion(impactLoc);
-                    }
-
-                    if (!snowball.isDead()) {
-                        snowball.remove();
-                    }
-                    cancel();
-                    return;
-                }
-
-                ticks++;
-
-                // Particules de traînée
-                if (showParticles && ticks % 2 == 0) {
-                    owner.spawnParticle(Particle.SNOWFLAKE, snowball.getLocation(), 1, 0, 0, 0, 0);
-                }
-            }
-        }.runTaskTimer(plugin, 0L, 1L);
+        // OPTIMISATION: Ajouter à la liste au lieu de créer une task
+        activeSnowballs.add(new SnowballTracker(snowball));
     }
 
     private void triggerExplosion(Location center) {
@@ -324,6 +382,7 @@ public class BlizzardAnimation {
         plugin.markAsEnchantEntity(droppedGift);
 
         activeGiftItem = droppedGift;
+        giftTicksElapsed = 0;
 
         // Effets visuels
         if (showParticles) {
@@ -334,55 +393,56 @@ public class BlizzardAnimation {
         owner.playSound(spawnLoc, Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.5f);
         owner.playSound(spawnLoc, Sound.BLOCK_NOTE_BLOCK_CHIME, 1.0f, 1.0f);
 
-        // Tracker pour le ramassage
-        new BukkitRunnable() {
-            int ticks = 0;
-            boolean rewardGiven = false;
+        // OPTIMISATION: Plus de task séparée - géré dans updateGift()
+    }
 
-            @Override
-            public void run() {
-                // Timeout après 30 secondes - pas de récompense
-                if (ticks > 600) {
-                    if (!droppedGift.isDead()) {
-                        droppedGift.remove();
-                    }
-                    cancel();
-                    return;
-                }
+    /**
+     * OPTIMISATION: Met à jour le cadeau dans la task principale
+     * au lieu d'avoir une task séparée
+     */
+    private void updateGift() {
+        if (activeGiftItem == null) return;
 
-                // Vérifier si le joueur est proche (ramassage) - SEUL moyen d'obtenir la récompense
-                if (!droppedGift.isDead() && droppedGift.isValid() && owner.isOnline()) {
-                    try {
-                        if (owner.getLocation().distance(droppedGift.getLocation()) < 1.5) {
-                            droppedGift.remove();
-                            if (!rewardGiven) {
-                                rewardGiven = true;
-                                executeGiftReward();
-                            }
-                            cancel();
-                            return;
-                        }
-                    } catch (IllegalArgumentException ignored) {
-                        // Mondes différents - ignorer
-                    }
-                }
+        giftTicksElapsed++;
 
-                // Si le cadeau a disparu sans être ramassé par le joueur (hopper, despawn, etc.) - pas de récompense
-                if (droppedGift.isDead() || !droppedGift.isValid()) {
-                    cancel();
-                    return;
-                }
-
-                ticks++;
-
-                // Particules autour du cadeau
-                if (showParticles && ticks % 8 == 0) {
-                    Location giftLoc = droppedGift.getLocation();
-                    owner.spawnParticle(Particle.END_ROD, giftLoc, 2, 0.3, 0.3, 0.3, 0.02);
-                    owner.spawnParticle(Particle.SNOWFLAKE, giftLoc.clone().add(0, 0.5, 0), 1, 0.2, 0.2, 0.2, 0);
-                }
+        // Timeout après 30 secondes - pas de récompense
+        if (giftTicksElapsed > 600) {
+            if (!activeGiftItem.isDead()) {
+                activeGiftItem.remove();
             }
-        }.runTaskTimer(plugin, 0L, 1L);
+            activeGiftItem = null;
+            return;
+        }
+
+        // Vérifier si le joueur est proche (ramassage) - SEUL moyen d'obtenir la récompense
+        if (!activeGiftItem.isDead() && activeGiftItem.isValid() && owner.isOnline()) {
+            try {
+                if (owner.getLocation().distance(activeGiftItem.getLocation()) < 1.5) {
+                    activeGiftItem.remove();
+                    if (!giftRewardGiven) {
+                        giftRewardGiven = true;
+                        executeGiftReward();
+                    }
+                    activeGiftItem = null;
+                    return;
+                }
+            } catch (IllegalArgumentException ignored) {
+                // Mondes différents - ignorer
+            }
+        }
+
+        // Si le cadeau a disparu sans être ramassé par le joueur (hopper, despawn, etc.) - pas de récompense
+        if (activeGiftItem.isDead() || !activeGiftItem.isValid()) {
+            activeGiftItem = null;
+            return;
+        }
+
+        // Particules autour du cadeau
+        if (showParticles && giftTicksElapsed % 8 == 0) {
+            Location giftLoc = activeGiftItem.getLocation();
+            owner.spawnParticle(Particle.END_ROD, giftLoc, 2, 0.3, 0.3, 0.3, 0.02);
+            owner.spawnParticle(Particle.SNOWFLAKE, giftLoc.clone().add(0, 0.5, 0), 1, 0.2, 0.2, 0.2, 0);
+        }
     }
 
     private ItemStack createGiftHead() {
@@ -452,17 +512,27 @@ public class BlizzardAnimation {
     }
 
     private void cleanup() {
+        // Nettoyer toutes les snowballs actives
+        for (SnowballTracker tracker : activeSnowballs) {
+            if (tracker.snowball != null && !tracker.snowball.isDead()) {
+                tracker.snowball.remove();
+            }
+        }
+        activeSnowballs.clear();
+
         // Nettoyer le cadeau actif s'il existe encore
         if (activeGiftItem != null && !activeGiftItem.isDead()) {
             activeGiftItem.remove();
         }
 
         // Effets de fin
-        if (showParticles) {
+        if (showParticles && owner.isOnline()) {
             owner.spawnParticle(Particle.SNOWFLAKE, owner.getLocation().add(0, 2, 0), 25, 3, 2, 3, 0.05);
         }
 
-        owner.playSound(owner.getLocation(), Sound.BLOCK_POWDER_SNOW_BREAK, 1.0f, 0.8f);
+        if (owner.isOnline()) {
+            owner.playSound(owner.getLocation(), Sound.BLOCK_POWDER_SNOW_BREAK, 1.0f, 0.8f);
+        }
 
         if (onFinish != null) {
             onFinish.accept(totalCropsHarvested);
